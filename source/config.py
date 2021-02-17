@@ -4,7 +4,7 @@ class Config(object):
     TESTING = False
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:" + password + "@localhost:5432"
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:" + password + "@localhost:5432/tractor"
     SQLALCHEMY_BINDS = {
         "tractor": "postgresql://postgres:" + password + "@localhost:5432/tractor",
         "dev": "postgresql://postgres:" + password + "@localhost:5432/dev"
@@ -12,8 +12,8 @@ class Config(object):
 
     def __init__(self, password = ""):
         self.password = password
-        SQLALCHEMY_DATABASE_URI = "postgresql://postgres:" + password + "@localhost:5432"
-        SQLALCHEMY_BINDS = {
+        self.SQLALCHEMY_DATABASE_URI = "postgresql://postgres:" + password + "@localhost:5432/tractor"
+        self.SQLALCHEMY_BINDS = {
             "tractor": "postgresql://postgres:" + password + "@localhost:5432/tractor",
             "dev": "postgresql://postgres:" + password + "@localhost:5432/dev"
         }
