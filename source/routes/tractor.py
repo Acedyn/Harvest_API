@@ -1,9 +1,10 @@
 from flask import Blueprint
-from mapping.tractor import Job
+from mappings.tractor import Job
+from server import tractor_db
 
-blueprint = Blueprint("main", __name__)
+tractor_routes = Blueprint("main", __name__)
 
-@blueprint.route("/")
+@tractor_routes.route("/")
 def index():
     job_query = tractor_db.session.query(Job.jid, Job.owner).order_by(Job.jid).all()
     for job_responce in job_query:

@@ -1,9 +1,6 @@
-from flask import Flask, request
-from flask_sqlalchemy import SQLAlchemy
+from server import create_app
 from config import DevelopmentConfig, ProductionConfig, Config
 import getpass, sys, getopt
-
-from blueprint import blueprint
 
 # Get aguments
 argv = sys.argv[1:]
@@ -31,17 +28,12 @@ for opt, arg in opts:
 
 
 # Create the flask app from the config file
-app = Flask(__name__)
-app.config.from_object(config)
-
-
-# Create the database interface
-tractor_db = SQLAlchemy(app)
-tractor_db.reflect(bind="tractor")
+app = create_app(config)
 
 
 # Register the routes
-app.register_blueprint(blueprint)
+from routes.tractor import tractor_routes
+app.register_blueprint(tractor_routes)
 
 
 # Start the flask application
