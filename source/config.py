@@ -1,7 +1,7 @@
 class Config(object):
     password = ""
-    DEBUG = False
-    TESTING = False
+    DEBUG = True
+    TESTING = True
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_DATABASE_URI = "postgresql://postgres:" + password + "@localhost:5432/tractor"
@@ -21,6 +21,9 @@ class Config(object):
 class DevelopmentConfig(Config):
     DEVELOPMENT = True
     DEBUG = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 class ProductionConfig(Config):
+    DEVELOPMENT = False
+    DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
