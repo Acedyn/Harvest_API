@@ -1,6 +1,7 @@
 from server import create_app
 from config import DevelopmentConfig, ProductionConfig, Config
 import getpass, sys, getopt
+from flask_cors import CORS
 
 # Get aguments
 argv = sys.argv[1:]
@@ -29,6 +30,7 @@ for opt, arg in opts:
 
 # Create the flask app from the config file
 app = create_app(config)
+CORS(app)
 
 
 # Register the routes
@@ -39,8 +41,8 @@ app.register_blueprint(tractor_routes)
 # Start the flask application
 if __name__ == '__main__':
     if environment == "prod":
-        app.run(debug = False)
+        app.run(debug = False, host='0.0.0.0')
     elif environment == "dev":
-        app.run(debug = True)
+        app.run(debug = True, host='0.0.0.0')
     else:
-        app.run()
+        app.run(host='0.0.0.0')
