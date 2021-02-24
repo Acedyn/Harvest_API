@@ -1,19 +1,30 @@
 from flask import Blueprint
 from flask import jsonify
-from mappings.tractor import Job
 from server import tractor_db
 from sqlalchemy.sql import text
-import datetime
+import datetime, os
 
+# Initialize the set to routes for tractor
 tractor_routes = Blueprint("main", __name__)
 
-@tractor_routes.route("/")
+# Route for "/crew-progression"
+@tractor_routes.route("/crew-progression")
 def index():
-    file = open("G:/PROJECT/2021/TOOL_HarverstBackend/source/query/crew_progression.sql")
+    # Get the file of the coresponding query
+    try:
+        file = open("G:/PROJECT/2021/TOOL_HarverstBackend/source/query/crew_progression.sql")
+    except IOError:
+        return "ERROR: Could not open the crew_progression.sql file"
+    # Read the content of the file
     query = text(file.read())
-    results = tractor_db.engine.execute(query)
+    # Execute the query of the file
+    try:
+        results = tractor_db.engine.execute(query)
+    except:
+        return "ERROR: Could not execute the SQL query from crew_progression.sql"
 
-    projects = {
+    # Initialize the response for each timestamp
+    timetamp_state = {
         "date": str(datetime.date(1, 1, 1)),
         "timestamp": 0,
         "DIVE": 0,
@@ -25,24 +36,34 @@ def index():
         "PIR_HEARTH": 0
     }
 
+    # Initialize the final response that will contain all the timestamps
     response = []
 
+    # Loop over all the rows of the sql response
     for result in results:
+        # Store all the colunm values for the curent row
         project = result[0]
         date = str(datetime.date(result[1].year, result[1].month, result[1].day))
         timestamp = int(result[1].timestamp())
         done = result[2]
 
-        if(projects["timestamp"] == 0):
-            projects["timestamp"] = timestamp
-            projects["date"] = date
-        elif(projects["timestamp"] != timestamp):
-            response.append(projects.copy())
-            projects["timestamp"] = timestamp
-            projects["date"] = date
+        # If this the timestamp_state is not initialized yet
+        if(timetamp_state["timestamp"] == 0):
+            # Initialize the timestamp an the date
+            timetamp_state["timestamp"] = timestamp
+            timetamp_state["date"] = date
+        # If we reach a new timestamp
+        elif(timetamp_state["timestamp"] != timestamp):
+            # Store the curent state of timestamp_state in the response
+            response.append(timetamp_state.copy())
+            timetamp_state["timestamp"] = timestamp
+            timetamp_state["date"] = date
 
-        projects[project] = done
+        # Store the value of the row to the current timestamp_state
+        timetamp_state[project] = done
 
-    response.append(projects.copy())
+    # Append the timestamp_state one last time
+    response.append(timetamp_state.copy())
 
+    # Return the response in json format
     return jsonify(response)

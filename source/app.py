@@ -1,7 +1,6 @@
 from server import create_app
 from config import DevelopmentConfig, ProductionConfig, Config
 import getpass, sys, getopt
-from flask_cors import CORS
 
 # Get aguments
 argv = sys.argv[1:]
@@ -30,7 +29,6 @@ for opt, arg in opts:
 
 # Create the flask app from the config file
 app = create_app(config)
-CORS(app)
 
 
 # Register the routes
