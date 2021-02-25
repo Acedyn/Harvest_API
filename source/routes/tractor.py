@@ -74,7 +74,7 @@ def crew_progression():
 def frame_computetime():
     # Get the file of the coresponding query
     try:
-        file = open("D:/Simon/PROJECT/2021/TOOL_HarverstBackend/source/query/computation_stat.sql")
+        file = open("D:/Simon/PROJECT/2021/TOOL_HarverstBackend/source/query/frame_computetime.sql")
     except IOError:
         return "ERROR: Could not open the computation_stat.sql file"
     # Read the content of the file
@@ -98,7 +98,7 @@ def frame_computetime():
         # Store all the colunm values for the curent row
         computer = result[0]
         project = result[1]
-        frametime = result[2]
+        frametime = round(number = result[2])
 
         # If this the project_stats is not initialized yet
         if(project_stats["name"] == ""):
@@ -111,12 +111,10 @@ def frame_computetime():
             project_stats["name"] = project
 
         # Store the value of the row to the current project_stats
-        project_stats[computer] = str(frametime)
+        project_stats[computer] = frametime
 
     # Append the project_state one last time
     response.append(project_stats.copy())
-
-    print(response)
 
     # Return the response in json format
     return jsonify(response)
