@@ -10,7 +10,7 @@ FROM
     FROM
         -- Get the data joined between task and job, and create a row for each frames in the frame ranges
         (SELECT
-        job.*, date_trunc('week', job.starttime) AS date, task.tid, task.title, generate_series(task.startframe, task.endframe) AS frame, task.state
+        job.*, date_trunc('day', job.starttime) AS date, task.tid, task.title, generate_series(task.startframe, task.endframe) AS frame, task.state
         FROM
             -- Get the parsed metadata content
             (SELECT 
@@ -18,7 +18,9 @@ FROM
             FROM 
                 -- Get the parsed metadata
                 (SELECT 
-                jid, owner, starttime, metadata::json AS metadata, (metadata::json->>'scene')::json AS scene FROM job WHERE metadata != '') AS jobData 
+                jid, owner, starttime, metadata::json AS metadata, (metadata::json->>'scene')::json AS scene 
+                FROM job 
+                WHERE metadata != '') AS jobData 
             WHERE scene->>'project' != 'TEST_PIPE') AS job, task 
         WHERE 
         job.jid = task.jid AND task.state = 'done' AND type = 'final') AS output
