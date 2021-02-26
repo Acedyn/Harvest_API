@@ -4,15 +4,20 @@ from server import tractor_db
 from sqlalchemy.sql import text
 import datetime, os
 
+# TODO: Factorize the function for each routes because they all to pretty mutch the same thing
+
 # Initialize the set to routes for tractor
 tractor_routes = Blueprint("main", __name__)
+
+basepath = os.path.dirname(__file__)
+query_dir = os.path.join(basepath, "..", "queries")
 
 # Route for "/crew-progression"
 @tractor_routes.route("/crew-progression")
 def crew_progression():
     # Get the file of the coresponding query
     try:
-        file = open("D:/Simon/PROJECT/2021/TOOL_HarverstBackend/source/query/crew_progression.sql")
+        file = open(os.path.join(query_dir, "crew_progression.sql"))
     except IOError:
         return "ERROR: Could not open the crew_progression.sql file"
     # Read the content of the file
@@ -24,6 +29,7 @@ def crew_progression():
         return "ERROR: Could not execute the SQL query from crew_progression.sql"
 
     # Initialize the response for each timestamp
+    # TODO: Query all the project names from our awesome futur database
     timetamp_state = {
         "date": str(datetime.date(1, 1, 1)),
         "timestamp": 0,
@@ -33,7 +39,10 @@ def crew_progression():
         "BACKSTAGE": 0,
         "COCORICA": 0,
         "DREAMBLOWER": 0,
-        "PIR_HEARTH": 0
+        "PIR_HEARTH": 0,
+        "HOSTILE": 0,
+        "GREEN": 0,
+        "FROM_ABOVE": 0,
     }
 
     # Initialize the final response that will contain all the timestamps
@@ -74,7 +83,7 @@ def crew_progression():
 def frame_computetime():
     # Get the file of the coresponding query
     try:
-        file = open("D:/Simon/PROJECT/2021/TOOL_HarverstBackend/source/query/frame_computetime.sql")
+        file = open(os.path.join(query_dir, "frame_computetime.sql"))
     except IOError:
         return "ERROR: Could not open the computation_stat.sql file"
     # Read the content of the file

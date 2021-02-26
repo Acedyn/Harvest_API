@@ -21,6 +21,6 @@ FROM
                 jid, owner, starttime, metadata::json AS metadata, (metadata::json->>'scene')::json AS scene FROM job WHERE metadata != '') AS jobData 
             WHERE scene->>'project' != 'TEST_PIPE') AS job, task 
         WHERE 
-        job.jid = task.jid AND task.state = 'done' AND type = 'final') AS output
+        job.jid = task.jid AND task.state = 'done') AS output
     ORDER BY frame, shot, sequence, owner, starttime) AS output
 ORDER BY date, owner, done DESC

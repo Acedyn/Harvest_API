@@ -1,5 +1,7 @@
 from server import tractor_db
 
+# These mappings a curently not used, only the .sql files are used for now
+
 # Mapping to get to the job table
 class Job(tractor_db.Model):
     __table__ = tractor_db.Model.metadata.tables["job"]
