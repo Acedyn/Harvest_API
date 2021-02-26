@@ -4,12 +4,16 @@ import warnings
 # They are imported in app.py to apply the config to the flask app
 class Config(object):
     def __init__(self, db_password = "", db_adress = "localhost:5432"):
+        # Initialize the attributes using the given parameters
         self.db_password = db_password
         self.SQLALCHEMY_DATABASE_URI = "postgresql://postgres:" + db_password + "@" + db_adress + "/tractor"
         self.SQLALCHEMY_BINDS = {
             "tractor": "postgresql://postgres:" + db_password + "@" + db_adress + "/tractor",
             "dev": "postgresql://postgres:" + db_password + "@" + db_adress + "/dev"
         }
+        # Ignore the warnings from sqlachemy 
+        # (it gives errors because it does not support some types in the tractor's database)
+        warnings.filterwarnings("ignore", module="sqlalchemy.dialects.postgresql.base")
 
     environment = "default"
     db_password = ""
@@ -36,7 +40,6 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     def __init__(self, db_password = "", db_adress = "localhost:5432"):
         Config.__init__(self, db_password, db_adress)
-        warnings.simplefilter("ignore")
 
     environment = "prod"
     port=5000

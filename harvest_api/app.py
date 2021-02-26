@@ -1,6 +1,6 @@
-from server import create_app
+from .server import create_app
 from waitress import serve
-from config.config import DevelopmentConfig, ProductionConfig, Config
+from .config.config import DevelopmentConfig, ProductionConfig, Config
 import getpass, sys, getopt
 
 # Get aguments
@@ -42,7 +42,7 @@ app = create_app(config)
 
 
 # Register the routes
-from routes.tractor_graphs import tractor_routes
+from .routes.tractor_graphs import tractor_routes
 app.register_blueprint(tractor_routes)
 
 
