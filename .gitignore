@@ -1,4 +1,12 @@
+# Build
 build
 dist
+*.egg-info
+
+# Dependencies
 venv
-harvest_api.egg-info
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
