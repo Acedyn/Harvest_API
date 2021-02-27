@@ -5,7 +5,7 @@ Backend REST API to get statistics about CGI projects. Harvest mixes data from t
 ## Get started
 
 To install : repository/location/ pip install .
-To start the server : python -m harvest_api.app
+To start the server : python -m harvest_api
 To start the server without install : repository/location/harvest_api python app.py
 
 ### Dependencies

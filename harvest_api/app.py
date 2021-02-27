@@ -19,6 +19,7 @@ if ("-e", "dev") in opts or ("-e", "development") in opts:
     for opt, arg in opts:
         if(opt == "-d"):
             config = DevelopmentConfig(password, arg)
+            break
         else:
             config = DevelopmentConfig(password)
 # If the -e prod argument has been passed use production configuration
@@ -26,6 +27,7 @@ elif ("-e", "prod") in opts or ("-e", "production") in opts:
     for opt, arg in opts:
         if(opt == "-d"):
             config = ProductionConfig(password, arg)
+            break
         else:
             config = ProductionConfig(password)
 # If the no -e argument has been passed use default configuration
