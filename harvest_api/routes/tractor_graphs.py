@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import jsonify
-from ..server import tractor_db
+from server import tractor_db
 from sqlalchemy.sql import text
 import datetime, os
 
