@@ -1,6 +1,7 @@
 from server import create_app
 from waitress import serve
 from config.config import DevelopmentConfig, ProductionConfig, Config
+import sqlalchemy
 import getpass, sys, getopt
 
 # Get aguments
@@ -40,7 +41,11 @@ else:
 
 
 # Create the flask app from the config file
-app = create_app(config)
+try:
+    app = create_app(config)
+except sqlalchemy.exc.OperationalError:
+    print ("ERROR: Wrong password")
+    sys.exit()
 
 
 # Register the routes

@@ -9,6 +9,7 @@ class Config(object):
         self.SQLALCHEMY_DATABASE_URI = "postgresql://postgres:" + db_password + "@" + db_adress + "/tractor"
         self.SQLALCHEMY_BINDS = {
             "tractor": "postgresql://postgres:" + db_password + "@" + db_adress + "/tractor",
+            "harvest": "postgresql://postgres:" + db_password + "@" + db_adress + "/harvest",
             "dev": "postgresql://postgres:" + db_password + "@" + db_adress + "/dev"
         }
         # Ignore the warnings from sqlachemy 
