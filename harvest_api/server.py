@@ -15,5 +15,13 @@ def create_app(config_file):
     tractor_db.init_app(app)
     with app.app_context():
         tractor_db.reflect(bind="tractor")
+        tractor_db.create_all(bind="harvest")
+
+    # Register the routes
+    from routes.tractor_graphs import tractor_route_graph
+    from routes.tractor_stats import tractor_route_stat
+    app.register_blueprint(tractor_route_graph)
+    app.register_blueprint(tractor_route_stat)
+
 
     return app

@@ -48,13 +48,6 @@ except sqlalchemy.exc.OperationalError:
     sys.exit()
 
 
-# Register the routes
-from routes.tractor_graphs import tractor_route_graph
-from routes.tractor_stats import tractor_route_stat
-app.register_blueprint(tractor_route_graph)
-app.register_blueprint(tractor_route_stat)
-
-
 # Start the flask application
 if __name__ == '__main__':
     if config.environment == "prod":
