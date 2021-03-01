@@ -44,7 +44,7 @@ else:
 try:
     app = create_app(config)
 except sqlalchemy.exc.OperationalError:
-    print ("ERROR: Wrong password")
+    print ("ERROR: Failed to connect to the database, it can be due to a wrong password, or a wrong adress")
     sys.exit()
 
 

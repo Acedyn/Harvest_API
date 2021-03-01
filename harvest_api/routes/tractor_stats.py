@@ -6,9 +6,9 @@ from mappings.tractor_tables import Blade
 # Initialize the set to routes for tractor
 tractor_route_stat = Blueprint("stats", __name__)
 
-# Route for "/pc-used"
-@tractor_route_stat.route("/pc-used")
-def pc_used():
+# Route for "/pc-work"
+@tractor_route_stat.route("/pc-work")
+def pc_work():
     PCs_working = Blade.query.filter_by(status = "no free slots (1)").count()
     response = {"PC_used": PCs_working}
     return jsonify(response)

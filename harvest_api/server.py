@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 tractor_db = SQLAlchemy()
+harvest_db = SQLAlchemy()
 
 def create_app(config_file):
     # Create the flask app from the config file
@@ -13,9 +14,10 @@ def create_app(config_file):
 
     # Create the tractor database interface
     tractor_db.init_app(app)
+    harvest_db.init_app(app)
     with app.app_context():
         tractor_db.reflect(bind="tractor")
-        tractor_db.create_all(bind="harvest")
+        harvest_db.create_all(bind="harvest")
 
     # Register the routes
     from routes.tractor_graphs import tractor_route_graph

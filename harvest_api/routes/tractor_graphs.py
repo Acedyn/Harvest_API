@@ -25,7 +25,8 @@ def crew_progression():
     # Execute the query of the file
     try:
         results = tractor_db.engine.execute(query)
-    except:
+    except Exception as exception:
+        print(exception)
         return "ERROR: Could not execute the SQL query from crew_progression.sql"
 
     # Initialize the response for each timestamp
