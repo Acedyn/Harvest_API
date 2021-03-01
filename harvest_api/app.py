@@ -44,8 +44,10 @@ app = create_app(config)
 
 
 # Register the routes
-from routes.tractor_graphs import tractor_routes
-app.register_blueprint(tractor_routes)
+from routes.tractor_graphs import tractor_route_graph
+from routes.tractor_stats import tractor_route_stat
+app.register_blueprint(tractor_route_graph)
+app.register_blueprint(tractor_route_stat)
 
 
 # Start the flask application

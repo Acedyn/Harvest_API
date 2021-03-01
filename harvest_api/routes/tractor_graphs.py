@@ -7,13 +7,13 @@ import datetime, os
 # TODO: Factorize the function for each routes because they all to pretty mutch the same thing
 
 # Initialize the set to routes for tractor
-tractor_routes = Blueprint("main", __name__)
+tractor_route_graph = Blueprint("main", __name__)
 
 basepath = os.path.dirname(__file__)
 query_dir = os.path.join(basepath, "..", "queries")
 
 # Route for "/crew-progression"
-@tractor_routes.route("/crew-progression")
+@tractor_route_graph.route("/crew-progression")
 def crew_progression():
     # Get the file of the coresponding query
     try:
@@ -79,7 +79,7 @@ def crew_progression():
 
 
 # Route for "/frame-computetime"
-@tractor_routes.route("/frame-computetime")
+@tractor_route_graph.route("/frame-computetime")
 def frame_computetime():
     # Get the file of the coresponding query
     try:
