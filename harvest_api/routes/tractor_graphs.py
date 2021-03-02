@@ -86,14 +86,14 @@ def frame_computetime():
     try:
         file = open(os.path.join(query_dir, "frame_computetime.sql"))
     except IOError:
-        return "ERROR: Could not open the computation_stat.sql file"
+        return "ERROR: Could not open the frame_computetime.sql file"
     # Read the content of the file
     query = text(file.read())
     # Execute the query of the file
     try:
         results = tractor_db.engine.execute(query)
     except:
-        return "ERROR: Could not execute the SQL query from computation_stat.sql"
+        return "ERROR: Could not execute the SQL query from frame_computetime.sql"
 
     # Initialize the response for each timestamp
     project_stats = {
