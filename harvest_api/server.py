@@ -17,7 +17,7 @@ def create_app(config_file):
     harvest_db.init_app(app)
     with app.app_context():
         tractor_db.reflect(bind="tractor")
-        harvest_db.create_all(bind="harvest")
+        # harvest_db.create_all(bind="harvest")
 
     # Register the routes
     from routes.tractor_graphs import tractor_route_graph
