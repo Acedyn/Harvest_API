@@ -1,6 +1,10 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+import os
+
+basepath = os.path.dirname(__file__)
+query_dir = os.path.join(basepath, "queries")
 
 tractor_db = SQLAlchemy()
 harvest_db = SQLAlchemy()

@@ -55,7 +55,7 @@ def crew_progression():
         # Store all the colunm values for the curent row
         project = result[0]
         date = str(datetime.date(result[1].year, result[1].month, result[1].day))
-        timestamp = int(result[1].timestamp())
+        timestamp = int(result[1].timestamp()) * 1000
         done = result[2]
 
         # If this the timestamp_state is not initialized yet
