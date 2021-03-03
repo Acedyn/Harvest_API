@@ -1,88 +1,55 @@
 from flask import Blueprint
 from flask import jsonify
-from server import tractor_db
-from mappings.tractor_tables import Blade, Job, Invocation, Task
-from sqlalchemy.sql import text
-import os
-
-# TODO: Clean the mess, use sqlalchemy queries and find a way to not repeat the filters
+from sqlalchemy import func
+from database import sessions
+from mappings.tractor_tables import Blade, Task, Job
 
 # Initialize the set to routes for tractor
-tractor_route_stat = Blueprint("stats", __name__)
+tractor_stat = Blueprint("stats", __name__)
 
-basepath = os.path.dirname(__file__)
-query_dir = os.path.join(basepath, "..", "queries")
 
 # Route for "/pc-work"
-@tractor_route_stat.route("/pc-work")
+@tractor_stat.route("/pc-work")
 def pc_work():
     # Get the working blades
-    # TODO: This is not the good way to do it but the meeting is in 10 min to this will do for now
-    try:
-        file = open(os.path.join(query_dir, "blade_crew.sql"))
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Could not open the blade_crew.sql file"
-    # Read the content of the file
-    query = text(file.read())
-    # Execute the query of the file
-    try:
-        results = tractor_db.engine.execute(query)
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Could not execute the SQL query from blade_crew.sql"
-
-    PCs_working = 0
-    for result in results:
-        PCs_working += result[1]
+    blades_busy = sessions["tractor"].query(func.count(Job.jid)) \
+    .filter(Job.jid == Task.jid) \
+    .filter(Task.state == "active") \
 
     # Get the free blades
-    PCs_free = Blade.query \
-    .filter(Blade.status == "") \
-    .filter(Blade.profile != "LAVIT") \
-    .filter(Blade.profile != "JV") \
-    .filter(Blade.profile != "windows10") \
-    .filter(Blade.profile != "TD") \
-    .filter(Blade.profile != "BUG") \
-    .filter(Blade.availdisk > 5).count()
+    blades_free = sessions["tractor"].query(func.count(Blade.bladeid)) \
+    .filter(Blade.status == "")
 
     # Get the blades with nimby on
-    PCs_nimby = Blade.query \
-    .filter(Blade.status.startswith("nimby")) \
-    .filter(Blade.profile != "LAVIT") \
-    .filter(Blade.profile != "JV") \
-    .filter(Blade.profile != "windows10") \
-    .filter(Blade.profile != "TD") \
-    .filter(Blade.profile != "BUG") \
-    .filter(Blade.availdisk > 5).count()
+    blades_nimby = sessions["tractor"].query(func.count(Blade.bladeid)) \
+    .filter(Blade.nimby != "")
+
+    # .filter(Blade.profile != "LAVIT") \
+    # .filter(Blade.profile != "JV") \
+    # .filter(Blade.profile != "windows10") \
+    # .filter(Blade.profile != "TD") \
+    # .filter(Blade.profile != "BUG") \
+    # .filter(Blade.availdisk > 5).count()
+
     # Return a json
-    response = [{"name": "Free", "value": PCs_free}, {"name": "Busy", "value": PCs_working}, {"name": "Nimby ON", "value": PCs_nimby}]
+    response = [{"name": "Free", "value": blades_free[0][0]}, {"name": "Busy", "value": blades_busy[0][0]}, {"name": "Nimby ON", "value": blades_nimby[0][0]}]
     return jsonify(response)
 
 # Route for "/pc-crew"
-@tractor_route_stat.route("/pc-crew")
+@tractor_stat.route("/pc-crew")
 def pc_crew():
-    # Get the file of the coresponding query
-    try:
-        file = open(os.path.join(query_dir, "blade_crew.sql"))
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Could not open the blade_crew.sql file"
-    # Read the content of the file
-    query = text(file.read())
-    # Execute the query of the file
-    try:
-        results = tractor_db.engine.execute(query)
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Could not execute the SQL query from blade_crew.sql"
+    # Get the working blades per project
+    blades_busy = sessions["tractor"].query(Job.owner, func.count(Job.owner)) \
+    .filter(Job.jid == Task.jid) \
+    .filter(Task.state == "active") \
+    .group_by(Job.owner)
 
-    # Initialize the final response that will contain all the timestamps
+    # Initialize the final response that will contain all the projects
     response = []
 
     # Loop over all the rows of the sql response
-    for result in results:
-        response.append({"name": result[0], "value": result[1]})
+    for blade_busy in blades_busy:
+        response.append({"name": blade_busy[0], "value": blade_busy[1]})
 
     # Return the response in json format
     return jsonify(response)

@@ -1,28 +1,25 @@
-from server import tractor_db
+from database import bases
 
 # Currently only the Blade table is used in the tractor_route_stat.py file
 
 # Mapping to get to the job table
-class Job(tractor_db.Model):
-    __bind_key__ = "tractor"
-    __table__ = tractor_db.Model.metadata.tables["job"]
+class Job(bases["tractor"]):
+    __table__ = bases["tractor"].metadata.tables["job"]
 
 # Mapping to get to the task table
-class Task(tractor_db.Model):
-    __bind_key__ = "tractor"
-    __table__ = tractor_db.Model.metadata.tables["task"]
+class Task(bases["tractor"]):
+    __table__ = bases["tractor"].metadata.tables["task"]
 
 # Mapping to get to the invocation table
-class Invocation(tractor_db.Model):
-    __bind_key__ = "tractor"
-    __table__ = tractor_db.Model.metadata.tables["invocation"]
+class Invocation(bases["tractor"]):
+    __table__ = bases["tractor"].metadata.tables["invocation"]
 
 # Mapping to get to the command table
-class Command(tractor_db.Model):
+class Command(bases["tractor"]):
     __bind_key__ = "tractor"
-    __table__ = tractor_db.Model.metadata.tables["command"]
+    __table__ = bases["tractor"].metadata.tables["command"]
 
 # Mapping to get to the blade table
-class Blade(tractor_db.Model):
+class Blade(bases["tractor"]):
     __bind_key__ = "tractor"
-    __table__ = tractor_db.Model.metadata.tables["blade"]
+    __table__ = bases["tractor"].metadata.tables["blade"]

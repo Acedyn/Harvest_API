@@ -3,8 +3,6 @@ from flask import jsonify
 from database import execute_from_file
 import datetime
 
-# TODO: Factorize the function for each routes because they all to pretty mutch the same thing
-
 # Initialize the set to routes for tractor
 tractor_graph = Blueprint("graph", __name__)
 

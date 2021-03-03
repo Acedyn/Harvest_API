@@ -1,14 +1,15 @@
 from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
 import os
 
-# Initialize the engines and session dictionnary
-# We initialize it here to avoid circular imports
+# Initialize the engines, sessions and bases dictionnary
+# We initialize it here so we can import them everywhere and avoid circular imports
 engines = {}
 sessions = {}
-
+bases = {}
 
 
 # Initialize SQLAlchemy from config
@@ -20,6 +21,13 @@ def create_orm(config_file):
     # Create the sessions that will be the handle to comunicate with the databaes
     sessions["tractor"] = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engines["tractor"]))
     sessions["harvest"] = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engines["harvest"]))
+
+    # Create the bases that will be the handle for you mappings
+    bases["tractor"] = declarative_base()
+    bases["harvest"] = declarative_base()
+
+    # Refect all the tables of the tractor's database
+    bases["tractor"].metadata.reflect(bind=engines["tractor"])
 
     # Initialize the SQL functions to make sure we can use them in the raw queries
     execute_from_file("tractor", "func_valid_json.sql")
