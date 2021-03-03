@@ -1,24 +1,26 @@
--- Get only the most recent row for each date(it can be by week, days, or anything), for each teams
+-- Get the computation time per frames per blades per project
 SELECT
-DISTINCT ON (date, project)
-project, date, row_number() OVER (PARTITION BY project ORDER BY starttime, sequence, shot, frame) AS done
+computer, project, TRUNC(AVG(frametime)) AS frametime
 FROM
-    -- Remove the frame that where rendered twice
+    -- Get the blade that computed that task and the time per frames
     (SELECT
-    DISTINCT ON (frame, shot, sequence, project) 
-    *
+    DISTINCT ON (metadata.jid, metadata.tid, metadata.project)
+    metadata.project,
+    substring(upper(blade.name) from '(?<=-MK).*(?=-[\d]{4})')::int AS index,
+    substring(upper(blade.name) from '(?<=-).*(?=-[\d]{4})') AS computer,
+    invocation.elapsedreal / metadata.frames AS frametime, invocation.elapsedreal, metadata.frames
     FROM
-        -- Get the parsed metadata content and expand the array of frames
+        -- Get the parsed metadata content and compute the amount of frames in each task
         (SELECT 
-        jid, date_trunc('day', starttime) AS date, starttime, 
+        jid, tid, starttime, state,
         job_metadata->>'project' AS project, job_metadata->>'renderState' AS category, job_metadata->>'seq' AS sequence, job_metadata->>'shot' AS shot, 
-        unnest(string_to_array(regexp_replace(task_metadata->>'frames', '[\[\]\s\.]', '', 'g'), ',', '')) AS frame
+        array_length(string_to_array(regexp_replace(task_metadata->>'frames', '[\[\]\s\.]', '', 'g'), ',', '')::int[], 1) AS frames
         FROM
             -- Get the parsed metadata
             (SELECT 
-                job.jid, job.starttime, job.metadata::json AS job_metadata, task.metadata::json AS task_metadata, task.state
+                task.jid, task.tid, job.starttime, job.metadata::json AS job_metadata, task.metadata::json AS task_metadata, task.state
                 FROM job, task 
                 WHERE is_valid_json(job.metadata) AND is_valid_json(task.metadata) AND task.jid = job.jid LIMIT 10000000) AS taskData 
-        WHERE state = 'done') AS metadata
-    WHERE project != 'TEST_PIPE' AND category = 'final' AND shot != '' AND sequence != '') AS metadata
-ORDER BY date, project, done DESC
+        WHERE state = 'done' AND job_metadata->>'project' != 'TEST_PIPE' AND job_metadata->>'renderState' = 'final') AS metadata, invocation, blade
+    WHERE shot != '' AND sequence != '' AND metadata.jid = invocation.jid AND metadata.tid = invocation.tid AND blade.bladeid = invocation.bladeid) AS computationstat
+GROUP BY index, computer, project

@@ -10,13 +10,13 @@ FROM
     FROM
         -- Get the parsed metadata content and expand the array of frames
         (SELECT 
-        jid, date_trunc('day', starttime) AS date, starttime, 
+        jid, tid, date_trunc('day', starttime) AS date, starttime, state,
         job_metadata->>'project' AS project, job_metadata->>'renderState' AS category, job_metadata->>'seq' AS sequence, job_metadata->>'shot' AS shot, 
-        unnest(string_to_array(regexp_replace(task_metadata->>'frames', '[\[\]\s\.]', '', 'g'), ',', '')) AS frame
+        unnest(string_to_array(regexp_replace(task_metadata->>'frames', '[\[\]\s\.]', '', 'g'), ',', '')::int[]) AS frame
         FROM
             -- Get the parsed metadata
             (SELECT 
-                job.jid, job.starttime, job.metadata::json AS job_metadata, task.metadata::json AS task_metadata, task.state
+                task.jid, task.tid, job.starttime, job.metadata::json AS job_metadata, task.metadata::json AS task_metadata, task.state
                 FROM job, task 
                 WHERE is_valid_json(job.metadata) AND is_valid_json(task.metadata) AND task.jid = job.jid LIMIT 10000000) AS taskData 
         WHERE state = 'done') AS metadata

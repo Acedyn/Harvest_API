@@ -1,29 +1,26 @@
 -- Get the computation time per frames per blades per project
 SELECT
-computer, owner, AVG(frametime) AS frametime
+computer, project, TRUNC(AVG(frametime)) AS frametime
 FROM
-    -- Get the blade that computed that task
-    (SELECT 
-    DISTINCT ON (task.jid, task.tid) substring(upper(blade.name) from '(?<=-MK).*(?=-[\d]{4})')::int AS index, substring(upper(blade.name) from '(?<=-).*(?=-[\d]{4})') AS computer, task.*, invocation.elapsedreal / task.frames AS frametime
+    -- Get the blade that computed that task and the time per frames
+    (SELECT
+    DISTINCT ON (metadata.jid, metadata.tid, metadata.project)
+    metadata.project,
+    substring(upper(blade.name) from '(?<=-MK).*(?=-[\d]{4})')::int AS index,
+    substring(upper(blade.name) from '(?<=-).*(?=-[\d]{4})') AS computer,
+    invocation.elapsedreal / metadata.frames AS frametime, invocation.elapsedreal, metadata.frames
     FROM
-        -- Get the time it took to complete each tasks
-        (SELECT
-        job.jid, task.tid, job.owner, (task.endframe - task.startframe) + 1 AS frames
+        -- Get the parsed metadata content and compute the amount of frames in each task
+        (SELECT 
+        jid, tid, starttime, state,
+        job_metadata->>'project' AS project, job_metadata->>'renderState' AS category, job_metadata->>'seq' AS sequence, job_metadata->>'shot' AS shot, 
+        array_length(string_to_array(regexp_replace(task_metadata->>'frames', '[\[\]\s\.]', '', 'g'), ',', '')::int[], 1) AS frames
         FROM
-            -- Get the parsed metadata content
-            (SELECT
-            jid, owner, starttime, metadata->>'renderState' AS type
-            FROM 
-                -- Get the parsed metadata
-                (SELECT 
-                jid, owner, starttime, metadata::json AS metadata, (metadata::json->>'scene')::json AS scene 
-                FROM job 
-                WHERE metadata != '') AS jobData 
-            WHERE scene->>'project' != 'TEST_PIPE') AS job, task 
-        WHERE 
-        job.jid = task.jid AND task.state = 'done') AS task, invocation, blade
-    WHERE task.jid = invocation.jid AND task.tid = invocation.tid AND blade.bladeid = invocation.bladeid
-    ORDER BY task.jid, task.tid) AS computationstat
-WHERE index >= 0
-GROUP BY index, computer, owner
-ORDER BY owner, index
+            -- Get the parsed metadata
+            (SELECT 
+                task.jid, task.tid, job.starttime, job.metadata::json AS job_metadata, task.metadata::json AS task_metadata, task.state
+                FROM job, task 
+                WHERE is_valid_json(job.metadata) AND is_valid_json(task.metadata) AND task.jid = job.jid LIMIT 10000000) AS taskData 
+        WHERE state = 'done' AND job_metadata->>'project' != 'TEST_PIPE' AND job_metadata->>'renderState' = 'final') AS metadata, invocation, blade
+    WHERE shot != '' AND sequence != '' AND metadata.jid = invocation.jid AND metadata.tid = invocation.tid AND blade.bladeid = invocation.bladeid) AS computationstat
+GROUP BY index, computer, project
