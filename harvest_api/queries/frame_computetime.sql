@@ -12,15 +12,16 @@ FROM
     FROM
         -- Get the parsed metadata content and compute the amount of frames in each task
         (SELECT 
-        jid, tid, starttime, state,
-        job_metadata->>'project' AS project, job_metadata->>'renderState' AS category, job_metadata->>'seq' AS sequence, job_metadata->>'shot' AS shot, 
+        jid, tid, state,
+        job_metadata->>'project' AS project, job_metadata->>'renderState' AS category,
         array_length(string_to_array(regexp_replace(task_metadata->>'frames', '[\[\]\s\.]', '', 'g'), ',', '')::int[], 1) AS frames
         FROM
             -- Get the parsed metadata
             (SELECT 
-                task.jid, task.tid, job.starttime, job.metadata::json AS job_metadata, task.metadata::json AS task_metadata, task.state
+                task.jid, task.tid, job.metadata::json AS job_metadata, task.metadata::json AS task_metadata, task.state
                 FROM job, task 
                 WHERE is_valid_json(job.metadata) AND is_valid_json(task.metadata) AND task.jid = job.jid LIMIT 10000000) AS taskData 
         WHERE state = 'done' AND job_metadata->>'project' != 'TEST_PIPE' AND job_metadata->>'renderState' = 'final') AS metadata, invocation, blade
-    WHERE shot != '' AND sequence != '' AND metadata.jid = invocation.jid AND metadata.tid = invocation.tid AND blade.bladeid = invocation.bladeid) AS computationstat
+    WHERE metadata.jid = invocation.jid AND metadata.tid = invocation.tid AND blade.bladeid = invocation.bladeid) AS computationstat
 GROUP BY index, computer, project
+ORDER BY project, index

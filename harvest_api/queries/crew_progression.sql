@@ -19,6 +19,6 @@ FROM
                 task.jid, task.tid, job.starttime, job.metadata::json AS job_metadata, task.metadata::json AS task_metadata, task.state
                 FROM job, task 
                 WHERE is_valid_json(job.metadata) AND is_valid_json(task.metadata) AND task.jid = job.jid LIMIT 10000000) AS taskData 
-        WHERE state = 'done') AS metadata
-    WHERE project != 'TEST_PIPE' AND category = 'final' AND shot != '' AND sequence != '') AS metadata
+        WHERE state = 'done' AND job_metadata->>'project' != 'TEST_PIPE') AS metadata
+    WHERE category = 'final' AND shot != '' AND sequence != '') AS metadata
 ORDER BY date, project, done DESC
