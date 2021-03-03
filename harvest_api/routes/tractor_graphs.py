@@ -100,7 +100,7 @@ def frame_computetime():
 
     # Initialize the response for each timestamp
     project_stats = {
-        "name": "",
+        "name": ""
     }
 
     # Initialize the final response that will contain all the project
@@ -121,7 +121,9 @@ def frame_computetime():
         elif(project_stats["name"] != project):
             # Store the curent state of project_state in the response
             response.append(project_stats.copy())
-            project_stats["name"] = project
+            project_stats = {
+                "name": project
+            }
 
         # Store the value of the row to the current project_stats
         project_stats[computer] = frametime
