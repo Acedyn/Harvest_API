@@ -1,26 +1,24 @@
 -- Get only the most recent row for each date(it can be by week, days, or anything), for each teams
 SELECT
-DISTINCT ON (date, owner)
-owner, date, row_number() OVER (PARTITION BY owner ORDER BY starttime, sequence, shot, title, frame) AS done
+DISTINCT ON (date, project)
+project, date, row_number() OVER (PARTITION BY project ORDER BY starttime, sequence, shot, frame) AS done
 FROM
     -- Remove the frame that where rendered twice
     (SELECT
-    DISTINCT ON (frame, shot, sequence, owner) 
-    output.* 
+    DISTINCT ON (frame, shot, sequence, project) 
+    *
     FROM
-        -- Get the data joined between task and job, and create a row for each frames in the frame ranges
-        (SELECT
-        job.*, date_trunc('day', job.starttime) AS date, task.tid, task.title, generate_series(task.startframe, task.endframe) AS frame, task.state
+        -- Get the parsed metadata content and expand the array of frames
+        (SELECT 
+        jid, date_trunc('day', starttime) AS date, starttime, 
+        job_metadata->>'project' AS project, job_metadata->>'renderState' AS category, job_metadata->>'seq' AS sequence, job_metadata->>'shot' AS shot, 
+        unnest(string_to_array(regexp_replace(task_metadata->>'frames', '[\[\]\s\.]', '', 'g'), ',', '')) AS frame
         FROM
-            -- Get the parsed metadata content
+            -- Get the parsed metadata
             (SELECT 
-            jid, owner, starttime, metadata->>'renderState' AS type, scene->>'seq' AS sequence, scene->>'shot' AS shot, metadata->>'dcc' AS dcc
-            FROM 
-                -- Get the parsed metadata
-                (SELECT 
-                jid, owner, starttime, metadata::json AS metadata, (metadata::json->>'scene')::json AS scene FROM job WHERE metadata != '') AS jobData 
-            WHERE scene->>'project' != 'TEST_PIPE') AS job, task 
-        WHERE 
-        job.jid = task.jid AND task.state = 'done') AS output
-    ORDER BY frame, shot, sequence, owner, starttime) AS output
-ORDER BY date, owner, done DESC
+                job.jid, job.starttime, job.metadata::json AS job_metadata, task.metadata::json AS task_metadata, task.state
+                FROM job, task 
+                WHERE is_valid_json(job.metadata) AND is_valid_json(task.metadata) AND task.jid = job.jid LIMIT 10000000) AS taskData 
+        WHERE state = 'done') AS metadata
+    WHERE project != 'TEST_PIPE' AND category = 'final' AND shot != '' AND sequence != '') AS metadata
+ORDER BY date, project, done DESC

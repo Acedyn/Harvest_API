@@ -1,4 +1,4 @@
-CREATE FUNCTION is_valid_json(text)
+CREATE OR REPLACE FUNCTION is_valid_json(text)
     RETURNS boolean
     LANGUAGE plpgsql
     IMMUTABLE
