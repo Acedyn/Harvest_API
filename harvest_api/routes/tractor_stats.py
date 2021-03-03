@@ -56,7 +56,7 @@ def pc_work():
     .filter(Blade.profile != "BUG") \
     .filter(Blade.availdisk > 5).count()
     # Return a json
-    response = [{"name": "Busy", "value": PCs_working}, {"name": "Free", "value": PCs_free}, {"name": "Nimby ON", "value": PCs_nimby}]
+    response = [{"name": "Free", "value": PCs_free}, {"name": "Busy", "value": PCs_working}, {"name": "Nimby ON", "value": PCs_nimby}]
     return jsonify(response)
 
 # Route for "/pc-crew"
