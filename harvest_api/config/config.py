@@ -6,9 +6,9 @@ class Config(object):
     def __init__(self, db_password = "", db_adress = "localhost:5432", user = "postgres"):
         # Initialize the attributes using the given parameters
         self.db_password = db_password
-        self.SQLALCHEMY_DATABASE_URI = "postgresql://" + user + ":" + db_password + "@" + db_adress + "/tractor_02_03_2021"
+        self.SQLALCHEMY_DATABASE_URI = "postgresql://" + user + ":" + db_password + "@" + db_adress + "/tractor"
         self.SQLALCHEMY_BINDS = {
-            "tractor": "postgresql://" + user + ":" + db_password + "@" + db_adress + "/tractor_02_03_2021",
+            "tractor": "postgresql://" + user + ":" + db_password + "@" + db_adress + "/tractor",
             "harvest": "postgresql://" + user + ":" + db_password + "@" + db_adress + "/harvest",
             "dev": "postgresql://" + user + ":" + db_password + "@" + db_adress + "/dev"
         }
