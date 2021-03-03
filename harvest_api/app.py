@@ -43,7 +43,8 @@ else:
 # Create the flask app from the config file
 try:
     app = create_app(config)
-except sqlalchemy.exc.OperationalError:
+except Exception as exception:
+    print(exception)
     print ("ERROR: Failed to connect to the database, it can be due to a wrong password, or a wrong adress")
     sys.exit()
 

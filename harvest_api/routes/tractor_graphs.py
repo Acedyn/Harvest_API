@@ -18,7 +18,8 @@ def crew_progression():
     # Get the file of the coresponding query
     try:
         file = open(os.path.join(query_dir, "crew_progression.sql"))
-    except IOError:
+    except Exception as exception:
+        print(exception)
         return "ERROR: Could not open the crew_progression.sql file"
     # Read the content of the file
     query = text(file.read())
@@ -85,14 +86,16 @@ def frame_computetime():
     # Get the file of the coresponding query
     try:
         file = open(os.path.join(query_dir, "frame_computetime.sql"))
-    except IOError:
+    except Exception as exception:
+        print(exception)
         return "ERROR: Could not open the frame_computetime.sql file"
     # Read the content of the file
     query = text(file.read())
     # Execute the query of the file
     try:
         results = tractor_db.engine.execute(query)
-    except:
+    except Exception as exception:
+        print(exception)
         return "ERROR: Could not execute the SQL query from frame_computetime.sql"
 
     # Initialize the response for each timestamp
