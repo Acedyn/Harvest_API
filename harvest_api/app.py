@@ -1,6 +1,7 @@
 from config.config import DevelopmentConfig, ProductionConfig, Config
 import getpass, sys, getopt
 from server import create_app
+from database import create_orm
 from waitress import serve
 
 # Get aguments
@@ -36,7 +37,9 @@ else:
     config = Config(**config_arg)
 
 
-# Create the flask app from the config file
+# Create the orm engines from the config
+engines, sessions = create_orm(config)
+# Create the flask app from the config
 app = create_app(config)
 
 
