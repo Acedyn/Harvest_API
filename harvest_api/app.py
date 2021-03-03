@@ -1,7 +1,7 @@
-# from server import create_app
-# from waitress import serve
 from config.config import DevelopmentConfig, ProductionConfig, Config
 import getpass, sys, getopt
+from server import create_app
+from waitress import serve
 
 # Get aguments
 argv = sys.argv[1:]
@@ -37,7 +37,7 @@ else:
 
 
 # Create the flask app from the config file
-# app = create_app(config)
+app = create_app(config)
 
 
 # Start the flask application
@@ -45,12 +45,12 @@ if __name__ == '__main__':
     if config.environment == "prod":
         pass
         # If we are in production serve with waitress
-        # serve(app, host=config.app_host, port=config.app_port)
+        serve(app, host=config.app_host, port=config.app_port)
     elif config.environment == "dev":
         pass
         # If we are in development serve with flask
-        # app.run(debug = True, host=config.app_host, port=config.app_port)
+        app.run(debug = True, host=config.app_host, port=config.app_port)
     else:
         pass
         # By default serve with flask
-        # app.run(debug = True, host=config.app_host, port=config.app_port)
+        app.run(debug = True, host=config.app_host, port=config.app_port)
