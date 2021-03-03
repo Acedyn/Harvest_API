@@ -28,7 +28,7 @@ class Config(object):
 # To use these config, add "-e dev" when starting the server 
 class DevelopmentConfig(Config):
     def __init__(self, db_password = "", db_adress = "localhost:5432", user = "postgres"):
-        Config.__init__(self, db_password, db_adress)
+        Config.__init__(self, db_password, db_adress, user)
 
     environment = "dev"
     port=8080
@@ -40,7 +40,7 @@ class DevelopmentConfig(Config):
 # To use these config, add "-e prod" when starting the server 
 class ProductionConfig(Config):
     def __init__(self, db_password = "", db_adress = "localhost:9876", user = "root"):
-        Config.__init__(self, db_password, db_adress)
+        Config.__init__(self, db_password, db_adress, user)
 
     environment = "prod"
     port=5000
