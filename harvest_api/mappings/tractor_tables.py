@@ -13,7 +13,7 @@ class Task(tractor_db.Model):
     __table__ = tractor_db.Model.metadata.tables["task"]
 
 # Mapping to get to the invocation table
-class Invoation(tractor_db.Model):
+class Invocation(tractor_db.Model):
     __bind_key__ = "tractor"
     __table__ = tractor_db.Model.metadata.tables["invocation"]
 
