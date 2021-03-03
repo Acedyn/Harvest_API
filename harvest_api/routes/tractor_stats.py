@@ -82,7 +82,7 @@ def pc_crew():
 
     # Loop over all the rows of the sql response
     for result in results:
-        response.append({result[0]: result[1]})
+        response.append({"name": result[0], "value": result[1]})
 
     # Return the response in json format
     return jsonify(response)
