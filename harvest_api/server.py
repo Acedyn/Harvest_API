@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from database import engines, execute_from_file
+from database import sessions, execute_from_file
 import os
 
 # Initialize the flask app
@@ -14,8 +14,8 @@ def create_app(config_file):
     CORS(app)
 
     # Register the routes
-    # from routes.tractor_graphs import tractor_route_graph
-    # app.register_blueprint(tractor_route_graph)
+    from routes.tractor_graphs import tractor_graph
+    app.register_blueprint(tractor_graph)
     # from routes.tractor_stats import tractor_route_stat
     # app.register_blueprint(tractor_route_stat)
 
@@ -25,8 +25,5 @@ def create_app(config_file):
     def cleanup(resp_or_exc):
         sessions["tractor"].remove()
         sessions["harvest"].remove()
-
-    # Initialize the SQL functions to make sure we can use them in the raw queries
-    execute_from_file("tractor", "func_valid_json.sql")
 
     return app

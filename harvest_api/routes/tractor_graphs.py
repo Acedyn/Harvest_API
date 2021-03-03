@@ -1,36 +1,21 @@
 from flask import Blueprint
 from flask import jsonify
-from server import tractor_db
-from sqlalchemy.sql import text
-import datetime, os
+from database import execute_from_file
+import datetime
 
 # TODO: Factorize the function for each routes because they all to pretty mutch the same thing
 
 # Initialize the set to routes for tractor
-tractor_route_graph = Blueprint("main", __name__)
+tractor_graph = Blueprint("graph", __name__)
 
-basepath = os.path.dirname(__file__)
-query_dir = os.path.join(basepath, "..", "queries")
 
 # Route for "/crew-progression"
-@tractor_route_graph.route("/crew-progression")
+@tractor_graph.route("/crew-progression")
 def crew_progression():
-    # Get the file of the coresponding query
-    try:
-        file = open(os.path.join(query_dir, "crew_progression.sql"))
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Could not open the crew_progression.sql file"
-    # Read the content of the file
-    query = text(file.read())
-    # Execute the query of the file
-    try:
-        results = tractor_db.engine.execute(query)
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Could not execute the SQL query from crew_progression.sql"
+    # Query from the crew_progression.sql file
+    results = execute_from_file("tractor", "crew_progression.sql")
 
-    # Initialize the response for each timestamp
+    # Initialize the timestamp state buffer
     # TODO: Query all the project names from our awesome futur database
     timetamp_state = {
         "date": str(datetime.date(1, 1, 1)),
@@ -81,24 +66,12 @@ def crew_progression():
 
 
 # Route for "/frame-computetime"
-@tractor_route_graph.route("/frame-computetime")
+@tractor_graph.route("/frame-computetime")
 def frame_computetime():
-    # Get the file of the coresponding query
-    try:
-        file = open(os.path.join(query_dir, "frame_computetime.sql"))
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Could not open the frame_computetime.sql file"
-    # Read the content of the file
-    query = text(file.read())
-    # Execute the query of the file
-    try:
-        results = tractor_db.engine.execute(query)
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Could not execute the SQL query from frame_computetime.sql"
+    # Query from the frame_computetime.sql file
+    results = execute_from_file("tractor", "frame_computetime.sql")
 
-    # Initialize the response for each timestamp
+    # Initialize the project stat buffer
     project_stats = {
         "name": ""
     }
@@ -121,6 +94,7 @@ def frame_computetime():
         elif(project_stats["name"] != project):
             # Store the curent state of project_state in the response
             response.append(project_stats.copy())
+            # Reset the buffer for the other project
             project_stats = {
                 "name": project
             }

@@ -21,6 +21,9 @@ def create_orm(config_file):
     sessions["tractor"] = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engines["tractor"]))
     sessions["harvest"] = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engines["harvest"]))
 
+    # Initialize the SQL functions to make sure we can use them in the raw queries
+    execute_from_file("tractor", "func_valid_json.sql")
+
     return engines, sessions
 
 
