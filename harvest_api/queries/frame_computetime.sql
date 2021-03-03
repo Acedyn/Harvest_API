@@ -6,8 +6,7 @@ FROM
     (SELECT
     DISTINCT ON (metadata.jid, metadata.tid, metadata.project)
     metadata.project,
-    substring(upper(blade.name) from '(?<=-MK).*(?=-[\d]{4})')::int AS index,
-    substring(upper(blade.name) from '(?<=-).*(?=-[\d]{4})') AS computer,
+    substring(upper(blade.name) from 'MK\d') AS computer,
     invocation.elapsedreal / metadata.frames AS frametime, invocation.elapsedreal, metadata.frames
     FROM
         -- Get the parsed metadata content and compute the amount of frames in each task
@@ -23,5 +22,5 @@ FROM
                 WHERE is_valid_json(job.metadata) AND is_valid_json(task.metadata) AND task.jid = job.jid LIMIT 10000000) AS taskData 
         WHERE state = 'done' AND job_metadata->>'project' != 'TEST_PIPE' AND job_metadata->>'renderState' = 'final') AS metadata, invocation, blade
     WHERE metadata.jid = invocation.jid AND metadata.tid = invocation.tid AND blade.bladeid = invocation.bladeid) AS computationstat
-GROUP BY index, computer, project
-ORDER BY project, index
+GROUP BY computer, project
+ORDER BY project, computer
