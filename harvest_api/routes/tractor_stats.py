@@ -5,6 +5,8 @@ from mappings.tractor_tables import Blade, Job, Invocation, Task
 from sqlalchemy.sql import text
 import os
 
+# TODO: Clean the mess, use sqlalchemy queries and find a way to not repeat the filters
+
 # Initialize the set to routes for tractor
 tractor_route_stat = Blueprint("stats", __name__)
 
@@ -15,14 +17,25 @@ query_dir = os.path.join(basepath, "..", "queries")
 @tractor_route_stat.route("/pc-work")
 def pc_work():
     # Get the working blades
-    PCs_working = Blade.query \
-    .filter(Blade.status == "no free slots (1)") \
-    .filter(Blade.profile != "LAVIT") \
-    .filter(Blade.profile != "JV") \
-    .filter(Blade.profile != "windows10") \
-    .filter(Blade.profile != "TD") \
-    .filter(Blade.profile != "BUG") \
-    .filter(Blade.availdisk > 5).count()
+    # TODO: This is not the good way to do it but the meeting is in 10 min to this will do for now
+    try:
+        file = open(os.path.join(query_dir, "blade_crew.sql"))
+    except Exception as exception:
+        print(exception)
+        return "ERROR: Could not open the blade_crew.sql file"
+    # Read the content of the file
+    query = text(file.read())
+    # Execute the query of the file
+    try:
+        results = tractor_db.engine.execute(query)
+    except Exception as exception:
+        print(exception)
+        return "ERROR: Could not execute the SQL query from blade_crew.sql"
+
+    PCs_working = 0
+    for result in results:
+        PCs_working += result[1]
+
     # Get the free blades
     PCs_free = Blade.query \
     .filter(Blade.status == "") \
@@ -32,6 +45,7 @@ def pc_work():
     .filter(Blade.profile != "TD") \
     .filter(Blade.profile != "BUG") \
     .filter(Blade.availdisk > 5).count()
+
     # Get the blades with nimby on
     PCs_nimby = Blade.query \
     .filter(Blade.status.startswith("nimby")) \
