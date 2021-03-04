@@ -28,6 +28,8 @@ def create_orm(config_file):
 
     # Refect all the tables of the tractor's database
     bases["tractor"].metadata.reflect(bind=engines["tractor"])
+    from mappings.harvest_tables import Project
+    bases["harvest"].metadata.create_all(bind=engines["harvest"])
 
     # Initialize the SQL functions to make sure we can use them in the raw queries
     execute_from_file("tractor", "func_valid_json.sql")
