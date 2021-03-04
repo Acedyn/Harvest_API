@@ -1,5 +1,4 @@
-from flask import Blueprint
-from flask import jsonify
+from flask import Blueprint, jsonify, request
 from database import execute_from_file, sessions
 from mappings.harvest_tables import Project
 import re
@@ -12,8 +11,8 @@ import re
 # Initialize the set of routes for validation
 validation = Blueprint("validation", __name__)
 
-# Route for "/validation/unvalidated-progression/<project>"
-@validation.route("/validation/unvalidated-progression/<project>")
+# Route used to get all the frames that has been rendered on the farm since the last validation
+@validation.route("/validation/unvalidated-progression/<project>", methods = ["GET"])
 def unvalidated_progression(project):
     # Query the last validation date of the given parameter
     last_validation = sessions["harvest"].query(Project.last_validation).filter(Project.name == project.upper()).first()
@@ -35,3 +34,11 @@ def unvalidated_progression(project):
         response.append({"sequence": sequence, "shot": shot, "frame": result["frame"]})
 
     return jsonify(response)
+
+
+# Route used to get all the frames that has been rendered on the farm since the last validation
+@validation.route("/validation/validate-progression/<project>", methods = ["POST"])
+def validate_progression(project):
+    data = request.json
+
+    return jsonify(data)
