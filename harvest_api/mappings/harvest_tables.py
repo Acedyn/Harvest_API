@@ -5,14 +5,10 @@ from sqlalchemy.orm import relationship
 # Mapping to get to the project table
 class Project(bases["harvest"]):
     __tablename__ = "project"
-    __table_args__ = (
-        CheckConstraint('index >= 0'),
-        CheckConstraint('total_sequences >= 0'),
-    )
 
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
-    total_sequences = Column(Integer, nullable = False)
     name = Column(String(50), nullable = False)
+    last_validation = Column(DateTime, nullable = False)
 
     sequence = relationship("Sequence", back_populates = "project")
 
@@ -28,12 +24,10 @@ class Sequence(bases["harvest"]):
     __tablename__ = "sequence"
     __table_args__ = (
         CheckConstraint('index >= 0'),
-        CheckConstraint('total_shots >= 0'),
     )
 
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
     index = Column(Integer, nullable = False)
-    total_shots = Column(Integer, nullable = False)
     project_id = Column(Integer, ForeignKey("project.id"), nullable = False)
 
     project = relationship("Project", back_populates = "sequence")
@@ -51,12 +45,10 @@ class Shot(bases["harvest"]):
     __tablename__ = "shot"
     __table_args__ = (
         CheckConstraint('index >= 0'),
-        CheckConstraint('total_frames >= 0'),
     )
 
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
     index = Column(Integer, nullable = False)
-    total_frames = Column(Integer, nullable = False)
     sequence_id = Column(Integer, ForeignKey("sequence.id"), nullable = False)
 
     sequence = relationship("Sequence", back_populates = "shot")
