@@ -39,7 +39,7 @@ def create_orm(config_file):
 
 
 # Execute an sql query from a file in the queries folder
-def execute_from_file(bind, file_name):
+def execute_from_file(bind, file_name, parameters = ()):
     # Get the root path of the queries folder
     query_dir = os.path.join(os.path.dirname(__file__), "queries")
 
@@ -53,7 +53,7 @@ def execute_from_file(bind, file_name):
     query = text(file.read())
     # Execute the query of the file
     try:
-        results = engines[bind].execute(query)
+        results = engines[bind].execute(query, parameters)
     except Exception as exception:
         print(exception)
         return "ERROR: Could not execute the SQL query from {file_name}"
