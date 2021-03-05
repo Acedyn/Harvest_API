@@ -1,5 +1,5 @@
 from database import bases
-from sqlalchemy import Column, Integer, DateTime, String, ForeignKey, CheckConstraint
+from sqlalchemy import Column, Integer, Boolean, DateTime, String, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
 
 # Mapping to get to the project table
@@ -73,9 +73,29 @@ class Frame(bases["harvest"]):
     shot_id = Column(Integer, ForeignKey("shot.id"), nullable = False)
 
     shot = relationship("Shot", back_populates = "frame")
+    layer = relationship("Layer", back_populates = "frame")
 
     def __repr__(self):
         return f"<Frame {self.id}"
     
     def __str__(self):
         return f"Frame : {self.index}"
+
+
+# Mapping to get the layer table
+class Layer(bases["harvest"]):
+    __tablename__ = "layer"
+
+    id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
+    name = Column(String(50), nullable = False)
+    valid = Column(Boolean, nullable = False)
+    rendertime = Column(DateTime, nullable = False)
+    frame_id = Column(Integer, ForeignKey("frame.id"), nullable = False)
+
+    frame = relationship("Frame", back_populates = "layer")
+
+    def __repr__(self):
+        return f"<Layer {self.id}"
+    
+    def __str__(self):
+        return f"Layer : {self.index}"
