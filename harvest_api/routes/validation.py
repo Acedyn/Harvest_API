@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
-from database import execute_from_file, sessions
-from mappings.harvest_tables import Project
+from sqlalchemy.sql import select
+from database import execute_from_file, sessions, engines
+from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer
 import re
 
 ########################################
@@ -10,6 +11,76 @@ import re
 
 # Initialize the set of routes for validation
 validation = Blueprint("validation", __name__)
+
+# Route used to get the project's state of the harvest database
+@validation.route("/validation/validated-progression/<project>", methods = ["GET"])
+def validated_progression_project(project):
+    query = get_project_query(project)
+    results = engines["harvest"].execute(query)
+
+    for result in results:
+        print(result)
+    
+
+    return "Hello world"
+
+
+# Route used to get the sequence's state of the harvest database
+@validation.route("/validation/validated-progression/<project>/<sequence>", methods = ["GET"])
+def validated_progression_sequence(project):
+
+
+    return "Hello world"
+
+
+# Route used to get the shot's state of the harvest database
+@validation.route("/validation/validated-progression/<project>/<sequence>/<shot>", methods = ["GET"])
+def validated_progression_shot(project):
+
+
+    return "Hello world"
+
+# Route used to get the frame's state of the harvest database
+@validation.route("/validation/validated-progression/<project>/<sequence>/<shot>/<frame>", methods = ["GET"])
+def validated_progression_frame(project):
+
+
+    return "Hello world"
+
+
+
+# Route used to update the project's state of the harvest database
+@validation.route("/validation/validate-progression/<project>", methods = ["POST"])
+def validate_progression_project(project):
+    data = request.json
+
+    return jsonify(data)
+
+
+# Route used to update the sequence's state of the harvest database
+@validation.route("/validation/validate-progression/<project>/<sequence>", methods = ["POST"])
+def validate_progression_sequence(project):
+    data = request.json
+
+    return jsonify(data)
+
+
+# Route used to update the shot's state of the harvest database
+@validation.route("/validation/validate-progression/<project>/<sequence>/<shot>", methods = ["POST"])
+def validate_progression_shot(project):
+    data = request.json
+
+    return jsonify(data)
+
+
+# Route used to update the frame's state of the harvest database
+@validation.route("/validation/validate-progression/<project>/<sequence>/<shot>/<frame>", methods = ["POST"])
+def validate_progression_frame(project):
+    data = request.json
+
+    return jsonify(data)
+
+
 
 # Route used to get all the frames that has been rendered on the farm since the last validation
 @validation.route("/validation/unvalidated-progression/<project>", methods = ["GET"])
@@ -36,9 +107,14 @@ def unvalidated_progression(project):
     return jsonify(response)
 
 
-# Route used to get all the frames that has been rendered on the farm since the last validation
-@validation.route("/validation/validate-progression/<project>", methods = ["POST"])
-def validate_progression(project):
-    data = request.json
+########################################
+# Utility functions
+########################################
 
-    return jsonify(data)
+def get_project_query(name: str):
+    project_query = select([Project.name, Project.id]).where(Project.name == name.upper())
+    project_query_alias = project_query.alias()
+    sequence_query = select([Sequence.index, Sequence.id]).where(Sequence.project_id == project_query_alias.c.id)
+
+    return sequence_query
+

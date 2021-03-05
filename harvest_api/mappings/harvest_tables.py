@@ -1,5 +1,5 @@
 from database import bases
-from sqlalchemy import Column, Integer, Boolean, DateTime, String, ForeignKey, CheckConstraint
+from sqlalchemy import Column, Integer, Boolean, DateTime, String, ForeignKey, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 # Mapping to get to the project table
@@ -7,7 +7,7 @@ class Project(bases["harvest"]):
     __tablename__ = "project"
 
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
-    name = Column(String(50), nullable = False)
+    name = Column(String(50), nullable = False, unique = True)
     last_validation = Column(DateTime, nullable = False)
 
     sequence = relationship("Sequence", back_populates = "project")
@@ -24,6 +24,7 @@ class Sequence(bases["harvest"]):
     __tablename__ = "sequence"
     __table_args__ = (
         CheckConstraint('index >= 0'),
+        UniqueConstraint('index', 'project_id', name='unique_sequence'),
     )
 
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
@@ -45,6 +46,7 @@ class Shot(bases["harvest"]):
     __tablename__ = "shot"
     __table_args__ = (
         CheckConstraint('index >= 0'),
+        UniqueConstraint('index', 'sequence_id', name='unique_shot'),
     )
 
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
@@ -66,10 +68,12 @@ class Frame(bases["harvest"]):
     __tablename__ = "frame"
     __table_args__ = (
         CheckConstraint('index >= 0'),
+        UniqueConstraint('index', 'shot_id', name='unique_frame'),
     )
 
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
     index = Column(Integer, nullable = False)
+    valid = Column(Boolean, nullable = False)
     shot_id = Column(Integer, ForeignKey("shot.id"), nullable = False)
 
     shot = relationship("Shot", back_populates = "frame")
@@ -85,11 +89,12 @@ class Frame(bases["harvest"]):
 # Mapping to get the layer table
 class Layer(bases["harvest"]):
     __tablename__ = "layer"
+    __table_args__ = (
+        UniqueConstraint('name', 'frame_id', name='unique_layer'),
+    )
 
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
     name = Column(String(50), nullable = False)
-    valid = Column(Boolean, nullable = False)
-    rendertime = Column(DateTime, nullable = False)
     frame_id = Column(Integer, ForeignKey("frame.id"), nullable = False)
 
     frame = relationship("Frame", back_populates = "layer")
