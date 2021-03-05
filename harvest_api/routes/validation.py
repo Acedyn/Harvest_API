@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy import func
-from sqlalchemy.sql import select, and_
+from sqlalchemy.sql import select, and_, true, false
 from database import execute_from_file, sessions, engines
 from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer
 import re
@@ -17,11 +17,13 @@ validation = Blueprint("validation", __name__)
 @validation.route("/validation/validated-progression/<project>", methods = ["GET"])
 def validated_progression_project(project):
     # Query all the layers of the given project to get the % of progression
-    project_query = select([Sequence.index, func.count(Sequence.index)]).where(and_( \
-        Project.name == project.upper(), \
+    project_query = select([Sequence.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+        .where(and_( \
+        Project.name == re.sub("-", '_', project.upper()), \
         Sequence.project_id == Project.id, \
         Shot.sequence_id == Sequence.id, \
-        Frame.shot_id == Shot.id)). \
+        Frame.shot_id == Shot.id, \
+        Layer.frame_id == Frame.id)). \
         group_by(Sequence.index)
     # Execute the query
     results = engines["harvest"].execute(project_query)
@@ -31,7 +33,7 @@ def validated_progression_project(project):
     
     # Convert the sql result to a jsonifyable list
     for result in results:
-        response.append({"index": result["index"], "total": result[1]})
+        response.append({"index": result["index"], "total": result["total"], "valid": result["valid"]})
     
     return jsonify(response)
 
@@ -40,12 +42,14 @@ def validated_progression_project(project):
 @validation.route("/validation/validated-progression/<project>/<sequence>", methods = ["GET"])
 def validated_progression_sequence(project, sequence):
     # Query all the layers of the given sequence to get the % of progression
-    sequence_query = select([Shot.index, func.count(Shot.index)]).where(and_( \
-        Project.name == project.upper(), \
+    project_query = select([Shot.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+        .where(and_( \
+        Project.name == re.sub("-", '_', project.upper()), \
         Sequence.project_id == Project.id, \
         Sequence.index == int(re.sub("[^0-9]", '', sequence)), \
         Shot.sequence_id == Sequence.id, \
-        Frame.shot_id == Shot.id)). \
+        Frame.shot_id == Shot.id, \
+        Layer.frame_id == Frame.id)). \
         group_by(Shot.index)
     # Execute the query
     results = engines["harvest"].execute(sequence_query)
@@ -55,7 +59,7 @@ def validated_progression_sequence(project, sequence):
     
     # Convert the sql result to a jsonifyable list
     for result in results:
-        response.append({"index": result["index"], "total": result[1]})
+        response.append({"index": result["index"], "total": result["total"], "valid": result["valid"]})
     
     return jsonify(response)
 
@@ -64,13 +68,15 @@ def validated_progression_sequence(project, sequence):
 @validation.route("/validation/validated-progression/<project>/<sequence>/<shot>", methods = ["GET"])
 def validated_progression_shot(project, sequence, shot):
     # Query all the layers of the given shot to get the % of progression
-    sequence_query = select([Frame.index, func.count(Frame.index)]).where(and_( \
-        Project.name == project.upper(), \
+    project_query = select([Frame.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+        .where(and_( \
+        Project.name == re.sub("-", '_', project.upper()), \
         Sequence.project_id == Project.id, \
         Sequence.index == int(re.sub("[^0-9]", '', sequence)), \
         Shot.sequence_id == Sequence.id, \
         Shot.index == int(re.sub("[^0-9]", '', shot)), \
-        Frame.shot_id == Shot.id)). \
+        Frame.shot_id == Shot.id, \
+        Layer.frame_id == Frame.id)). \
         group_by(Frame.index)
     # Execute the query
     results = engines["harvest"].execute(sequence_query)
@@ -80,7 +86,7 @@ def validated_progression_shot(project, sequence, shot):
     
     # Convert the sql result to a jsonifyable list
     for result in results:
-        response.append({"index": result["index"], "total": result[1]})
+        response.append({"index": result["index"], "total": result["total"], "valid": result["valid"]})
     
     return jsonify(response)
 
@@ -88,14 +94,16 @@ def validated_progression_shot(project, sequence, shot):
 @validation.route("/validation/validated-progression/<project>/<sequence>/<shot>/<frame>", methods = ["GET"])
 def validated_progression_frame(project, sequence, shot, frame):
     # Query all the layers of the given frame to get the % of progression
-    sequence_query = select([Layer.name, func.count(Layer.name)]).where(and_( \
-        Project.name == project.upper(), \
+    project_query = select([Layer.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+        .where(and_( \
+        Project.name == re.sub("-", '_', project.upper()), \
         Sequence.project_id == Project.id, \
         Sequence.index == int(re.sub("[^0-9]", '', sequence)), \
         Shot.sequence_id == Sequence.id, \
         Shot.index == int(re.sub("[^0-9]", '', shot)), \
-        Frame.shot_id == Shot.id)). \
-        Shot.index == int(re.sub("[^0-9]", '', frame)), \
+        Frame.shot_id == Shot.id, \
+        Frame.index == int(re.sub("[^0-9]", '', frame)), \
+        Layer.frame_id == Frame.id)). \
         group_by(Layer.name)
     # Execute the query
     results = engines["harvest"].execute(sequence_query)
@@ -105,7 +113,7 @@ def validated_progression_frame(project, sequence, shot, frame):
     
     # Convert the sql result to a jsonifyable list
     for result in results:
-        response.append({"name": result["name"], "total": result[1]})
+        response.append({"name": result["name"], "total": result["total"], "valid": result["valid"]})
     
     return jsonify(response)
 
