@@ -96,7 +96,7 @@ class Layer(bases["harvest"]):
     name = Column(String(50), nullable = False, default = "none")
     rendertime = Column(DateTime)
     frame_id = Column(Integer, ForeignKey("frame.id"), nullable = False)
-    valid = Column(Boolean, nullable = False)
+    valid = Column(Boolean, nullable = False, server_default = "FALSE")
 
     frame = relationship("Frame", back_populates = "layer")
 

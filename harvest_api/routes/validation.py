@@ -25,7 +25,6 @@ def validated_progression_project(project):
         group_by(Sequence.index)
     # Execute the query
     results = engines["harvest"].execute(project_query)
-    print(results)
 
     # Initialize the final response that will contain project
     response = []
