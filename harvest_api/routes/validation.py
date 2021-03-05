@@ -42,7 +42,7 @@ def validated_progression_project(project):
 @validation.route("/validation/validated-progression/<project>/<sequence>", methods = ["GET"])
 def validated_progression_sequence(project, sequence):
     # Query all the layers of the given sequence to get the % of progression
-    project_query = select([Shot.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+    sequence_query = select([Shot.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
         .where(and_( \
         Project.name == re.sub("-", '_', project.upper()), \
         Sequence.project_id == Project.id, \
@@ -67,8 +67,13 @@ def validated_progression_sequence(project, sequence):
 # Route used to get the shot's state of the harvest database
 @validation.route("/validation/validated-progression/<project>/<sequence>/<shot>", methods = ["GET"])
 def validated_progression_shot(project, sequence, shot):
+    # TODO: Replace the temporary 999999999 from the code
+    start = request.args.get('start', default = 0, type = int)
+    end = request.args.get('end', default = 999999999, type = int)
+    print(start, end)
+
     # Query all the layers of the given shot to get the % of progression
-    project_query = select([Frame.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+    shot_query = select([Frame.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
         .where(and_( \
         Project.name == re.sub("-", '_', project.upper()), \
         Sequence.project_id == Project.id, \
@@ -76,10 +81,12 @@ def validated_progression_shot(project, sequence, shot):
         Shot.sequence_id == Sequence.id, \
         Shot.index == int(re.sub("[^0-9]", '', shot)), \
         Frame.shot_id == Shot.id, \
-        Layer.frame_id == Frame.id)). \
+        Layer.frame_id == Frame.id, \
+        Frame.index >= start, \
+        Frame.index <= end)). \
         group_by(Frame.index)
     # Execute the query
-    results = engines["harvest"].execute(sequence_query)
+    results = engines["harvest"].execute(shot_query)
 
     # Initialize the final response that will contain project
     response = []
@@ -94,7 +101,7 @@ def validated_progression_shot(project, sequence, shot):
 @validation.route("/validation/validated-progression/<project>/<sequence>/<shot>/<frame>", methods = ["GET"])
 def validated_progression_frame(project, sequence, shot, frame):
     # Query all the layers of the given frame to get the % of progression
-    project_query = select([Layer.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+    frame_query = select([Layer.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
         .where(and_( \
         Project.name == re.sub("-", '_', project.upper()), \
         Sequence.project_id == Project.id, \
@@ -106,7 +113,7 @@ def validated_progression_frame(project, sequence, shot, frame):
         Layer.frame_id == Frame.id)). \
         group_by(Layer.name)
     # Execute the query
-    results = engines["harvest"].execute(sequence_query)
+    results = engines["harvest"].execute(frame_query)
 
     # Initialize the final response that will contain project
     response = []
