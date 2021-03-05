@@ -93,11 +93,30 @@ class Layer(bases["harvest"]):
     )
 
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
-    name = Column(String(50), nullable = False)
+    name = Column(String(50), nullable = False, default = "none")
+    rendertime = Column(DateTime)
     frame_id = Column(Integer, ForeignKey("frame.id"), nullable = False)
     valid = Column(Boolean, nullable = False)
 
     frame = relationship("Frame", back_populates = "layer")
+
+    def __repr__(self):
+        return f"<Layer {self.id}"
+    
+    def __str__(self):
+        return f"Layer : {self.index}"
+
+
+# Mapping to get the history table
+class History(bases["harvest"]):
+    __tablename__ = "history"
+
+    # TODO: Auto fill the date when inserting a row
+    date = Column(DateTime, primary_key = True, nullable=False)
+    blade_busy = Column(Integer, nullable = False)
+    blade_nimby = Column(Integer, nullable = False)
+    blade_off = Column(Integer, nullable = False)
+    blade_free = Column(Integer, nullable = False)
 
     def __repr__(self):
         return f"<Layer {self.id}"

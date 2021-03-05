@@ -25,13 +25,14 @@ def validated_progression_project(project):
         group_by(Sequence.index)
     # Execute the query
     results = engines["harvest"].execute(project_query)
+    print(results)
 
     # Initialize the final response that will contain project
     response = []
     
     # Convert the sql result to a jsonifyable list
     for result in results:
-        response.append({"index": result["index"], "value": result[1]})
+        response.append({"index": result["index"], "total": result[1]})
     
     return jsonify(response)
 
@@ -55,7 +56,7 @@ def validated_progression_sequence(project, sequence):
     
     # Convert the sql result to a jsonifyable list
     for result in results:
-        response.append({"index": result["index"], "value": result[1]})
+        response.append({"index": result["index"], "total": result[1]})
     
     return jsonify(response)
 
@@ -80,7 +81,7 @@ def validated_progression_shot(project, sequence, shot):
     
     # Convert the sql result to a jsonifyable list
     for result in results:
-        response.append({"index": result["index"], "value": result[1]})
+        response.append({"index": result["index"], "total": result[1]})
     
     return jsonify(response)
 
@@ -105,7 +106,7 @@ def validated_progression_frame(project, sequence, shot, frame):
     
     # Convert the sql result to a jsonifyable list
     for result in results:
-        response.append({"name": result["name"], "value": result[1]})
+        response.append({"name": result["name"], "total": result[1]})
     
     return jsonify(response)
 
