@@ -73,7 +73,6 @@ class Frame(bases["harvest"]):
 
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
     index = Column(Integer, nullable = False)
-    valid = Column(Boolean, nullable = False)
     shot_id = Column(Integer, ForeignKey("shot.id"), nullable = False)
 
     shot = relationship("Shot", back_populates = "frame")
@@ -96,6 +95,7 @@ class Layer(bases["harvest"]):
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
     name = Column(String(50), nullable = False)
     frame_id = Column(Integer, ForeignKey("frame.id"), nullable = False)
+    valid = Column(Boolean, nullable = False)
 
     frame = relationship("Frame", back_populates = "layer")
 

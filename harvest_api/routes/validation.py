@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
-from sqlalchemy.sql import select
+from sqlalchemy import func
+from sqlalchemy.sql import select, and_
 from database import execute_from_file, sessions, engines
 from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer
 import re
@@ -15,37 +16,98 @@ validation = Blueprint("validation", __name__)
 # Route used to get the project's state of the harvest database
 @validation.route("/validation/validated-progression/<project>", methods = ["GET"])
 def validated_progression_project(project):
-    query = get_project_query(project)
-    results = engines["harvest"].execute(query)
+    # Query all the layers of the given project to get the % of progression
+    project_query = select([Sequence.index, func.count(Sequence.index)]).where(and_( \
+        Project.name == project.upper(), \
+        Sequence.project_id == Project.id, \
+        Shot.sequence_id == Sequence.id, \
+        Frame.shot_id == Shot.id)). \
+        group_by(Sequence.index)
+    # Execute the query
+    results = engines["harvest"].execute(project_query)
 
-    for result in results:
-        print(result)
+    # Initialize the final response that will contain project
+    response = []
     
-
-    return "Hello world"
+    # Convert the sql result to a jsonifyable list
+    for result in results:
+        response.append({"index": result["index"], "value": result[1]})
+    
+    return jsonify(response)
 
 
 # Route used to get the sequence's state of the harvest database
 @validation.route("/validation/validated-progression/<project>/<sequence>", methods = ["GET"])
-def validated_progression_sequence(project):
+def validated_progression_sequence(project, sequence):
+    # Query all the layers of the given sequence to get the % of progression
+    sequence_query = select([Shot.index, func.count(Shot.index)]).where(and_( \
+        Project.name == project.upper(), \
+        Sequence.project_id == Project.id, \
+        Sequence.index == int(re.sub("[^0-9]", '', sequence)), \
+        Shot.sequence_id == Sequence.id, \
+        Frame.shot_id == Shot.id)). \
+        group_by(Shot.index)
+    # Execute the query
+    results = engines["harvest"].execute(sequence_query)
 
-
-    return "Hello world"
+    # Initialize the final response that will contain project
+    response = []
+    
+    # Convert the sql result to a jsonifyable list
+    for result in results:
+        response.append({"index": result["index"], "value": result[1]})
+    
+    return jsonify(response)
 
 
 # Route used to get the shot's state of the harvest database
 @validation.route("/validation/validated-progression/<project>/<sequence>/<shot>", methods = ["GET"])
-def validated_progression_shot(project):
+def validated_progression_shot(project, sequence, shot):
+    # Query all the layers of the given shot to get the % of progression
+    sequence_query = select([Frame.index, func.count(Frame.index)]).where(and_( \
+        Project.name == project.upper(), \
+        Sequence.project_id == Project.id, \
+        Sequence.index == int(re.sub("[^0-9]", '', sequence)), \
+        Shot.sequence_id == Sequence.id, \
+        Shot.index == int(re.sub("[^0-9]", '', shot)), \
+        Frame.shot_id == Shot.id)). \
+        group_by(Frame.index)
+    # Execute the query
+    results = engines["harvest"].execute(sequence_query)
 
-
-    return "Hello world"
+    # Initialize the final response that will contain project
+    response = []
+    
+    # Convert the sql result to a jsonifyable list
+    for result in results:
+        response.append({"index": result["index"], "value": result[1]})
+    
+    return jsonify(response)
 
 # Route used to get the frame's state of the harvest database
 @validation.route("/validation/validated-progression/<project>/<sequence>/<shot>/<frame>", methods = ["GET"])
-def validated_progression_frame(project):
+def validated_progression_frame(project, sequence, shot, frame):
+    # Query all the layers of the given frame to get the % of progression
+    sequence_query = select([Layer.name, func.count(Layer.name)]).where(and_( \
+        Project.name == project.upper(), \
+        Sequence.project_id == Project.id, \
+        Sequence.index == int(re.sub("[^0-9]", '', sequence)), \
+        Shot.sequence_id == Sequence.id, \
+        Shot.index == int(re.sub("[^0-9]", '', shot)), \
+        Frame.shot_id == Shot.id)). \
+        Shot.index == int(re.sub("[^0-9]", '', frame)), \
+        group_by(Layer.name)
+    # Execute the query
+    results = engines["harvest"].execute(sequence_query)
 
-
-    return "Hello world"
+    # Initialize the final response that will contain project
+    response = []
+    
+    # Convert the sql result to a jsonifyable list
+    for result in results:
+        response.append({"name": result["name"], "value": result[1]})
+    
+    return jsonify(response)
 
 
 
@@ -105,16 +167,4 @@ def unvalidated_progression(project):
         response.append({"sequence": sequence, "shot": shot, "frame": result["frame"]})
 
     return jsonify(response)
-
-
-########################################
-# Utility functions
-########################################
-
-def get_project_query(name: str):
-    project_query = select([Project.name, Project.id]).where(Project.name == name.upper())
-    project_query_alias = project_query.alias()
-    sequence_query = select([Sequence.index, Sequence.id]).where(Sequence.project_id == project_query_alias.c.id)
-
-    return sequence_query
 
