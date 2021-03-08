@@ -126,16 +126,8 @@ def validated_progression_frame(project, sequence, shot, frame):
 
 
 
-# Route used to update the project's state of the harvest database
-@validation.route("/validation/validate-progression/<project>", methods = ["POST"])
-def validate_progression_project(project):
-    data = request.json
-
-    return jsonify(data)
-
-
 # Route used to update the sequence's state of the harvest database
-@validation.route("/validation/validate-progression/<project>/<sequence>", methods = ["POST"])
+@validation.route("/validation/validate-progression/<project>/sequences", methods = ["POST"])
 def validate_progression_sequence(project):
     data = request.json
 
@@ -143,7 +135,7 @@ def validate_progression_sequence(project):
 
 
 # Route used to update the shot's state of the harvest database
-@validation.route("/validation/validate-progression/<project>/<sequence>/<shot>", methods = ["POST"])
+@validation.route("/validation/validate-progression/<project>/shots", methods = ["POST"])
 def validate_progression_shot(project):
     data = request.json
 
@@ -151,9 +143,31 @@ def validate_progression_shot(project):
 
 
 # Route used to update the frame's state of the harvest database
-@validation.route("/validation/validate-progression/<project>/<sequence>/<shot>/<frame>", methods = ["POST"])
+@validation.route("/validation/validate-progression/<project>/frames", methods = ["POST"])
 def validate_progression_frame(project):
     data = request.json
+
+    return jsonify(data)
+
+# Route used to update the layer's state of the harvest database
+@validation.route("/validation/validate-progression/<project>/layers", methods = ["POST"])
+def validate_progression_layer(project):
+    data = request.json
+    
+    query_update = sessions["harvest"].query(Layer.valid)\
+    .filter(Layer.frame_id == Frame.id)\
+    .filter(Frame.shot_id == Shot.id)\
+    .filter(Shot.sequence_id == Sequence.id)\
+    .filter(Sequence.project_id == Project.id)\
+    .filter(Project.name == re.sub("-", '_', project.upper()))\
+    .filter(Layer.name.in_([layer["name"] for layer in data]))\
+    .filter(Frame.index.in_([layer["frame"] for layer in data]))\
+    .filter(Shot.index.in_([layer["shot"] for layer in data]))\
+    .filter(Sequence.index.in_([layer["sequence"] for layer in data]))\
+    .update({Layer.valid: true()}, synchronize_session = False)
+
+    sessions["harvest"].commit()
+    
 
     return jsonify(data)
 
