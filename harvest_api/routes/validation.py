@@ -129,8 +129,10 @@ def validated_progression_frame(project, sequence, shot, frame):
 # Route used to update the sequence's state of the harvest database
 @validation.route("/validation/validate-progression/<project>/sequences", methods = ["POST"])
 def validate_progression_sequence(project):
+    # Get the json body
     data = request.json
 
+    # Try to query the update of the databse according to the json body
     try:
         query_update = sessions["harvest"].query(Layer.valid)\
         .filter(Layer.frame_id == Frame.id)\
@@ -143,18 +145,22 @@ def validate_progression_sequence(project):
 
         sessions["harvest"].commit()
 
+    # If an error occured return an error message
     except Exception as exception:
         print(exception)
         return "ERROR: Make sure your request is a list of object with at least the attribute : sequence in a json format"
 
-    return jsonify(data)
+    # Return a success message
+    return "Tables updated successfully"
 
 
 # Route used to update the shot's state of the harvest database
 @validation.route("/validation/validate-progression/<project>/shots", methods = ["POST"])
 def validate_progression_shot(project):
+    # Get the json body
     data = request.json
 
+    # Try to query the update of the databse according to the json body
     try:
         query_update = sessions["harvest"].query(Layer.valid)\
         .filter(Layer.frame_id == Frame.id)\
@@ -168,18 +174,22 @@ def validate_progression_shot(project):
 
         sessions["harvest"].commit()
 
+    # If an error occured return an error message
     except Exception as exception:
         print(exception)
         return "ERROR: Make sure your request is a list of object with at least the attributes : sequence, shot in a json format"
 
-    return jsonify(data)
+    # Return a success message
+    return "Tables updated successfully"
 
 
 # Route used to update the frame's state of the harvest database
 @validation.route("/validation/validate-progression/<project>/frames", methods = ["POST"])
 def validate_progression_frame(project):
+    # Get the json body
     data = request.json
 
+    # Try to query the update of the databse according to the json body
     try:
         query_update = sessions["harvest"].query(Layer.valid)\
         .filter(Layer.frame_id == Frame.id)\
@@ -194,18 +204,22 @@ def validate_progression_frame(project):
 
         sessions["harvest"].commit()
 
+    # If an error occured return an error message
     except Exception as exception:
         print(exception)
         return "ERROR: Make sure your request is a list of object with at least the attributes : sequence, shot, frame in a json format"
 
-    return jsonify(data)
+    # Return a success message
+    return "Tables updated successfully"
 
 
 # Route used to update the layer's state of the harvest database
 @validation.route("/validation/validate-progression/<project>/layers", methods = ["POST"])
 def validate_progression_layer(project):
+    # Get the json body
     data = request.json
     
+    # Try to query the update of the databse according to the json body
     try:
         query_update = sessions["harvest"].query(Layer.valid)\
         .filter(Layer.frame_id == Frame.id)\
@@ -221,11 +235,13 @@ def validate_progression_layer(project):
 
         sessions["harvest"].commit()
 
+    # If an error occured return an error message
     except Exception as exception:
         print(exception)
         return "ERROR: Make sure your request is a list of object with at least the attributes : sequence, shot, frame, layer in a json format"
 
-    return jsonify(data)
+    # Return a success message
+    return "Tables updated successfully"
 
 
 

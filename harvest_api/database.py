@@ -45,17 +45,17 @@ def execute_from_file(bind, file_name, parameters = ()):
 
     # Get the file of the coresponding SQL query
     try:
-        file = open(os.path.join(query_dir, file_name))
+        with open(os.path.join(query_dir, file_name)) as file:
+            # Read the content of the file
+            query = text(file.read())
+            # Execute the query of the file
+            try:
+                results = engines[bind].execute(query, parameters)
+            except Exception as exception:
+                print(exception)
+                return f"ERROR: Could not execute the SQL query from {file_name}"
     except Exception as exception:
         print(exception)
-        return f"ERROR: Could not open the {file_name} file"
-    # Read the content of the file
-    query = text(file.read())
-    # Execute the query of the file
-    try:
-        results = engines[bind].execute(query, parameters)
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Could not execute the SQL query from {file_name}"
+        return f"ERROR: Could not open {file_name} to execute sql query"
 
     return results
