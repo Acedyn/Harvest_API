@@ -131,6 +131,22 @@ def validated_progression_frame(project, sequence, shot, frame):
 def validate_progression_sequence(project):
     data = request.json
 
+    try:
+        query_update = sessions["harvest"].query(Layer.valid)\
+        .filter(Layer.frame_id == Frame.id)\
+        .filter(Frame.shot_id == Shot.id)\
+        .filter(Shot.sequence_id == Sequence.id)\
+        .filter(Sequence.project_id == Project.id)\
+        .filter(Project.name == re.sub("-", '_', project.upper()))\
+        .filter(Sequence.index.in_([layer["sequence"] for layer in data]))\
+        .update({Layer.valid: true()}, synchronize_session = False)
+
+        sessions["harvest"].commit()
+
+    except Exception as exception:
+        print(exception)
+        return "ERROR: Make sure your request is a list of object with at least the attribute : sequence in a json format"
+
     return jsonify(data)
 
 
@@ -138,6 +154,23 @@ def validate_progression_sequence(project):
 @validation.route("/validation/validate-progression/<project>/shots", methods = ["POST"])
 def validate_progression_shot(project):
     data = request.json
+
+    try:
+        query_update = sessions["harvest"].query(Layer.valid)\
+        .filter(Layer.frame_id == Frame.id)\
+        .filter(Frame.shot_id == Shot.id)\
+        .filter(Shot.sequence_id == Sequence.id)\
+        .filter(Sequence.project_id == Project.id)\
+        .filter(Project.name == re.sub("-", '_', project.upper()))\
+        .filter(Shot.index.in_([layer["shot"] for layer in data]))\
+        .filter(Sequence.index.in_([layer["sequence"] for layer in data]))\
+        .update({Layer.valid: true()}, synchronize_session = False)
+
+        sessions["harvest"].commit()
+
+    except Exception as exception:
+        print(exception)
+        return "ERROR: Make sure your request is a list of object with at least the attributes : sequence, shot in a json format"
 
     return jsonify(data)
 
@@ -147,27 +180,50 @@ def validate_progression_shot(project):
 def validate_progression_frame(project):
     data = request.json
 
+    try:
+        query_update = sessions["harvest"].query(Layer.valid)\
+        .filter(Layer.frame_id == Frame.id)\
+        .filter(Frame.shot_id == Shot.id)\
+        .filter(Shot.sequence_id == Sequence.id)\
+        .filter(Sequence.project_id == Project.id)\
+        .filter(Project.name == re.sub("-", '_', project.upper()))\
+        .filter(Frame.index.in_([layer["frame"] for layer in data]))\
+        .filter(Shot.index.in_([layer["shot"] for layer in data]))\
+        .filter(Sequence.index.in_([layer["sequence"] for layer in data]))\
+        .update({Layer.valid: true()}, synchronize_session = False)
+
+        sessions["harvest"].commit()
+
+    except Exception as exception:
+        print(exception)
+        return "ERROR: Make sure your request is a list of object with at least the attributes : sequence, shot, frame in a json format"
+
     return jsonify(data)
+
 
 # Route used to update the layer's state of the harvest database
 @validation.route("/validation/validate-progression/<project>/layers", methods = ["POST"])
 def validate_progression_layer(project):
     data = request.json
     
-    query_update = sessions["harvest"].query(Layer.valid)\
-    .filter(Layer.frame_id == Frame.id)\
-    .filter(Frame.shot_id == Shot.id)\
-    .filter(Shot.sequence_id == Sequence.id)\
-    .filter(Sequence.project_id == Project.id)\
-    .filter(Project.name == re.sub("-", '_', project.upper()))\
-    .filter(Layer.name.in_([layer["name"] for layer in data]))\
-    .filter(Frame.index.in_([layer["frame"] for layer in data]))\
-    .filter(Shot.index.in_([layer["shot"] for layer in data]))\
-    .filter(Sequence.index.in_([layer["sequence"] for layer in data]))\
-    .update({Layer.valid: true()}, synchronize_session = False)
+    try:
+        query_update = sessions["harvest"].query(Layer.valid)\
+        .filter(Layer.frame_id == Frame.id)\
+        .filter(Frame.shot_id == Shot.id)\
+        .filter(Shot.sequence_id == Sequence.id)\
+        .filter(Sequence.project_id == Project.id)\
+        .filter(Project.name == re.sub("-", '_', project.upper()))\
+        .filter(Layer.name.in_([layer["layer"] for layer in data]))\
+        .filter(Frame.index.in_([layer["frame"] for layer in data]))\
+        .filter(Shot.index.in_([layer["shot"] for layer in data]))\
+        .filter(Sequence.index.in_([layer["sequence"] for layer in data]))\
+        .update({Layer.valid: true()}, synchronize_session = False)
 
-    sessions["harvest"].commit()
-    
+        sessions["harvest"].commit()
+
+    except Exception as exception:
+        print(exception)
+        return "ERROR: Make sure your request is a list of object with at least the attributes : sequence, shot, frame, layer in a json format"
 
     return jsonify(data)
 
