@@ -1,26 +1,29 @@
--- Get the computation time per frames per blades per project
-SELECT
-computer, project, TRUNC(AVG(frametime)) AS frametime
-FROM
-    -- Get the blade that computed that task and the time per frames
-    (SELECT
-    DISTINCT ON (metadata.jid, metadata.tid, metadata.project)
-    metadata.project,
-    substring(upper(blade.name) from '(?<=-MK).*(?=-[\d]{4})')::int AS index,
-    substring(upper(blade.name) from '(?<=-).*(?=-[\d]{4})') AS computer,
-    invocation.elapsedreal / metadata.frames AS frametime, invocation.elapsedreal, metadata.frames
+-- ########################################
+-- Returns the frames that has been rendered since last validation for the specified project
+--
+-- Parameters : :project :last_validation
+-- ########################################
+
+
+    -- SUBQUERY : Get the parsed metadata content and expand the array of frames
+    SELECT 
+    DISTINCT ON (job_metadata->>'project')
+    starttime,
+    -- Select the metadata that we need
+    job_metadata->>'project' AS project, job_metadata->>'seq' AS sequence, job_metadata->>'shot' AS shot, 
+    -- Create a raw for each element of the metadata's array of frames
+    unnest(string_to_array(regexp_replace(task_metadata->>'frames', '[\[\]\s\.]', '', 'g'), ',', '')::int[]) AS frame
     FROM
-        -- Get the parsed metadata content and compute the amount of frames in each task
+
+        -- SUBQUERY : Get the parsed metadata
         (SELECT 
-        jid, tid, starttime, state,
-        job_metadata->>'project' AS project, job_metadata->>'renderState' AS category, job_metadata->>'seq' AS sequence, job_metadata->>'shot' AS shot, 
-        array_length(string_to_array(regexp_replace(task_metadata->>'frames', '[\[\]\s\.]', '', 'g'), ',', '')::int[], 1) AS frames
-        FROM
-            -- Get the parsed metadata
-            (SELECT 
-                task.jid, task.tid, job.starttime, job.metadata::json AS job_metadata, task.metadata::json AS task_metadata, task.state
-                FROM job, task 
-                WHERE is_valid_json(job.metadata) AND is_valid_json(task.metadata) AND task.jid = job.jid LIMIT 10000000) AS taskData 
-        WHERE state = 'done' AND job_metadata->>'project' != 'TEST_PIPE' AND job_metadata->>'renderState' = 'final') AS metadata, invocation, blade
-    WHERE shot != '' AND sequence != '' AND metadata.jid = invocation.jid AND metadata.tid = invocation.tid AND blade.bladeid = invocation.bladeid) AS computationstat
-GROUP BY index, computer, project
+        -- Select the metadata from job and task and cast them from string to json
+        job.starttime, job.metadata::json AS job_metadata, task.metadata::json AS task_metadata, task.state
+        -- Join the job table and the task table
+        FROM job, task 
+        -- Ignore the jobs and the task where the metadata can't be converted to json
+        -- TODO: Figure out why it doesn't work if we don't put a limit
+        WHERE is_valid_json(job.metadata) AND is_valid_json(task.metadata) AND task.jid = job.jid LIMIT 999999999) AS taskData 
+    WHERE state = 'done' AND starttime > '2021-01-01 00:00:00'
+    AND job_metadata->>'renderState' = 'final' AND job_metadata->>'shot' != '' AND job_metadata->>'seq' != ''
+    ORDER BY job_metadata->>'project', starttime, frame
