@@ -13,8 +13,6 @@ import re
 # Initialize the set of routes for validation
 validation = Blueprint("validation", __name__)
 
-# TODO: See how to reduce the repetitions in the queries
-
 # Set of filter that we will use multiple times
 combine_filters = (
     Layer.frame_id == Frame.id,
@@ -106,7 +104,7 @@ def validated_progression_shot(project, sequence, shot):
 @validation.route("/validation/validated-progression/<project>/<sequence>/<shot>/<frame>", methods = ["GET"])
 def validated_progression_frame(project, sequence, shot, frame):
     # Query all the layers of the given frame to get the % of progression
-    frame_query = select([Layer.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+    frame_query = select([Layer.name, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
         .where(and_( \
         Project.name == re.sub("-", '_', project.upper()), \
         Sequence.index == int(re.sub("[^0-9]", '', sequence)), \
@@ -139,7 +137,7 @@ def validate_progression_sequence(project):
 
     # Try to query the update of the databse according to the json body
     try:
-        query_update = sessions["harvest"].query(Layer.valid)\
+        sessions["harvest"].query(Layer.valid)\
         .filter(*combine_filters)\
         .filter(Project.name == re.sub("-", '_', project.upper()))\
         .filter(Sequence.index.in_([layer["sequence"] for layer in data]))\
@@ -164,7 +162,7 @@ def validate_progression_shot(project):
 
     # Try to query the update of the databse according to the json body
     try:
-        query_update = sessions["harvest"].query(Layer.valid)\
+        sessions["harvest"].query(Layer.valid)\
         .filter(*combine_filters)\
         .filter(Project.name == re.sub("-", '_', project.upper()))\
         .filter(Shot.index.in_([layer["shot"] for layer in data]))\
@@ -190,7 +188,7 @@ def validate_progression_frame(project):
 
     # Try to query the update of the databse according to the json body
     try:
-        query_update = sessions["harvest"].query(Layer.valid)\
+        sessions["harvest"].query(Layer.valid)\
         .filter(*combine_filters)\
         .filter(Project.name == re.sub("-", '_', project.upper()))\
         .filter(Frame.index.in_([layer["frame"] for layer in data]))\
@@ -217,7 +215,7 @@ def validate_progression_layer(project):
     
     # Try to query the update of the databse according to the json body
     try:
-        query_update = sessions["harvest"].query(Layer.valid)\
+        sessions["harvest"].query(Layer.valid)\
         .filter(*combine_filters)\
         .filter(Project.name == re.sub("-", '_', project.upper()))\
         .filter(Layer.name.in_([layer["layer"] for layer in data]))\
