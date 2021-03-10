@@ -15,6 +15,8 @@ def create_app(config_file):
     # Register the routes
     from routes.tractor_graphs import tractor_graph
     app.register_blueprint(tractor_graph)
+    from routes.graphics import graphics
+    app.register_blueprint(graphics)
     from routes.tractor_stats import tractor_stat
     app.register_blueprint(tractor_stat)
     from routes.validation import validation

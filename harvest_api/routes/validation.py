@@ -3,7 +3,7 @@ from sqlalchemy import func
 from sqlalchemy.sql import select, and_, true, false
 from database import execute_from_file, sessions, engines
 from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer
-import re
+import re, datetime
 
 ########################################
 ## Validation blueprint : Set of routes that will return and get data
@@ -129,84 +129,6 @@ def validated_progression_frame(project, sequence, shot, frame):
 # VALIDATE DATA
 ########################################
 
-# Route used to update the sequence's state of the harvest database
-@validation.route("/validation/validate-progression/<project>/sequences", methods = ["POST"])
-def validate_progression_sequence(project):
-    # Get the json body
-    data = request.json
-
-    # Try to query the update of the databse according to the json body
-    try:
-        sessions["harvest"].query(Layer.valid)\
-        .filter(*combine_filters)\
-        .filter(Project.name == re.sub("-", '_', project.upper()))\
-        .filter(Sequence.index.in_([layer["sequence"] for layer in data]))\
-        .update({Layer.valid: true()}, synchronize_session = False)
-
-        sessions["harvest"].commit()
-
-    # If an error occured return an error message
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Make sure your request is a list of object with at least the attribute : sequence in a json format"
-
-    # Return a success message
-    return "Tables updated successfully"
-
-
-# Route used to update the shot's state of the harvest database
-@validation.route("/validation/validate-progression/<project>/shots", methods = ["POST"])
-def validate_progression_shot(project):
-    # Get the json body
-    data = request.json
-
-    # Try to query the update of the databse according to the json body
-    try:
-        sessions["harvest"].query(Layer.valid)\
-        .filter(*combine_filters)\
-        .filter(Project.name == re.sub("-", '_', project.upper()))\
-        .filter(Shot.index.in_([layer["shot"] for layer in data]))\
-        .filter(Sequence.index.in_([layer["sequence"] for layer in data]))\
-        .update({Layer.valid: true()}, synchronize_session = False)
-
-        sessions["harvest"].commit()
-
-    # If an error occured return an error message
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Make sure your request is a list of object with at least the attributes : sequence, shot in a json format"
-
-    # Return a success message
-    return "Tables updated successfully"
-
-
-# Route used to update the frame's state of the harvest database
-@validation.route("/validation/validate-progression/<project>/frames", methods = ["POST"])
-def validate_progression_frame(project):
-    # Get the json body
-    data = request.json
-
-    # Try to query the update of the databse according to the json body
-    try:
-        sessions["harvest"].query(Layer.valid)\
-        .filter(*combine_filters)\
-        .filter(Project.name == re.sub("-", '_', project.upper()))\
-        .filter(Frame.index.in_([layer["frame"] for layer in data]))\
-        .filter(Shot.index.in_([layer["shot"] for layer in data]))\
-        .filter(Sequence.index.in_([layer["sequence"] for layer in data]))\
-        .update({Layer.valid: true()}, synchronize_session = False)
-
-        sessions["harvest"].commit()
-
-    # If an error occured return an error message
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Make sure your request is a list of object with at least the attributes : sequence, shot, frame in a json format"
-
-    # Return a success message
-    return "Tables updated successfully"
-
-
 # Route used to update the layer's state of the harvest database
 @validation.route("/validation/validate-progression/<project>", methods = ["POST"])
 def validate_progression_layer(project):
@@ -247,13 +169,18 @@ def validate_progression_layer(project):
             print(exception)
             return "ERROR: Coult not parse the url attribute of the json body"
 
+    print(sequence_data)
+    print(shot_data)
+
+    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     # Try to query the update of the databse according sequence_data
     try:
         sessions["harvest"].query(Layer.valid)\
         .filter(*combine_filters)\
         .filter(Project.name == re.sub("-", '_', project.upper()))\
         .filter(Sequence.index.in_([item["sequence"] for item in sequence_data]))\
-        .update({Layer.valid: true()}, synchronize_session = False)
+        .update({Layer.valid: true(), Layer.validation_date: current_datetime}, synchronize_session = False)
 
         sessions["harvest"].commit()
 
@@ -269,7 +196,7 @@ def validate_progression_layer(project):
         .filter(Project.name == re.sub("-", '_', project.upper()))\
         .filter(Shot.index.in_([item["shot"] for item in shot_data]))\
         .filter(Sequence.index.in_([item["sequence"] for item in shot_data]))\
-        .update({Layer.valid: true()}, synchronize_session = False)
+        .update({Layer.valid: true(), Layer.validation_date: current_datetime}, synchronize_session = False)
 
         sessions["harvest"].commit()
 
@@ -286,7 +213,7 @@ def validate_progression_layer(project):
         .filter(Frame.index.in_([item["frame"] for item in frame_data]))\
         .filter(Shot.index.in_([item["shot"] for item in frame_data]))\
         .filter(Sequence.index.in_([item["sequence"] for item in frame_data]))\
-        .update({Layer.valid: true()}, synchronize_session = False)
+        .update({Layer.valid: true(), Layer.validation_date: current_datetime}, synchronize_session = False)
 
         sessions["harvest"].commit()
 
@@ -304,7 +231,7 @@ def validate_progression_layer(project):
         .filter(Frame.index.in_([item["frame"] for item in layer_data]))\
         .filter(Shot.index.in_([item["shot"] for item in layer_data]))\
         .filter(Sequence.index.in_([item["sequence"] for item in layer_data]))\
-        .update({Layer.valid: true()}, synchronize_session = False)
+        .update({Layer.valid: true(), Layer.validation_date: current_datetime}, synchronize_session = False)
 
         sessions["harvest"].commit()
 
