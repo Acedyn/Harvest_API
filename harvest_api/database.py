@@ -28,6 +28,8 @@ def create_orm(config_file):
 
     # Refect all the tables of the tractor's database
     bases["tractor"].metadata.reflect(bind=engines["tractor"])
+    from mappings.harvest_tables import Project
+    bases["harvest"].metadata.create_all(bind=engines["harvest"])
 
     # Initialize the SQL functions to make sure we can use them in the raw queries
     execute_from_file("tractor", "func_valid_json.sql")
@@ -37,23 +39,23 @@ def create_orm(config_file):
 
 
 # Execute an sql query from a file in the queries folder
-def execute_from_file(bind, file_name):
+def execute_from_file(bind, file_name, parameters = ()):
     # Get the root path of the queries folder
     query_dir = os.path.join(os.path.dirname(__file__), "queries")
 
     # Get the file of the coresponding SQL query
     try:
-        file = open(os.path.join(query_dir, file_name))
+        with open(os.path.join(query_dir, file_name)) as file:
+            # Read the content of the file
+            query = text(file.read())
+            # Execute the query of the file
+            try:
+                results = engines[bind].execute(query, parameters)
+            except Exception as exception:
+                print(exception)
+                return f"ERROR: Could not execute the SQL query from {file_name}"
     except Exception as exception:
         print(exception)
-        return f"ERROR: Could not open the {file_name} file"
-    # Read the content of the file
-    query = text(file.read())
-    # Execute the query of the file
-    try:
-        results = engines[bind].execute(query)
-    except Exception as exception:
-        print(exception)
-        return "ERROR: Could not execute the SQL query from {file_name}"
+        return f"ERROR: Could not open {file_name} to execute sql query"
 
     return results
