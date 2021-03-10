@@ -17,7 +17,7 @@ combine_filters = (
 )
 
 # Route for "/crew-progression"
-@graphics.route("/graph/progression/<project>")
+@graphics.route("/graphics/progression/<project>")
 def crew_progression(project):
     # Query all the layers of the given project to get the project name
     project_query = select([func.date_trunc("day", Layer.validation_date), func.count(1).label("frame_count")]) \
@@ -42,7 +42,7 @@ def crew_progression(project):
         timestamp = int(result[0].timestamp()) * 1000
         frame_count += result[1]
 
-        timetamp_state = {"timestamp": timestamp, "date": date, "frame_count": frame_count}
+        timetamp_state = {"timestamp": timestamp, "date": date, re.sub("-", '_', project.upper()): frame_count}
 
         response.append(timetamp_state)
 

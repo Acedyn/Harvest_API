@@ -76,7 +76,6 @@ def validated_progression_shot(project, sequence, shot):
     # TODO: Replace the temporary 999999999 from the code
     start = request.args.get('start', default = 0, type = int)
     end = request.args.get('end', default = 999999999, type = int)
-    print(start, end)
 
     # Query all the layers of the given shot to get the % of progression
     shot_query = select([Frame.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
@@ -137,6 +136,8 @@ def validate_progression_layer(project):
     shot_data = []
     frame_data = []
     layer_data = []
+
+    print(request.json)
 
     # Parse the json body into the different types of data
     for item in request.json:
