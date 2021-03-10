@@ -229,20 +229,23 @@ def validate_progression_layer(project):
                 new_data["shot"] = url[1]
             else:
                 sequence_data.append(new_data)
+                continue
             if(len(url) >= 3):
                 new_data["frame"] = url[2]
             else:
                 shot_data.append(new_data)
+                continue
             if(len(url) >= 4):
                 new_data["layer"] = url[3]
                 layer_data.append(new_data)
+                continue
             else:
                 frame_data.append(new_data)
+                continue
 
         except Exception as exception:
             print(exception)
             return "ERROR: Coult not parse the url attribute of the json body"
-
 
     # Try to query the update of the databse according sequence_data
     try:
