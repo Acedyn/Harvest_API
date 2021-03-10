@@ -95,6 +95,7 @@ class Layer(bases["harvest"]):
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
     name = Column(String(50), nullable = False, default = "none")
     rendertime = Column(DateTime)
+    validationDate = Column(DateTime)
     frame_id = Column(Integer, ForeignKey("frame.id"), nullable = False)
     valid = Column(Boolean, nullable = False, server_default = "FALSE")
 

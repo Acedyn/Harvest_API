@@ -208,20 +208,48 @@ def validate_progression_frame(project):
 
 
 # Route used to update the layer's state of the harvest database
-@validation.route("/validation/validate-progression/<project>/layers", methods = ["POST"])
+@validation.route("/validation/validate-progression/<project>", methods = ["POST"])
 def validate_progression_layer(project):
-    # Get the json body
-    data = request.json
-    
-    # Try to query the update of the databse according to the json body
+    # Initialize the data holders
+    sequence_data = []
+    shot_data = []
+    frame_data = []
+    layer_data = []
+
+    # Parse the json body into the different types of data
+    for item in request.json:
+        try:
+            url = item["url"].split("/")
+            url.pop(0)
+
+            new_data = {}
+            if(len(url) >= 1):
+                new_data["sequence"] = url[0]
+            if(len(url) >= 2):
+                new_data["shot"] = url[1]
+            else:
+                sequence_data.append(new_data)
+            if(len(url) >= 3):
+                new_data["frame"] = url[2]
+            else:
+                shot_data.append(new_data)
+            if(len(url) >= 4):
+                new_data["layer"] = url[3]
+                layer_data.append(new_data)
+            else:
+                frame_data.append(new_data)
+
+        except Exception as exception:
+            print(exception)
+            return "ERROR: Coult not parse the url attribute of the json body"
+
+
+    # Try to query the update of the databse according sequence_data
     try:
         sessions["harvest"].query(Layer.valid)\
         .filter(*combine_filters)\
         .filter(Project.name == re.sub("-", '_', project.upper()))\
-        .filter(Layer.name.in_([layer["layer"] for layer in data]))\
-        .filter(Frame.index.in_([layer["frame"] for layer in data]))\
-        .filter(Shot.index.in_([layer["shot"] for layer in data]))\
-        .filter(Sequence.index.in_([layer["sequence"] for layer in data]))\
+        .filter(Sequence.index.in_([item["sequence"] for item in sequence_data]))\
         .update({Layer.valid: true()}, synchronize_session = False)
 
         sessions["harvest"].commit()
@@ -229,7 +257,58 @@ def validate_progression_layer(project):
     # If an error occured return an error message
     except Exception as exception:
         print(exception)
-        return "ERROR: Make sure your request is a list of object with at least the attributes : sequence, shot, frame, layer in a json format"
+        return "ERROR: Could not update the given sequence"
+
+    # Try to query the update of the databse according shot_data
+    try:
+        sessions["harvest"].query(Layer.valid)\
+        .filter(*combine_filters)\
+        .filter(Project.name == re.sub("-", '_', project.upper()))\
+        .filter(Shot.index.in_([item["shot"] for item in shot_data]))\
+        .filter(Sequence.index.in_([item["sequence"] for item in shot_data]))\
+        .update({Layer.valid: true()}, synchronize_session = False)
+
+        sessions["harvest"].commit()
+
+    # If an error occured return an error message
+    except Exception as exception:
+        print(exception)
+        return "ERROR: Could not update the given shot"
+
+    # Try to query the update of the databse according frame_data
+    try:
+        sessions["harvest"].query(Layer.valid)\
+        .filter(*combine_filters)\
+        .filter(Project.name == re.sub("-", '_', project.upper()))\
+        .filter(Frame.index.in_([item["frame"] for item in frame_data]))\
+        .filter(Shot.index.in_([item["shot"] for item in frame_data]))\
+        .filter(Sequence.index.in_([item["sequence"] for item in frame_data]))\
+        .update({Layer.valid: true()}, synchronize_session = False)
+
+        sessions["harvest"].commit()
+
+    # If an error occured return an error message
+    except Exception as exception:
+        print(exception)
+        return "ERROR: Could not update the given frames"
+    
+    # Try to query the update of the databse according layer_data
+    try:
+        sessions["harvest"].query(Layer.valid)\
+        .filter(*combine_filters)\
+        .filter(Project.name == re.sub("-", '_', project.upper()))\
+        .filter(Layer.name.in_([item["layer"] for item in layer_data]))\
+        .filter(Frame.index.in_([item["frame"] for item in layer_data]))\
+        .filter(Shot.index.in_([item["shot"] for item in layer_data]))\
+        .filter(Sequence.index.in_([item["sequence"] for item in layer_data]))\
+        .update({Layer.valid: true()}, synchronize_session = False)
+
+        sessions["harvest"].commit()
+
+    # If an error occured return an error message
+    except Exception as exception:
+        print(exception)
+        return "ERROR: Could not update the given layers"
 
     # Return a success message
     return "Tables updated successfully"
