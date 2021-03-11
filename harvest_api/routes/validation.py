@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from sqlalchemy import func, case
+from sqlalchemy import func, case, not_
 from sqlalchemy.sql import select, and_, true, false
 from database import execute_from_file, sessions, engines
 from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer
@@ -177,7 +177,7 @@ def validate_progression_layer(project):
         .filter(*combine_filters)\
         .filter(Project.name == re.sub("-", '_', project.upper()))\
         .filter(Sequence.index.in_([item["sequence"] for item in sequence_data]))\
-        .update({Layer.valid: true(), Layer.validation_date: current_datetime}, synchronize_session = False)
+        .update({Layer.valid: not_(Layer.valid), Layer.validation_date: current_datetime}, synchronize_session = False)
 
         sessions["harvest"].commit()
 
@@ -193,7 +193,7 @@ def validate_progression_layer(project):
         .filter(Project.name == re.sub("-", '_', project.upper()))\
         .filter(Shot.index.in_([item["shot"] for item in shot_data]))\
         .filter(Sequence.index.in_([item["sequence"] for item in shot_data]))\
-        .update({Layer.valid: true(), Layer.validation_date: current_datetime}, synchronize_session = False)
+        .update({Layer.valid: not_(Layer.valid), Layer.validation_date: current_datetime}, synchronize_session = False)
 
         sessions["harvest"].commit()
 
@@ -210,7 +210,7 @@ def validate_progression_layer(project):
         .filter(Frame.index.in_([item["frame"] for item in frame_data]))\
         .filter(Shot.index.in_([item["shot"] for item in frame_data]))\
         .filter(Sequence.index.in_([item["sequence"] for item in frame_data]))\
-        .update({Layer.valid: true(), Layer.validation_date: current_datetime}, synchronize_session = False)
+        .update({Layer.valid: not_(Layer.valid), Layer.validation_date: current_datetime}, synchronize_session = False)
 
         sessions["harvest"].commit()
 
@@ -228,7 +228,7 @@ def validate_progression_layer(project):
         .filter(Frame.index.in_([item["frame"] for item in layer_data]))\
         .filter(Shot.index.in_([item["shot"] for item in layer_data]))\
         .filter(Sequence.index.in_([item["sequence"] for item in layer_data]))\
-        .update({Layer.valid: true(), Layer.validation_date: current_datetime}, synchronize_session = False)
+        .update({Layer.valid: not_(Layer.valid), Layer.validation_date: current_datetime}, synchronize_session = False)
 
         sessions["harvest"].commit()
 

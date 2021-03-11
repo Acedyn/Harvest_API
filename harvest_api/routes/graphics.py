@@ -26,7 +26,8 @@ def crew_progression(project):
         Layer.valid == true(), \
         Layer.validation_date != None,\
         *combine_filters)). \
-        group_by(func.date_trunc("day", Layer.validation_date))
+        group_by(func.date_trunc("day", Layer.validation_date)).\
+        order_by(func.date_trunc("day", Layer.validation_date))
     # Execute the query
     results = engines["harvest"].execute(project_query)
 
