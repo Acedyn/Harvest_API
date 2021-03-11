@@ -10,7 +10,7 @@ opts, args = getopt.getopt(argv, "e:h:u:p:")
 
 
 # Get password from user
-password = getpass.getpass("Database password: ")
+password = ""
 
 
 # Get the input arguments and store them in a list

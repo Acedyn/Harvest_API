@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from sqlalchemy import func
+from sqlalchemy import func, case
 from sqlalchemy.sql import select, and_, true, false
 from database import execute_from_file, sessions, engines
 from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer
@@ -29,7 +29,7 @@ combine_filters = (
 @validation.route("/validation/validated-progression/<project>", methods = ["GET"])
 def validated_progression_project(project):
     # Query all the layers of the given project to get the % of progression
-    project_query = select([Sequence.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+    project_query = select([Sequence.index, func.count(1).label("total"), func.count(case([((Layer.valid == True), 1)])).label("valid")]) \
         .where(and_( \
         Project.name == re.sub("-", '_', project.upper()), \
         *combine_filters)). \
@@ -51,7 +51,7 @@ def validated_progression_project(project):
 @validation.route("/validation/validated-progression/<project>/<sequence>", methods = ["GET"])
 def validated_progression_sequence(project, sequence):
     # Query all the layers of the given sequence to get the % of progression
-    sequence_query = select([Shot.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+    sequence_query = select([Shot.index, func.count(1).label("total"), func.count(case([((Layer.valid == True), 1)])).label("valid")]) \
         .where(and_( \
         Project.name == re.sub("-", '_', project.upper()), \
         Sequence.index == int(re.sub("[^0-9]", '', sequence)), \
@@ -78,7 +78,7 @@ def validated_progression_shot(project, sequence, shot):
     end = request.args.get('end', default = 999999999, type = int)
 
     # Query all the layers of the given shot to get the % of progression
-    shot_query = select([Frame.index, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+    shot_query = select([Frame.index, func.count(1).label("total"), func.count(case([((Layer.valid == True), 1)])).label("valid")]) \
         .where(and_( \
         Project.name == re.sub("-", '_', project.upper()), \
         Sequence.index == int(re.sub("[^0-9]", '', sequence)), \
@@ -103,7 +103,7 @@ def validated_progression_shot(project, sequence, shot):
 @validation.route("/validation/validated-progression/<project>/<sequence>/<shot>/<frame>", methods = ["GET"])
 def validated_progression_frame(project, sequence, shot, frame):
     # Query all the layers of the given frame to get the % of progression
-    frame_query = select([Layer.name, func.count(1).label("total"), func.count(1).filter(Layer.valid == true()).label("valid")]) \
+    frame_query = select([Layer.name, func.count(1).label("total"), func.count(case([((Layer.valid == True), 1)])).label("valid")]) \
         .where(and_( \
         Project.name == re.sub("-", '_', project.upper()), \
         Sequence.index == int(re.sub("[^0-9]", '', sequence)), \
@@ -137,8 +137,6 @@ def validate_progression_layer(project):
     frame_data = []
     layer_data = []
 
-    print(request.json)
-
     # Parse the json body into the different types of data
     for item in request.json:
         try:
@@ -170,8 +168,6 @@ def validate_progression_layer(project):
             print(exception)
             return "ERROR: Coult not parse the url attribute of the json body"
 
-    print(sequence_data)
-    print(shot_data)
 
     current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
