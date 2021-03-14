@@ -26,6 +26,10 @@ def create_app(config_file):
     from routes.stats import stats
     app.register_blueprint(stats)
 
+    # Start the scheduled operations
+    from scheduler.tractor_history import tractor_history_updater
+    tractor_history_updater.start()
+
     # Make sure we release the resources of the sessions after each requests
     # TODO: Figure out if we realy need to do this and why
     @app.teardown_appcontext

@@ -16,10 +16,11 @@ setup(
     packages=find_packages(),
     install_requires=[
           'flask',
-          'flask-sqlalchemy',
+          'sqlalchemy',
           'flask_cors',
           'waitress',
           'psycopg2',
+          'apscheduler'
     ],
     long_description=read('README.md'),
     include_package_data=True,
