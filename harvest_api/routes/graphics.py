@@ -16,7 +16,7 @@ combine_filters = (
     Sequence.project_id == Project.id,
 )
 
-# Route for "/graphics/progression/<project>"
+# Route to get the progression of the specified project
 @graphics.route("/graphics/progression/<project>")
 def crew_progression(project):
     # Query all the layers of the given project to get the project name
@@ -46,6 +46,64 @@ def crew_progression(project):
         timetamp_state = {"timestamp": timestamp, "date": date, re.sub("-", '_', project.upper()): frame_count}
 
         response.append(timetamp_state)
+
+    # Return the response in json format
+    return jsonify(response)
+
+
+# Route to get the progression of all the projects
+@graphics.route("/graphics/progression")
+def projects_progression():
+    # Get all the project
+    get_project_names = select([Project.name])
+    # Execute the query
+    projects_names = engines["harvest"].execute(get_project_names)
+
+    # Query all the layers of each projects
+    project_query = select([Project.name, func.date_trunc("day", Layer.validation_date), func.count(1).label("frame_count")]) \
+        .where(and_( \
+        Layer.valid == true(), \
+        Layer.validation_date != None,\
+        *combine_filters)). \
+        group_by(Project.name, func.date_trunc("day", Layer.validation_date)).\
+        order_by(func.date_trunc("day", Layer.validation_date), Project.name)
+    # Execute the query
+    results = engines["harvest"].execute(project_query)
+
+
+    # Initialize the timestamp_state
+    timetamp_state = {
+        "timestamp": 0,
+    }
+    # Initialize all the projects to 0
+    for project_name in projects_names:
+        timetamp_state[project_name[0]] = 0
+
+    # Initialize the final response that will contain all the timestamps
+    response = []
+
+    # Loop over all the rows of the sql response
+    for result in results:
+        # Store all the colunm values for the curent row
+        project = result[0]
+        timestamp = int(result[1].timestamp()) * 1000
+        done = result[2]
+
+        # If this the timestamp_state is not initialized yet
+        if(timetamp_state["timestamp"] == 0):
+            # Initialize the timestamp an the date
+            timetamp_state["timestamp"] = timestamp
+        # If we reach a new timestamp
+        elif(timetamp_state["timestamp"] != timestamp):
+            # Store the curent state of timestamp_state in the response
+            response.append(timetamp_state.copy())
+            timetamp_state["timestamp"] = timestamp
+
+        # Store the value of the row to the current timestamp_state
+        timetamp_state[project] = done
+
+    # Append the timestamp_state one last time
+    response.append(timetamp_state.copy())
 
     # Return the response in json format
     return jsonify(response)
