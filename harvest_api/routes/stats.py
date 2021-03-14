@@ -1,43 +1,48 @@
-from flask import Blueprint
-from flask import jsonify
+from flask import Blueprint, jsonify
 from sqlalchemy import func
 from database import sessions
 from mappings.tractor_tables import Blade, Task, Job
 
-# Initialize the set to routes for tractor
-tractor_stat = Blueprint("tractor_stat", __name__)
+# Initialize the set to routes for infos
+stats = Blueprint("stats", __name__)
 
+# Set of filter to get rig of unused pools
+pool_filters = (
+    Blade.profile != "LAVIT",
+    Blade.profile != "JV",
+    Blade.profile != "windows10",
+    Blade.profile != "TD",
+    Blade.profile != "BUG",
+    Blade.availdisk > 5
+)
 
-# Route for "/pc-work"
-@tractor_stat.route("/pc-work")
-def pc_work():
+# Return the amound of blades that are working, free, and on nimby
+@stats.route("/stats/blades-status")
+def blades_status():
     # Get the working blades
     blades_busy = sessions["tractor"].query(func.count(Job.jid)) \
     .filter(Job.jid == Task.jid) \
     .filter(Task.state == "active") \
+    .filter(*pool_filters) \
 
     # Get the free blades
     blades_free = sessions["tractor"].query(func.count(Blade.bladeid)) \
-    .filter(Blade.status == "")
+    .filter(Blade.status == "") \
+    .filter(*pool_filters) \
 
     # Get the blades with nimby on
     blades_nimby = sessions["tractor"].query(func.count(Blade.bladeid)) \
-    .filter(Blade.nimby != "")
-
-    # .filter(Blade.profile != "LAVIT") \
-    # .filter(Blade.profile != "JV") \
-    # .filter(Blade.profile != "windows10") \
-    # .filter(Blade.profile != "TD") \
-    # .filter(Blade.profile != "BUG") \
-    # .filter(Blade.availdisk > 5).count()
+    .filter(Blade.nimby != "") \
+    .filter(*pool_filters) \
 
     # Return a json
     response = [{"name": "Free", "value": blades_free[0][0]}, {"name": "Busy", "value": blades_busy[0][0]}, {"name": "Nimby ON", "value": blades_nimby[0][0]}]
     return jsonify(response)
 
-# Route for "/pc-crew"
-@tractor_stat.route("/pc-crew")
-def pc_crew():
+
+# Return how many blades each projects are occupying
+@stats.route("/stats/projects-usage")
+def projects_usage():
     # Get the working blades per project
     blades_busy = sessions["tractor"].query(Job.owner, func.count(Job.owner)) \
     .filter(Job.jid == Task.jid) \

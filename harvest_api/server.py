@@ -23,6 +23,8 @@ def create_app(config_file):
     app.register_blueprint(validation)
     from routes.infos import infos
     app.register_blueprint(infos)
+    from routes.stats import stats
+    app.register_blueprint(stats)
 
     # Make sure we release the resources of the sessions after each requests
     # TODO: Figure out if we realy need to do this and why

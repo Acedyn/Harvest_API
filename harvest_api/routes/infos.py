@@ -4,7 +4,7 @@ from sqlalchemy.sql import select, and_, true, false
 from database import sessions, engines
 from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer
 
-# Initialize the set to routes for tractor
+# Initialize the set to routes for infos
 infos = Blueprint("infos", __name__)
 
 # Set of filter that we will use multiple times
