@@ -15,12 +15,14 @@ def create_app(config_file):
     # Register the routes
     from routes.tractor_graphs import tractor_graph
     app.register_blueprint(tractor_graph)
-    from routes.graphics import graphics
-    app.register_blueprint(graphics)
     from routes.tractor_stats import tractor_stat
     app.register_blueprint(tractor_stat)
+    from routes.graphics import graphics
+    app.register_blueprint(graphics)
     from routes.validation import validation
     app.register_blueprint(validation)
+    from routes.infos import infos
+    app.register_blueprint(infos)
 
     # Make sure we release the resources of the sessions after each requests
     # TODO: Figure out if we realy need to do this and why

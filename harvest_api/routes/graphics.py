@@ -16,7 +16,7 @@ combine_filters = (
     Sequence.project_id == Project.id,
 )
 
-# Route for "/crew-progression"
+# Route for "/graphics/progression/<project>"
 @graphics.route("/graphics/progression/<project>")
 def crew_progression(project):
     # Query all the layers of the given project to get the project name

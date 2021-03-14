@@ -9,6 +9,7 @@ class Project(bases["harvest"]):
     id = Column(Integer, primary_key = True, nullable=False, autoincrement=True)
     name = Column(String(50), nullable = False, unique = True)
     last_validation = Column(DateTime, nullable = False)
+    color = Column(String, default = "#000000")
 
     sequence = relationship("Sequence", back_populates = "project")
 
