@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from sqlalchemy import func
-from database import sessions
-from mappings.tractor_tables import Blade, Task, Job
+from database import sessions, engines
+from mappings.tractor_tables import Blade, BladeUse, Task, Job
 
 # Initialize the set to routes for infos
 stats = Blueprint("stats", __name__)
@@ -20,10 +20,8 @@ pool_filters = (
 @stats.route("/stats/blades-status")
 def blades_status():
     # Get the working blades
-    blades_busy = sessions["tractor"].query(func.count(Job.jid)) \
-    .filter(Job.jid == Task.jid) \
-    .filter(Task.state == "active") \
-    .filter(*pool_filters) \
+    blades_busy = sessions["tractor"].query(func.count(1)) \
+    .filter(BladeUse.taskcount > 0) \
 
     # Get the free blades
     blades_free = sessions["tractor"].query(func.count(Blade.bladeid)) \
@@ -31,12 +29,17 @@ def blades_status():
     .filter(*pool_filters) \
 
     # Get the blades with nimby on
-    blades_nimby = sessions["tractor"].query(func.count(Blade.bladeid)) \
-    .filter(Blade.nimby != "") \
+    blades_nimby = sessions["tractor"].query(func.count(1)) \
+    .filter(Blade.status.like("nimby%") ) \
     .filter(*pool_filters) \
 
+    # Get the blades that are off
+    # TODO: find the sqlalchemy way to use the function age
+    blades_off_query = engines["tractor"].execute("SELECT count(*) FROM blade where age(current_timestamp, heartbeattime) > interval '1 hours'")
+    blades_off = [blades_off_result[0] for blades_off_result in blades_off_query]
+
     # Return a json
-    response = [{"name": "Free", "value": blades_free[0][0]}, {"name": "Busy", "value": blades_busy[0][0]}, {"name": "Nimby ON", "value": blades_nimby[0][0]}]
+    response = [{"name": "Free", "value": blades_free[0][0]}, {"name": "Busy", "value": blades_busy[0][0]}, {"name": "Nimby ON", "value": blades_nimby[0][0]}, {"name": "Off", "value": blades_off[0]}]
     return jsonify(response)
 
 

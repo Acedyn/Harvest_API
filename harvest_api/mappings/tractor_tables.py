@@ -23,3 +23,8 @@ class Command(bases["tractor"]):
 class Blade(bases["tractor"]):
     __bind_key__ = "tractor"
     __table__ = bases["tractor"].metadata.tables["blade"]
+
+# Mapping to get to the bladeuse table
+class BladeUse(bases["tractor"]):
+    __bind_key__ = "tractor"
+    __table__ = bases["tractor"].metadata.tables["bladeuse"]
