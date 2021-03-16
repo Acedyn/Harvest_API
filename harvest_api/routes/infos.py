@@ -19,10 +19,10 @@ combine_filters = (
 @infos.route("/infos/projects")
 def project_infos():
     # Get all the project, their color and the amount of frames to compute
-    projects_query = select([Project.name, Project.color, func.count(1).label("total")]) \
+    projects_query = select([Project.name, Project.color, func.count(1).label("total"), Project.id]) \
         .where(and_( \
         *combine_filters)). \
-        group_by(Project.name, Project.color)
+        group_by(Project.name, Project.color, Project.id)
     # Execute the query
     results = engines["harvest"].execute(projects_query)
 
@@ -31,6 +31,6 @@ def project_infos():
     
     # Convert the sql result to a jsonifyable list
     for result in results:
-        response.append({"name": result["name"], "color": result["color"], "frames": result["total"]})
+        response.append({"name": result["name"], "color": result["color"], "frames": result["total"], "id": result["id"]})
     
     return jsonify(response)
