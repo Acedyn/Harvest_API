@@ -49,7 +49,10 @@ def pc_crew():
 
     # Loop over all the rows of the sql response
     for blade_busy in blades_busy:
-        response.append({"name": blade_busy[0], "value": blade_busy[1]})
+        if(blade_busy[0] == "PIR_HEARTH"):
+            response.append({"name": "PIR_HEART", "value": blade_busy[1]})
+        else:
+            response.append({"name": blade_busy[0], "value": blade_busy[1]})
 
     # Return the response in json format
     return jsonify(response)
