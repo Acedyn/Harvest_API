@@ -100,7 +100,7 @@ def projects_progression():
             timetamp_state["timestamp"] = timestamp
 
         # Store the value of the row to the current timestamp_state
-        timetamp_state[project] = done
+        timetamp_state[project] += done
 
     # Append the timestamp_state one last time
     response.append(timetamp_state.copy())
