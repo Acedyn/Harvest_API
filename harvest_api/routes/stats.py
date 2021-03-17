@@ -1,3 +1,4 @@
+import datetime
 from flask import Blueprint, jsonify
 from sqlalchemy import func
 from database import sessions, engines
@@ -21,25 +22,36 @@ pool_filters = (
 def blades_status():
     # Get the working blades
     blades_busy = sessions["tractor"].query(func.count(1)) \
-    .filter(BladeUse.taskcount > 0) \
-
+    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(Blade.bladeid == BladeUse.bladeid) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
+    .filter(BladeUse.taskcount > 0)
+    
     # Get the free blades
-    blades_free = sessions["tractor"].query(func.count(Blade.bladeid)) \
+    blades_free = sessions["tractor"].query(func.count(1)) \
+    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(Blade.bladeid == BladeUse.bladeid) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
+    .filter(BladeUse.taskcount > 0) \
     .filter(Blade.status == "") \
-    .filter(*pool_filters) \
+    .filter(Blade.nimby == "") 
 
     # Get the blades with nimby on
     blades_nimby = sessions["tractor"].query(func.count(1)) \
-    .filter(Blade.status.like("nimby%") ) \
-    .filter(*pool_filters) \
+    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(Blade.bladeid == BladeUse.bladeid) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
+    .filter(BladeUse.taskcount > 0) \
+    .filter(Blade.nimby != "")
 
     # Get the blades that are off
-    # TODO: find the sqlalchemy way to use the function age
-    blades_off_query = engines["tractor"].execute("SELECT count(*) FROM blade where age(current_timestamp, heartbeattime) > interval '1 hours'")
-    blades_off = [blades_off_result[0] for blades_off_result in blades_off_query]
+    blades_off = sessions["tractor"].query(func.count(1)) \
+    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(Blade.bladeid == BladeUse.bladeid) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) > datetime.timedelta(seconds=120)) \
 
     # Return a json
-    response = [{"name": "Free", "value": blades_free[0][0]}, {"name": "Busy", "value": blades_busy[0][0]}, {"name": "Nimby ON", "value": blades_nimby[0][0]}, {"name": "Off", "value": blades_off[0]}]
+    response = [{"name": "Free", "value": blades_free[0][0]}, {"name": "Busy", "value": blades_busy[0][0]}, {"name": "Nimby ON", "value": blades_nimby[0][0]}, {"name": "Off", "value": blades_off[0][0]}]
     return jsonify(response)
 
 
