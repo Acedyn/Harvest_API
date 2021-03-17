@@ -41,8 +41,8 @@ def blades_status():
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
-    .filter(BladeUse.taskcount > 0) \
-    .filter(func.upper(Blade.status).like("%nimby%"))
+    .filter(BladeUse.taskcount == 0) \
+    .filter(Blade.status.like("%nimby%"))
 
     # Get the blades that are off
     blades_off = sessions["tractor"].query(func.count(1)) \
