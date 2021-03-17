@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 from sqlalchemy import func
 from sqlalchemy.sql import select, and_, true, false
 from database import execute_from_file, sessions, engines
-from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer
+from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer, History
 import re, datetime
 
 # Initialize the set to routes for tractor
@@ -104,6 +104,31 @@ def projects_progression():
 
     # Append the timestamp_state one last time
     response.append(timetamp_state.copy())
+
+    # Return the response in json format
+    return jsonify(response)
+
+
+# Route to get the history of farm usage
+@graphics.route("/graphics/blade-status")
+def blades_status_history():
+    # Query all the layers of the given project to get the project name
+    history_query = select([History.blade_busy, History.blade_off, History.blade_free, History.blade_nimby, History.date]) \
+        .order_by(History.date)
+    # Execute the query
+    results = engines["harvest"].execute(history_query)
+
+    # Initialize the final response that will contain all the timestamps
+    response = []
+
+    # Loop over all the rows of the sql response
+    for result in results:
+        # Store all the colunm values for the curent row
+        timestamp = int(result[4].timestamp()) * 1000
+        # Gather all the data of the row
+        timetamp_state = {"timestamp": timestamp, "busy": result[0], "off": result[1], "free": result[2], "nimby": result[3]}
+
+        response.append(timetamp_state)
 
     # Return the response in json format
     return jsonify(response)
