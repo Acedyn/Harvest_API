@@ -22,33 +22,34 @@ pool_filters = (
 def blades_status():
     # Get the working blades
     blades_busy = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
     .filter(BladeUse.taskcount > 0)
     
     # Get the free blades
     blades_free = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
-    .filter(BladeUse.taskcount > 0) \
-    .filter(Blade.status == "") \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(BladeUse.taskcount == 0) \
+    .filter(Blade.status == "")  \
     .filter(Blade.nimby == "") 
 
     # Get the blades with nimby on
     blades_nimby = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
     .filter(BladeUse.taskcount > 0) \
-    .filter(Blade.nimby != "")
+    .filter(func.upper(Blade.status).like("%nimby%"))
 
     # Get the blades that are off
     blades_off = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) > datetime.timedelta(seconds=120)) \
+    .filter(BladeUse.taskcount == 0) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) > datetime.timedelta(seconds=180)) \
 
     # Return a json
     response = [{"name": "Free", "value": blades_free[0][0]}, {"name": "Busy", "value": blades_busy[0][0]}, {"name": "Nimby ON", "value": blades_nimby[0][0]}, {"name": "Off", "value": blades_off[0][0]}]
