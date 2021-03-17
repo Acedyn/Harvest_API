@@ -11,14 +11,14 @@ from mappings.harvest_tables import History
 def update_tractor_history():
     # Get the working blades
     blades_busy = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
     .filter(BladeUse.taskcount > 0)
     
     # Get the free blades
     blades_free = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
     .filter(BladeUse.taskcount > 0) \
@@ -27,7 +27,7 @@ def update_tractor_history():
 
     # Get the blades with nimby on
     blades_nimby = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
     .filter(BladeUse.taskcount > 0) \
@@ -35,7 +35,7 @@ def update_tractor_history():
 
     # Get the blades that are off
     blades_off = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.name).like("%MK%")) \
+    .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) > datetime.timedelta(seconds=120)) \
 
