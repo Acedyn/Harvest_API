@@ -13,31 +13,32 @@ def update_tractor_history():
     blades_busy = sessions["tractor"].query(func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
     .filter(BladeUse.taskcount > 0)
     
     # Get the free blades
     blades_free = sessions["tractor"].query(func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
-    .filter(BladeUse.taskcount > 0) \
-    .filter(Blade.status == "") \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(BladeUse.taskcount == 0) \
+    .filter(Blade.status == "")  \
     .filter(Blade.nimby == "") 
 
     # Get the blades with nimby on
     blades_nimby = sessions["tractor"].query(func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=120)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
     .filter(BladeUse.taskcount > 0) \
-    .filter(Blade.nimby != "")
+    .filter(func.upper(Blade.status).like("%nimby%"))
 
     # Get the blades that are off
     blades_off = sessions["tractor"].query(func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) > datetime.timedelta(seconds=120)) \
+    .filter(BladeUse.taskcount == 0) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) > datetime.timedelta(seconds=180)) \
 
     # Add the result to a new record in the history table
     new_record = History(date = datetime.datetime.now(), blade_busy = blades_busy[0][0], blade_free = blades_free[0][0], blade_nimby = blades_nimby[0][0], blade_off = blades_off[0][0])
