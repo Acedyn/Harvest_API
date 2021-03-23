@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify
 from sqlalchemy import func
 from database import sessions, engines
 from mappings.tractor_tables import Blade, BladeUse, Task, Job
+from mappings.harvest_tables import History
 
 # Initialize the set to routes for infos
 stats = Blueprint("stats", __name__)
@@ -73,6 +74,30 @@ def projects_usage():
     # Loop over all the rows of the sql response
     for blade_busy in blades_busy:
         response.append({"name": blade_busy[0], "value": blade_busy[1]})
+
+    # Return the response in json format
+    return jsonify(response)
+
+
+# Return the historic of the blades use
+@stats.route("/stats/blades-history")
+def blades_historic():
+    # Get the historic of the blades
+    blades_history = sessions["harvest"].query( \
+        func.extract("hour", History.date), \
+        func.avg(History.blade_busy).label("busy"), \
+        func.avg(History.blade_nimby).label("nimby"), \
+        func.avg(History.blade_off).label("off"), \
+        func.avg(History.blade_free).label("free")) \
+    .group_by(func.extract("hour", History.date)) \
+    .order_by(func.extract("hour", History.date)) \
+
+    # Initialize the final response that will contain all the projects
+    response = []
+
+    # Loop over all the rows of the sql response
+    for blade_history in blades_history:
+        response.append({"time": blade_history[0], "busy": float(blade_history[1]), "nimby": float(blade_history[2]), "off": float(blade_history[3]), "free": float(blade_history[4])})
 
     # Return the response in json format
     return jsonify(response)
