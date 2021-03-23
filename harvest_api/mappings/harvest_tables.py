@@ -12,6 +12,7 @@ class Project(bases["harvest"]):
     color = Column(String, default = "#000000")
 
     sequence = relationship("Sequence", back_populates = "project")
+    history_project = relationship("HistoryProject", back_populates = "project")
 
     def __repr__(self):
         return f"<Project {self.id}"
@@ -125,3 +126,20 @@ class History(bases["harvest"]):
     
     def __str__(self):
         return f"Layer : {self.index}"
+
+# Mapping to get the history_project table
+class HistoryProject(bases["harvest"]):
+    __tablename__ = "history_project"
+
+    # TODO: Auto fill the date when inserting a row
+    date = Column(DateTime, ForeignKey("history.date"), primary_key = True, nullable=False)
+    project_id = Column(Integer, ForeignKey("project.id"), nullable = False)
+    blade_busy = Column(Integer, nullable = False)
+
+    project = relationship("Project", back_populates = "history_project")
+
+    def __repr__(self):
+        return f"<HistoryProject {self.date}"
+    
+    def __str__(self):
+        return f"HistoryProject : {self.date}, {self.project_id}"

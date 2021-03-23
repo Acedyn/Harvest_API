@@ -6,6 +6,7 @@ from sqlalchemy import func
 from database import sessions, engines
 from mappings.tractor_tables import Blade, BladeUse, Task, Job
 from mappings.harvest_tables import History
+from routes.stats import blades_status
 
 # Store the current state of the blades in a new record in the history table
 def update_tractor_history():
@@ -49,7 +50,7 @@ def update_tractor_history():
 # Initialize the scheduler with the update_tractor_history function
 tractor_history_updater = BackgroundScheduler()
 # Trigger the function every 5 seconds
-tractor_history_updater.add_job(func = update_tractor_history, trigger = "interval", hours = 1, id = "tractor_history")
+tractor_history_updater.add_job(func = update_tractor_history, trigger = "interval", minutes = 1, id = "tractor_history")
 
 # Shut down the scheduler when exiting the app
 atexit.register(lambda: tractor_history_updater.shutdown())
