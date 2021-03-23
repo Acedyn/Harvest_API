@@ -59,11 +59,13 @@ def blades_status():
 # Return how many blades each projects are occupying
 @stats.route("/stats/projects-usage")
 def projects_usage():
-    # Get the working blades per project
-    blades_busy = sessions["tractor"].query(Job.owner, func.count(Job.owner)) \
-    .filter(Job.jid == Task.jid) \
-    .filter(Task.state == "active") \
-    .group_by(Job.owner)
+    # Get the working blades
+    blades_busy = sessions["tractor"].query(BladeUse.owners, func.count(1)) \
+    .filter(func.upper(Blade.profile).like("MK%")) \
+    .filter(Blade.bladeid == BladeUse.bladeid) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(BladeUse.taskcount > 0) \
+    .group_by(BladeUse.owners)
 
     # Initialize the final response that will contain all the projects
     response = []
