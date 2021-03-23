@@ -66,6 +66,7 @@ def projects_usage():
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
     .filter(BladeUse.taskcount > 0) \
+    .filter(func.array_length(BladeUse.owners, 1) > 0) \
     .group_by(BladeUse.owners)
 
     # Initialize the final response that will contain all the projects
@@ -73,7 +74,7 @@ def projects_usage():
 
     # Loop over all the rows of the sql response
     for blade_busy in blades_busy:
-        response.append({"name": blade_busy[0], "value": blade_busy[1]})
+        response.append({"name": blade_busy[0][0], "value": blade_busy[1]})
 
     # Return the response in json format
     return jsonify(response)
