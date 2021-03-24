@@ -16,8 +16,7 @@ combine_filters = (
 )
 
 # Retrieves the list of the project and multiple infos about them
-@infos.route("/infos/projects")
-def project_infos():
+def get_projects_infos():
     # Get all the project, their color and the amount of frames to compute
     projects_query = select([Project.name, Project.color, func.count(1).label("total"), Project.id]) \
         .where(and_( \
@@ -33,4 +32,11 @@ def project_infos():
     for result in results:
         response.append({"name": result["name"], "color": result["color"], "frames": result["total"], "id": result["id"]})
     
-    return jsonify(response)
+    return response
+
+@infos.route("/infos/projects")
+def projects_infos():
+    # TODO: Find a cleaner way to to this
+    # This is to reuse the get_projects_infos function in tractor_history.py
+    projects = get_projects_infos()
+    return jsonify(projects)

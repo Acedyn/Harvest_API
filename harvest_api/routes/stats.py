@@ -19,8 +19,7 @@ pool_filters = (
 )
 
 # Return the amound of blades that are working, free, and on nimby
-@stats.route("/stats/blades-status")
-def blades_status():
+def get_blades_status():
     # Get the working blades
     blades_busy = sessions["tractor"].query(func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
@@ -52,19 +51,29 @@ def blades_status():
     .filter(BladeUse.taskcount == 0) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) > datetime.timedelta(seconds=180)) \
 
+    return blades_free[0][0], blades_busy[0][0], blades_nimby[0][0], blades_off[0][0]
+
+@stats.route("/stats/blades-status")
+def blades_status():
+    # TODO: Find a cleaner way to to this
+    # This is to reuse the get_blades_status function in tractor_history.py
+    blades_free, blades_busy, blades_nimby, blades_off = get_blades_status()
+
     # Return a json
-    response = [{"name": "Free", "value": blades_free[0][0]}, {"name": "Busy", "value": blades_busy[0][0]}, {"name": "Nimby ON", "value": blades_nimby[0][0]}, {"name": "Off", "value": blades_off[0][0]}]
+    response = [{"name": "Free", "value": blades_free}, 
+        {"name": "Busy", "value": blades_busy}, 
+        {"name": "Nimby ON", "value": blades_nimby}, 
+        {"name": "Off", "value": blades_off}]
+
     return jsonify(response)
 
-
 # Return how many blades each projects are occupying
-@stats.route("/stats/projects-usage")
-def projects_usage():
+def get_projects_usage():
     # Get the working blades
     blades_busy = sessions["tractor"].query(BladeUse.owners, func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(days=10)) \
     .filter(BladeUse.taskcount == 1) \
     .filter(func.array_length(BladeUse.owners, 1) > 0) \
     .group_by(BladeUse.owners)
@@ -76,9 +85,14 @@ def projects_usage():
     for blade_busy in blades_busy:
         response.append({"name": blade_busy[0][0], "value": blade_busy[1]})
 
-    # Return the response in json format
-    return jsonify(response)
+    return response
 
+@stats.route("/stats/projects-usage")
+def projects_usage():
+    # TODO: Find a cleaner way to to this
+    # This is to reuse the get_projects_usage function in tractor_history.py
+    blades_busy = get_projects_usage()
+    return jsonify(blades_busy)
 
 # Return the historic of the blades use
 @stats.route("/stats/blades-history")

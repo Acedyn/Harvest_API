@@ -147,7 +147,7 @@ class HistoryProject(bases["harvest"]):
     def __str__(self):
         return f"HistoryProject : {self.date}, {self.project_id}"
 
-# Mapping to get the history_project table
+# Mapping to get the history_blades table
 class HistoryBlades(bases["harvest"]):
     __tablename__ = "history_blades"
 
