@@ -1,5 +1,5 @@
 from database import bases
-from sqlalchemy import Column, Integer, Boolean, DateTime, String, ForeignKey, CheckConstraint, UniqueConstraint
+from sqlalchemy import Column, Integer, Boolean, DateTime, Time, String, ForeignKey, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 # Mapping to get to the project table
@@ -121,6 +121,9 @@ class History(bases["harvest"]):
     blade_off = Column(Integer, nullable = False)
     blade_free = Column(Integer, nullable = False)
 
+    projects = relationship("HistoryProject", back_populates = "history")
+    blades = relationship("HistoryBlades", back_populates = "history")
+
     def __repr__(self):
         return f"<Layer {self.id}"
     
@@ -131,12 +134,28 @@ class History(bases["harvest"]):
 class HistoryProject(bases["harvest"]):
     __tablename__ = "history_project"
 
-    # TODO: Auto fill the date when inserting a row
     date = Column(DateTime, ForeignKey("history.date"), primary_key = True, nullable=False)
     project_id = Column(Integer, ForeignKey("project.id"), nullable = False)
     blade_busy = Column(Integer, nullable = False)
 
     project = relationship("Project", back_populates = "history_project")
+    history_date = relationship("History", back_populates = "history_project")
+
+    def __repr__(self):
+        return f"<HistoryProject {self.date}"
+    
+    def __str__(self):
+        return f"HistoryProject : {self.date}, {self.project_id}"
+
+# Mapping to get the history_project table
+class HistoryBlades(bases["harvest"]):
+    __tablename__ = "history_blades"
+
+    date = Column(DateTime, ForeignKey("history.date"), primary_key = True, nullable=False)
+    blade = Column(String, nullable = False)
+    computetime = Column(Time, nullable = False)
+
+    history_date = relationship("History", back_populates = "history_blades")
 
     def __repr__(self):
         return f"<HistoryProject {self.date}"

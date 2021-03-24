@@ -65,7 +65,7 @@ def projects_usage():
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
-    .filter(BladeUse.taskcount > 0) \
+    .filter(BladeUse.taskcount == 1) \
     .filter(func.array_length(BladeUse.owners, 1) > 0) \
     .group_by(BladeUse.owners)
 
