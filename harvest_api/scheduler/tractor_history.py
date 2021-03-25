@@ -50,6 +50,16 @@ def update_projects_history(history_buffer: SimpleNamespace):
     # Increase the counter so we can compute the average
     history_buffer.project_counter += 1
 
+def update_blades_history(history_buffer: SimpleNamespace):
+    # Get the project usage on the farm
+    projects_usage = get_projects_usage()
+    for project_usage in projects_usage:
+        # Check if the project exist in the database
+        if project_usage["name"] in history_buffer.project_usage:
+            history_buffer.project_usage[project_usage["name"]] += project_usage["value"]
+    # Increase the counter so we can compute the average
+    history_buffer.project_counter += 1
+
 # Initialize the scheduler with the update_tractor_history function
 tractor_history_updater = BackgroundScheduler()
 # Trigger the functions every 2 minutes

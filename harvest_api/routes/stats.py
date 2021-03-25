@@ -75,7 +75,7 @@ def get_projects_usage():
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(days=10)) \
     .filter(BladeUse.taskcount == 1) \
-    .filter(func.array_length(BladeUse.owners, 1) > 0) \
+    .filter(func.array_length(BladeUse.owners, 1) == 1) \
     .group_by(BladeUse.owners)
 
     # Initialize the final response that will contain all the projects
@@ -92,6 +92,33 @@ def projects_usage():
     # TODO: Find a cleaner way to to this
     # This is to reuse the get_projects_usage function in tractor_history.py
     blades_busy = get_projects_usage()
+    return jsonify(blades_busy)
+
+# Return how many blades are running for each blade types
+def get_blades_usage():
+    # Get the working blades
+    blades_busy = sessions["tractor"].query(func.regexp_matches(Blade.name, "mk[0-9]*", "g"), func.count(1)) \
+    .filter(func.upper(Blade.profile).like("MK%")) \
+    .filter(Blade.bladeid == BladeUse.bladeid) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(days=10)) \
+    .filter(BladeUse.taskcount == 1) \
+    .filter(func.array_length(func.regexp_matches(Blade.name, "mk[0-9]*", "g")) > 0) \
+    .group_by(func.regexp_matches(Blade.name, "mk[0-9]*", "g"))
+
+    # Initialize the final response that will contain all the projects
+    response = []
+
+    # Loop over all the rows of the sql response
+    for blade_busy in blades_busy:
+        response.append({"name": blade_busy[0][0], "value": blade_busy[1]})
+
+    return response
+
+@stats.route("/stats/blades-usage")
+def blades_usage():
+    # TODO: Find a cleaner way to to this
+    # This is to reuse the get_blades_usage function in tractor_history.py
+    blades_busy = get_blades_usage()
     return jsonify(blades_busy)
 
 # Return the historic of the blades use
