@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 from sqlalchemy import func
 from sqlalchemy.sql import select, and_, true, false
 from database import execute_from_file, sessions, engines
-from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer, History
+from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer, HistoryFarm
 import re, datetime
 
 # Initialize the set to routes for tractor
@@ -113,8 +113,8 @@ def projects_progression():
 @graphics.route("/graphics/blade-status")
 def blades_status_history():
     # Query all the layers of the given project to get the project name
-    history_query = select([History.blade_busy, History.blade_off, History.blade_free, History.blade_nimby, History.date]) \
-        .order_by(History.date)
+    history_query = select([HistoryFarm.blade_busy, HistoryFarm.blade_off, HistoryFarm.blade_free, HistoryFarm.blade_nimby, HistoryFarm.date]) \
+        .order_by(HistoryFarm.date)
     # Execute the query
     results = engines["harvest"].execute(history_query)
 

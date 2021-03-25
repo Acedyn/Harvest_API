@@ -110,8 +110,8 @@ class Layer(bases["harvest"]):
 
 
 # Mapping to get the history table
-class History(bases["harvest"]):
-    __tablename__ = "history"
+class HistoryFarm(bases["harvest"]):
+    __tablename__ = "history_farm"
 
     # TODO: Auto fill the date when inserting a row
     date = Column(DateTime, primary_key = True, nullable=False)

@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify
 from sqlalchemy import func
 from database import sessions, engines
 from mappings.tractor_tables import Blade, BladeUse, Task, Job
-from mappings.harvest_tables import History
+from mappings.harvest_tables import HistoryFarm
 
 # Initialize the set to routes for infos
 stats = Blueprint("stats", __name__)
@@ -125,13 +125,13 @@ def blades_usage():
 def blades_history():
     # Get the historic of the blades
     blades_history = sessions["harvest"].query( \
-        func.extract("hour", History.date), \
-        func.avg(History.blade_busy).label("busy"), \
-        func.avg(History.blade_nimby).label("nimby"), \
-        func.avg(History.blade_off).label("off"), \
-        func.avg(History.blade_free).label("free")) \
-    .group_by(func.extract("hour", History.date)) \
-    .order_by(func.extract("hour", History.date)) \
+        func.extract("hour", HistoryFarm.date), \
+        func.avg(HistoryFarm.blade_busy).label("busy"), \
+        func.avg(HistoryFarm.blade_nimby).label("nimby"), \
+        func.avg(HistoryFarm.blade_off).label("off"), \
+        func.avg(HistoryFarm.blade_free).label("free")) \
+    .group_by(func.extract("hour", HistoryFarm.date)) \
+    .order_by(func.extract("hour", HistoryFarm.date)) \
 
     # Initialize the final response that will contain all the projects
     response = []
@@ -150,14 +150,14 @@ def blades_history_date(date):
 
     # Get the historic of the blades
     blades_history = sessions["harvest"].query( \
-        func.extract("hour", History.date), \
-        func.avg(History.blade_busy).label("busy"), \
-        func.avg(History.blade_nimby).label("nimby"), \
-        func.avg(History.blade_off).label("off"), \
-        func.avg(History.blade_free).label("free")) \
-    .filter(History.date >= starting_date) \
-    .group_by(func.extract("hour", History.date)) \
-    .order_by(func.extract("hour", History.date)) \
+        func.extract("hour", HistoryFarm.date), \
+        func.avg(HistoryFarm.blade_busy).label("busy"), \
+        func.avg(HistoryFarm.blade_nimby).label("nimby"), \
+        func.avg(HistoryFarm.blade_off).label("off"), \
+        func.avg(HistoryFarm.blade_free).label("free")) \
+    .filter(HistoryFarm.date >= starting_date) \
+    .group_by(func.extract("hour", HistoryFarm.date)) \
+    .order_by(func.extract("hour", HistoryFarm.date)) \
 
     # Initialize the final response that will contain all the projects
     response = []

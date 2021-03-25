@@ -5,7 +5,7 @@ from sqlalchemy import func
 
 from database import sessions, engines
 from mappings.tractor_tables import Blade, BladeUse, Task, Job
-from mappings.harvest_tables import History, HistoryProject, HistoryBlade
+from mappings.harvest_tables import HistoryFarm, HistoryProject, HistoryBlade
 from routes.stats import get_farm_status, get_projects_usage, get_blades_usage
 from routes.infos import get_projects_infos
 
@@ -61,7 +61,7 @@ def update_blades_history(history_buffer: HistoryBuffer):
 def update_history_database(history_buffer: HistoryBuffer):
     record_time = datetime.datetime.now()
     # Add the result to a new record in the history table
-    history_record = History(date = record_time, 
+    history_record = HistoryFarm(date = record_time, 
         blade_busy = int(history_buffer.farm_usage["busy"] / history_buffer.farm_counter), 
         blade_free = int(history_buffer.farm_usage["free"] / history_buffer.farm_counter), 
         blade_nimby = int(history_buffer.farm_usage["nimby"] / history_buffer.farm_counter), 
