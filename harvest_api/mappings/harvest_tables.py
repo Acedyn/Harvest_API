@@ -130,7 +130,7 @@ class HistoryFarm(bases["harvest"]):
 class HistoryProject(bases["harvest"]):
     __tablename__ = "history_project"
 
-    date = Column(DateTime, ForeignKey("history.date"), primary_key = True, nullable=False)
+    date = Column(DateTime, ForeignKey("history_farm.date"), primary_key = True, nullable=False)
     project_id = Column(Integer, ForeignKey("project.id"), primary_key = True, nullable = False)
     blade_busy = Column(Integer, nullable = False)
 
@@ -144,7 +144,7 @@ class HistoryProject(bases["harvest"]):
 class HistoryBlade(bases["harvest"]):
     __tablename__ = "history_blade"
 
-    date = Column(DateTime, ForeignKey("history.date"), primary_key = True, nullable=False)
+    date = Column(DateTime, ForeignKey("history_farm.date"), primary_key = True, nullable=False)
     blade = Column(String, primary_key = True, nullable = False)
     computetime = Column(Time, nullable = False)
 

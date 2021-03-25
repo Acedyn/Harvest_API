@@ -88,10 +88,10 @@ def update_history_database(history_buffer: HistoryBuffer):
 # Initialize the scheduler with the update_tractor_history function
 tractor_history_updater = BackgroundScheduler()
 # Trigger the functions every 2 minutes
-tractor_history_updater.add_job(func = lambda: update_farm_history(history_buffer), trigger = "interval", seconds = 2, id = "tractor_history")
-tractor_history_updater.add_job(func = lambda: update_projects_history(history_buffer), trigger = "interval", seconds = 2, id = "projects_history")
-tractor_history_updater.add_job(func = lambda: update_blades_history(history_buffer), trigger = "interval", seconds = 2, id = "blades_history")
-tractor_history_updater.add_job(func = lambda: update_history_database(history_buffer), trigger = "interval", seconds = 6, id = "database_history")
+tractor_history_updater.add_job(func = lambda: update_farm_history(history_buffer), trigger = "interval", minutes = 2, id = "tractor_history")
+tractor_history_updater.add_job(func = lambda: update_projects_history(history_buffer), trigger = "interval", minutes = 2, id = "projects_history")
+tractor_history_updater.add_job(func = lambda: update_blades_history(history_buffer), trigger = "interval", minutes = 2, id = "blades_history")
+tractor_history_updater.add_job(func = lambda: update_history_database(history_buffer), trigger = "interval", hours = 1, id = "database_history")
 
 # Shut down the scheduler when exiting the app
 atexit.register(lambda: tractor_history_updater.shutdown())
