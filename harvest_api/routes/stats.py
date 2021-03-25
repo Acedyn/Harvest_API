@@ -73,8 +73,8 @@ def get_projects_usage():
     blades_busy = sessions["tractor"].query(BladeUse.owners, func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(days=10)) \
-    .filter(BladeUse.taskcount == 1) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(BladeUse.taskcount > 0) \
     .filter(func.array_length(BladeUse.owners, 1) == 1) \
     .group_by(BladeUse.owners)
 
@@ -97,13 +97,12 @@ def projects_usage():
 # Return how many blades are running for each blade types
 def get_blades_usage():
     # Get the working blades
-    blades_busy = sessions["tractor"].query(func.regexp_matches(Blade.name, "mk[0-9]*", "g"), func.count(1)) \
+    blades_busy = sessions["tractor"].query(func.regexp_matches(func.upper(Blade.name), "MK[0-9]*", "g"), func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(days=10)) \
-    .filter(BladeUse.taskcount == 1) \
-    .filter(func.array_length(func.regexp_matches(Blade.name, "mk[0-9]*", "g")) > 0) \
-    .group_by(func.regexp_matches(Blade.name, "mk[0-9]*", "g"))
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(BladeUse.taskcount > 0) \
+    .group_by(func.regexp_matches(func.upper(Blade.name), "MK[0-9]*", "g"))
 
     # Initialize the final response that will contain all the projects
     response = []
