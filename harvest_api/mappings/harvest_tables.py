@@ -141,8 +141,8 @@ class HistoryProject(bases["harvest"]):
         return f"HistoryProject : {self.date}, {self.project_id}"
 
 # Mapping to get the history_blades table
-class HistoryBlades(bases["harvest"]):
-    __tablename__ = "history_blades"
+class HistoryBlade(bases["harvest"]):
+    __tablename__ = "history_blade"
 
     date = Column(DateTime, ForeignKey("history.date"), primary_key = True, nullable=False)
     blade = Column(String, primary_key = True, nullable = False)

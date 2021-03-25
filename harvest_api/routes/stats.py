@@ -19,7 +19,7 @@ pool_filters = (
 )
 
 # Return the amound of blades that are working, free, and on nimby
-def get_blades_status():
+def get_farm_status():
     # Get the working blades
     blades_busy = sessions["tractor"].query(func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
@@ -57,7 +57,7 @@ def get_blades_status():
 def blades_status():
     # TODO: Find a cleaner way to to this
     # This is to reuse the get_blades_status function in tractor_history.py
-    blades_free, blades_busy, blades_nimby, blades_off = get_blades_status()
+    blades_free, blades_busy, blades_nimby, blades_off = get_farm_status()
 
     # Return a json
     response = [{"name": "Free", "value": blades_free}, 
