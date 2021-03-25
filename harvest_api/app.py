@@ -52,8 +52,8 @@ if __name__ == '__main__':
     elif config.environment == "dev":
         pass
         # If we are in development serve with flask
-        app.run(debug = True, host=config.app_host, port=config.app_port)
+        app.run(debug = config.DEBUG, host=config.app_host, port=config.app_port)
     else:
         pass
         # By default serve with flask
-        app.run(debug = True, host=config.app_host, port=config.app_port)
+        app.run(debug = config.DEBUG, host=config.app_host, port=config.app_port)

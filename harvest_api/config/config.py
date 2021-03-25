@@ -23,7 +23,8 @@ class Config(object):
 
     environment = "default"
     app_host="0.0.0.0"
-    DEBUG = True
+    # TODO: Fix the scheduler so it does not start another scheduler every time the app reload
+    DEBUG = False
     TESTING = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -35,7 +36,8 @@ class DevelopmentConfig(Config):
 
     environment = "dev"
     app_host="0.0.0.0"
-    DEBUG = True
+    # TODO: Fix the scheduler so it does not start another scheduler every time the app reload
+    DEBUG = False
     TESTING = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     
