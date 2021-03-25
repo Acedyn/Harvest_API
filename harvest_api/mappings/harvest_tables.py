@@ -12,7 +12,6 @@ class Project(bases["harvest"]):
     color = Column(String, default = "#000000")
 
     sequence = relationship("Sequence", back_populates = "project")
-    history_project = relationship("HistoryProject", back_populates = "project")
 
     def __repr__(self):
         return f"<Project {self.id}"
@@ -121,9 +120,6 @@ class History(bases["harvest"]):
     blade_off = Column(Integer, nullable = False)
     blade_free = Column(Integer, nullable = False)
 
-    projects = relationship("HistoryProject", back_populates = "history")
-    blades = relationship("HistoryBlades", back_populates = "history")
-
     def __repr__(self):
         return f"<Layer {self.id}"
     
@@ -135,11 +131,8 @@ class HistoryProject(bases["harvest"]):
     __tablename__ = "history_project"
 
     date = Column(DateTime, ForeignKey("history.date"), primary_key = True, nullable=False)
-    project_id = Column(Integer, ForeignKey("project.id"), nullable = False)
+    project_id = Column(Integer, ForeignKey("project.id"), primary_key = True, nullable = False)
     blade_busy = Column(Integer, nullable = False)
-
-    project = relationship("Project", back_populates = "history_project")
-    history_date = relationship("History", back_populates = "history_project")
 
     def __repr__(self):
         return f"<HistoryProject {self.date}"
@@ -152,10 +145,8 @@ class HistoryBlades(bases["harvest"]):
     __tablename__ = "history_blades"
 
     date = Column(DateTime, ForeignKey("history.date"), primary_key = True, nullable=False)
-    blade = Column(String, nullable = False)
+    blade = Column(String, primary_key = True, nullable = False)
     computetime = Column(Time, nullable = False)
-
-    history_date = relationship("History", back_populates = "history_blades")
 
     def __repr__(self):
         return f"<HistoryProject {self.date}"

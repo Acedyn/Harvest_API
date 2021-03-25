@@ -24,14 +24,14 @@ def get_blades_status():
     blades_busy = sessions["tractor"].query(func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(days=180)) \
     .filter(BladeUse.taskcount > 0)
     
     # Get the free blades
     blades_free = sessions["tractor"].query(func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(days=180)) \
     .filter(BladeUse.taskcount == 0) \
     .filter(Blade.status == "")  \
     .filter(Blade.nimby == "") 
@@ -40,7 +40,7 @@ def get_blades_status():
     blades_nimby = sessions["tractor"].query(func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(days=180)) \
     .filter(BladeUse.taskcount == 0) \
     .filter(Blade.status.like("%nimby%"))
 
@@ -49,7 +49,7 @@ def get_blades_status():
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(BladeUse.taskcount == 0) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) > datetime.timedelta(seconds=180)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) > datetime.timedelta(days=180)) \
 
     return blades_free[0][0], blades_busy[0][0], blades_nimby[0][0], blades_off[0][0]
 
@@ -73,7 +73,7 @@ def get_projects_usage():
     blades_busy = sessions["tractor"].query(BladeUse.owners, func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(days=180)) \
     .filter(BladeUse.taskcount > 0) \
     .filter(func.array_length(BladeUse.owners, 1) == 1) \
     .group_by(BladeUse.owners)
@@ -100,7 +100,7 @@ def get_blades_usage():
     blades_busy = sessions["tractor"].query(func.regexp_matches(func.upper(Blade.name), "MK[0-9]*", "g"), func.count(1)) \
     .filter(func.upper(Blade.profile).like("MK%")) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(days=180)) \
     .filter(BladeUse.taskcount > 0) \
     .group_by(func.regexp_matches(func.upper(Blade.name), "MK[0-9]*", "g"))
 
