@@ -124,7 +124,7 @@ def blades_usage():
 @stats.route("/stats/farm-history/hours")
 def farm_history_hours():
     start = request.args.get('start', default = 0, type = int)
-    end = request.args.get('end', default = datetime.timestamp(datetime.now())*1000, type = int)
+    end = request.args.get('end', default = datetime.datetime.timestamp(datetime.datetime.now())*1000, type = int)
     starting_date = datetime.datetime.fromtimestamp(int(start/1000))
     ending_date = datetime.datetime.fromtimestamp(int(end/1000))
 
@@ -175,7 +175,7 @@ def farm_history_days():
 
     # Loop over all the rows of the sql response
     for blade_history in blades_history:
-        response.append({"time": (blade_history[0] + 1) % 7, 
+        response.append({"time": (blade_history[0] - 1) % 7, 
             "busy": float(blade_history[1]), 
             "nimby": float(blade_history[2]), 
             "off": float(blade_history[3]), 
