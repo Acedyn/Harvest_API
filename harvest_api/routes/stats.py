@@ -123,10 +123,8 @@ def blades_usage():
 # Return the historic of the blades use along a day from a starting and end date
 @stats.route("/stats/farm-history/hours")
 def farm_history_hours():
-    # TODO: Replace the temporary 9999999999999 from the code
     start = request.args.get('start', default = 0, type = int)
-    end = request.args.get('end', default = 9999999999999, type = int)
-    print(end)
+    end = request.args.get('end', default = datetime.timestamp(datetime.now())*1000, type = int)
     starting_date = datetime.datetime.fromtimestamp(int(start/1000))
     ending_date = datetime.datetime.fromtimestamp(int(end/1000))
 
@@ -155,9 +153,8 @@ def farm_history_hours():
 # Return the historic of the blades use along a week from a starting and end date
 @stats.route("/stats/farm-history/days")
 def farm_history_days():
-    # TODO: Replace the temporary 9999999999999 from the code
     start = request.args.get('start', default = 0, type = int)
-    end = request.args.get('end', default = 9999999999999, type = int)
+    end = request.args.get('end', default = datetime.timestamp(datetime.now())*1000, type = int)
     starting_date = datetime.datetime.fromtimestamp(int(start/1000))
     ending_date = datetime.datetime.fromtimestamp(int(end/1000))
 
@@ -178,7 +175,11 @@ def farm_history_days():
 
     # Loop over all the rows of the sql response
     for blade_history in blades_history:
-        response.append({"time": blade_history[0], "busy": float(blade_history[1]), "nimby": float(blade_history[2]), "off": float(blade_history[3]), "free": float(blade_history[4])})
+        response.append({"time": (blade_history[0] + 1) % 7, 
+            "busy": float(blade_history[1]), 
+            "nimby": float(blade_history[2]), 
+            "off": float(blade_history[3]), 
+            "free": float(blade_history[4])})
 
     # Return the response in json format
     return jsonify(response)
