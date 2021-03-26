@@ -155,51 +155,30 @@ def farm_history_hours():
 # Return the historic of the blades use along a week from a starting and end date
 @stats.route("/stats/farm-history/days")
 def farm_history_days():
-    # TODO: Replace the temporary 999999999999999 from the code
+    # TODO: Replace the temporary 9999999999999 from the code
     start = request.args.get('start', default = 0, type = int)
-    end = request.args.get('end', default = 999999999999999, type = int)
+    end = request.args.get('end', default = 9999999999999, type = int)
     starting_date = datetime.datetime.fromtimestamp(int(start/1000))
     ending_date = datetime.datetime.fromtimestamp(int(end/1000))
 
     # Get the historic of the blades
     blades_history = sessions["harvest"].query( \
-        HistoryFarm.date, \
+        func.extract("dow", HistoryFarm.date), \
         func.avg(HistoryFarm.blade_busy).label("busy"), \
         func.avg(HistoryFarm.blade_nimby).label("nimby"), \
         func.avg(HistoryFarm.blade_off).label("off"), \
         func.avg(HistoryFarm.blade_free).label("free")) \
     .filter(HistoryFarm.date >= starting_date) \
     .filter(HistoryFarm.date <= ending_date) \
-    .group_by(HistoryFarm.date) \
-    .order_by(HistoryFarm.date) \
+    .group_by(func.extract("dow", HistoryFarm.date)) \
+    .order_by(func.extract("dow", HistoryFarm.date)) \
 
     # Initialize the final response that will contain all the projects
     response = []
 
-    days = {}
-
     # Loop over all the rows of the sql response
     for blade_history in blades_history:
-        if not blade_history[0].weekday() in days:
-            days[blade_history[0].weekday()] = \
-                {"busy": float(blade_history[1]), 
-                "nimby": float(blade_history[2]), 
-                "off": float(blade_history[3]), 
-                "free": float(blade_history[4]),
-                "counter": 1}
-        else:
-            days[blade_history[0].weekday()]["busy"] += float(blade_history[1])
-            days[blade_history[0].weekday()]["nimby"] += float(blade_history[2])
-            days[blade_history[0].weekday()]["off"] += float(blade_history[3])
-            days[blade_history[0].weekday()]["free"] += float(blade_history[4])
-            days[blade_history[0].weekday()]["counter"] += 1
-
-    for day, farm in days.items():
-        response.append({"time": day, 
-            "busy": farm["busy"]/farm["counter"], 
-            "nimby": farm["nimby"]/farm["counter"], 
-            "off": farm["off"]/farm["counter"], 
-            "free": farm["free"]/farm["counter"]})
+        response.append({"time": blade_history[0], "busy": float(blade_history[1]), "nimby": float(blade_history[2]), "off": float(blade_history[3]), "free": float(blade_history[4])})
 
     # Return the response in json format
     return jsonify(response)
