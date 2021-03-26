@@ -163,15 +163,15 @@ def farm_history_days():
 
     # Get the historic of the blades
     blades_history = sessions["harvest"].query( \
-        func.extract("day", HistoryFarm.date), \
+        func.extract("dow", HistoryFarm.date), \
         func.avg(HistoryFarm.blade_busy).label("busy"), \
         func.avg(HistoryFarm.blade_nimby).label("nimby"), \
         func.avg(HistoryFarm.blade_off).label("off"), \
         func.avg(HistoryFarm.blade_free).label("free")) \
     .filter(HistoryFarm.date >= starting_date) \
     .filter(HistoryFarm.date <= ending_date) \
-    .group_by(func.extract("hour", HistoryFarm.date)) \
-    .order_by(func.extract("hour", HistoryFarm.date)) \
+    .group_by(func.extract("dow", HistoryFarm.date)) \
+    .order_by(func.extract("dow", HistoryFarm.date)) \
 
     # Initialize the final response that will contain all the projects
     response = []
