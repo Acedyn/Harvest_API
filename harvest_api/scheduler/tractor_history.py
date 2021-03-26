@@ -2,6 +2,7 @@ import atexit, datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy import func
+from math import floor
 
 from database import sessions, engines
 from mappings.tractor_tables import Blade, BladeUse, Task, Job
@@ -79,7 +80,7 @@ def update_history_database(history_buffer: HistoryBuffer):
     for blade_name, blade_usage in history_buffer.blades_usage.items():
         blade_history_record = HistoryBlade(date = record_time,
             blade = blade_name,
-            computetime = datetime.time(minute = blade_usage))
+            computetime = datetime.time(hour = floor(blade_usage / 60), minute = blade_usage % 60))
         sessions["harvest"].add(blade_history_record)
     sessions["harvest"].commit()
     # Reset the buffer
