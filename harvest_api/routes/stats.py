@@ -154,7 +154,7 @@ def farm_history_hours():
 @stats.route("/stats/farm-history/days")
 def farm_history_days():
     start = request.args.get('start', default = 0, type = int)
-    end = request.args.get('end', default = datetime.timestamp(datetime.now())*1000, type = int)
+    end = request.args.get('end', default = datetime.datetime.timestamp(datetime.datetime.now())*1000, type = int)
     starting_date = datetime.datetime.fromtimestamp(int(start/1000))
     ending_date = datetime.datetime.fromtimestamp(int(end/1000))
 
