@@ -163,22 +163,43 @@ def farm_history_days():
 
     # Get the historic of the blades
     blades_history = sessions["harvest"].query( \
-        func.extract("dow", HistoryFarm.date), \
+        HistoryFarm.date, \
         func.avg(HistoryFarm.blade_busy).label("busy"), \
         func.avg(HistoryFarm.blade_nimby).label("nimby"), \
         func.avg(HistoryFarm.blade_off).label("off"), \
         func.avg(HistoryFarm.blade_free).label("free")) \
     .filter(HistoryFarm.date >= starting_date) \
     .filter(HistoryFarm.date <= ending_date) \
-    .group_by(func.extract("dow", HistoryFarm.date)) \
-    .order_by(func.extract("dow", HistoryFarm.date)) \
+    .group_by(HistoryFarm.date) \
+    .order_by(HistoryFarm.date) \
 
     # Initialize the final response that will contain all the projects
     response = []
 
+    days = {}
+
     # Loop over all the rows of the sql response
     for blade_history in blades_history:
-        response.append({"time": blade_history[0], "busy": float(blade_history[1]), "nimby": float(blade_history[2]), "off": float(blade_history[3]), "free": float(blade_history[4])})
+        if not blade_history[0].weekday() in days:
+            days[blade_history[0].weekday()] = \
+                {"busy": float(blade_history[1]), 
+                "nimby": float(blade_history[2]), 
+                "off": float(blade_history[3]), 
+                "free": float(blade_history[4]),
+                "counter": 1}
+        else:
+            days[blade_history[0].weekday()]["busy"] += float(blade_history[1])
+            days[blade_history[0].weekday()]["nimby"] += float(blade_history[2])
+            days[blade_history[0].weekday()]["off"] += float(blade_history[3])
+            days[blade_history[0].weekday()]["free"] += float(blade_history[4])
+            days[blade_history[0].weekday()]["counter"] += 1
+
+    for day, farm in days.items():
+        response.append({"time": day, 
+            "busy": farm["busy"]/farm["counter"], 
+            "nimby": farm["nimby"]/farm["counter"], 
+            "off": farm["off"]/farm["counter"], 
+            "free": farm["free"]/farm["counter"]})
 
     # Return the response in json format
     return jsonify(response)
