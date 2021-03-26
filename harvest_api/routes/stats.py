@@ -1,5 +1,5 @@
 import datetime
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from sqlalchemy import func
 from database import sessions, engines
 from mappings.tractor_tables import Blade, BladeUse, Task, Job
@@ -120,9 +120,16 @@ def blades_usage():
     blades_busy = get_blades_usage()
     return jsonify(blades_busy)
 
-# Return the historic of the blades use
-@stats.route("/stats/blades-history")
-def blades_history():
+# Return the historic of the blades use along a day from a starting and end date
+@stats.route("/stats/farm-history/hours")
+def farm_history_hours():
+    # TODO: Replace the temporary 9999999999999 from the code
+    start = request.args.get('start', default = 0, type = int)
+    end = request.args.get('end', default = 9999999999999, type = int)
+    print(end)
+    starting_date = datetime.datetime.fromtimestamp(int(start/1000))
+    ending_date = datetime.datetime.fromtimestamp(int(end/1000))
+
     # Get the historic of the blades
     blades_history = sessions["harvest"].query( \
         func.extract("hour", HistoryFarm.date), \
@@ -130,6 +137,8 @@ def blades_history():
         func.avg(HistoryFarm.blade_nimby).label("nimby"), \
         func.avg(HistoryFarm.blade_off).label("off"), \
         func.avg(HistoryFarm.blade_free).label("free")) \
+    .filter(HistoryFarm.date >= starting_date) \
+    .filter(HistoryFarm.date <= ending_date) \
     .group_by(func.extract("hour", HistoryFarm.date)) \
     .order_by(func.extract("hour", HistoryFarm.date)) \
 
@@ -143,19 +152,24 @@ def blades_history():
     # Return the response in json format
     return jsonify(response)
 
-# Return the historic of the blades use from a starting date
-@stats.route("/stats/blades-history/<int:date>")
-def blades_history_date(date):
-    starting_date = datetime.datetime.fromtimestamp(int(date))
+# Return the historic of the blades use along a week from a starting and end date
+@stats.route("/stats/farm-history/days")
+def farm_history_days():
+    # TODO: Replace the temporary 999999999999999 from the code
+    start = request.args.get('start', default = 0, type = int)
+    end = request.args.get('end', default = 999999999999999, type = int)
+    starting_date = datetime.datetime.fromtimestamp(int(start/1000))
+    ending_date = datetime.datetime.fromtimestamp(int(end/1000))
 
     # Get the historic of the blades
     blades_history = sessions["harvest"].query( \
-        func.extract("hour", HistoryFarm.date), \
+        func.extract("day", HistoryFarm.date), \
         func.avg(HistoryFarm.blade_busy).label("busy"), \
         func.avg(HistoryFarm.blade_nimby).label("nimby"), \
         func.avg(HistoryFarm.blade_off).label("off"), \
         func.avg(HistoryFarm.blade_free).label("free")) \
     .filter(HistoryFarm.date >= starting_date) \
+    .filter(HistoryFarm.date <= ending_date) \
     .group_by(func.extract("hour", HistoryFarm.date)) \
     .order_by(func.extract("hour", HistoryFarm.date)) \
 
