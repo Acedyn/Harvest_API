@@ -125,7 +125,7 @@ def blades_usage():
 def farm_history_hours():
     start = request.args.get('start', default = 0, type = int)
     end = request.args.get('end', default = datetime.datetime.timestamp(datetime.datetime.now())*1000, type = int)
-    ignore_weekend = request.args.get('we', default = False, type = bool)
+    ignore_weekend = request.args.get('ignore-we', default = False, type = bool)
     starting_date = datetime.datetime.fromtimestamp(int(start/1000))
     ending_date = datetime.datetime.fromtimestamp(int(end/1000))
 
