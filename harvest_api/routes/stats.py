@@ -125,9 +125,18 @@ def blades_usage():
 def farm_history_hours():
     start = request.args.get('start', default = 0, type = int)
     end = request.args.get('end', default = datetime.datetime.timestamp(datetime.datetime.now())*1000, type = int)
+    ignore_weekend = request.args.get('we', default = False, type = bool)
     starting_date = datetime.datetime.fromtimestamp(int(start/1000))
     ending_date = datetime.datetime.fromtimestamp(int(end/1000))
 
+    # List of filters that will be added according to some parameters in the route
+    optional_filters = []
+    # If the 'we' parameter in the route is true
+    if ignore_weekend:
+        print("HEEE")
+        optional_filters.append(func.extract("dow", HistoryFarm.date) != 0)
+        optional_filters.append(func.extract("dow", HistoryFarm.date) != 6)
+        
     # Get the historic of the blades
     blades_history = sessions["harvest"].query( \
         func.extract("hour", HistoryFarm.date), \
@@ -137,6 +146,7 @@ def farm_history_hours():
         func.avg(HistoryFarm.blade_free).label("free")) \
     .filter(HistoryFarm.date >= starting_date) \
     .filter(HistoryFarm.date <= ending_date) \
+    .filter(*optional_filters) \
     .group_by(func.extract("hour", HistoryFarm.date)) \
     .order_by(func.extract("hour", HistoryFarm.date)) \
 
