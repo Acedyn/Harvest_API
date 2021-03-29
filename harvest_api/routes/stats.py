@@ -221,7 +221,6 @@ def projects_history():
 
     # Loop over all the rows of the sql response
     for project_history in projects_history:
-        print(project_history[2])
         # If a new date is reached
         if project_history[0].timestamp() * 1000 != response_buffer["time"]:
             # Append the response
