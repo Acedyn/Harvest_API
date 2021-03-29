@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy import func
 from database import sessions, engines
 from mappings.tractor_tables import Blade, BladeUse, Task, Job
-from mappings.harvest_tables import HistoryFarm
+from mappings.harvest_tables import HistoryFarm, HistoryProject, Project
 
 # Initialize the set to routes for infos
 stats = Blueprint("stats", __name__)
@@ -133,7 +133,6 @@ def farm_history_hours():
     optional_filters = []
     # If the 'we' parameter in the route is true
     if ignore_weekend:
-        print("HEEE")
         optional_filters.append(func.extract("dow", HistoryFarm.date) != 0)
         optional_filters.append(func.extract("dow", HistoryFarm.date) != 6)
         
@@ -168,8 +167,8 @@ def farm_history_days():
     starting_date = datetime.datetime.fromtimestamp(int(start/1000))
     ending_date = datetime.datetime.fromtimestamp(int(end/1000))
 
-    # Get the historic of the blades
-    blades_history = sessions["harvest"].query( \
+    # Get the history of the farm
+    farm_history = sessions["harvest"].query( \
         func.extract("dow", HistoryFarm.date), \
         func.avg(HistoryFarm.blade_busy).label("busy"), \
         func.avg(HistoryFarm.blade_nimby).label("nimby"), \
@@ -184,12 +183,57 @@ def farm_history_days():
     response = []
 
     # Loop over all the rows of the sql response
-    for blade_history in blades_history:
+    for blade_history in farm_history:
         response.append({"time": (blade_history[0] - 1) % 7, 
             "busy": float(blade_history[1]), 
             "nimby": float(blade_history[2]), 
             "off": float(blade_history[3]), 
             "free": float(blade_history[4])})
+
+    # Return the response in json format
+    return jsonify(response)
+
+# Return the usage of each project of the farm
+@stats.route("/stats/projects-history")
+def projects_history():
+    start = request.args.get('start', default = 0, type = int)
+    end = request.args.get('end', default = datetime.datetime.timestamp(datetime.datetime.now())*1000, type = int)
+    starting_date = datetime.datetime.fromtimestamp(int(start/1000))
+    ending_date = datetime.datetime.fromtimestamp(int(end/1000))
+
+    # Get the history of the projects
+    projects_history = sessions["harvest"].query( \
+        HistoryProject.date, \
+        Project.name, \
+        HistoryProject.blade_busy) \
+    .filter(HistoryProject.project_id == Project.id) \
+    .filter(HistoryFarm.date >= starting_date) \
+    .filter(HistoryFarm.date <= ending_date) \
+    .order_by(HistoryProject.date)
+
+    # Initialize the final response that will contain all the projects
+    response = []
+    # If the sql result is empty return nothing
+    if len(projects_history.all()) < 1:
+        return jsonify(response)
+    # Initialize the response buffer
+    response_buffer = {"time": projects_history[0][0].timestamp() * 1000}
+
+    # Loop over all the rows of the sql response
+    for project_history in projects_history:
+        print(project_history[2])
+        # If a new date is reached
+        if project_history[0].timestamp() * 1000 != response_buffer["time"]:
+            # Append the response
+            response.append(response_buffer.copy())
+            # Reinitialise the buffer
+            response_buffer = {"time": project_history[0].timestamp() * 1000}
+        
+        # Add the project name to the buffer
+        response_buffer[project_history[1]] = project_history[2]
+       
+    # Append the response one last time
+    response.append(response_buffer.copy())
 
     # Return the response in json format
     return jsonify(response)
