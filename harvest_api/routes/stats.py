@@ -207,8 +207,8 @@ def projects_history():
         Project.name, \
         HistoryProject.blade_busy) \
     .filter(HistoryProject.project_id == Project.id) \
-    .filter(HistoryFarm.date >= starting_date) \
-    .filter(HistoryFarm.date <= ending_date) \
+    .filter(HistoryProject.date >= starting_date) \
+    .filter(HistoryProject.date <= ending_date) \
     .order_by(HistoryProject.date)
 
     # Initialize the final response that will contain all the projects
