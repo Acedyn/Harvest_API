@@ -36,5 +36,6 @@ def create_app(config_file):
     def cleanup(resp_or_exc):
         sessions["tractor"].remove()
         sessions["harvest"].remove()
+        sessions["nimbygame"].remove()
 
     return app

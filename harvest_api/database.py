@@ -17,19 +17,22 @@ def create_orm(config_file):
     # Create the engines that will connect to the databases
     engines["tractor"] = create_engine(config_file.SQLALCHEMY_DATABASES["tractor"])
     engines["harvest"] = create_engine(config_file.SQLALCHEMY_DATABASES["harvest"])
+    engines["nimbygame"] = create_engine(config_file.SQLALCHEMY_DATABASES["nimbygame"])
 
     # Create the sessions that will be the handle to comunicate with the databaes
     sessions["tractor"] = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engines["tractor"]))
     sessions["harvest"] = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engines["harvest"]))
+    sessions["nimbygame"] = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engines["nimbygame"]))
 
     # Create the bases that will be the handle for you mappings
     bases["tractor"] = declarative_base()
     bases["harvest"] = declarative_base()
+    bases["nimbygame"] = declarative_base()
 
     # Refect all the tables of the tractor's database
     bases["tractor"].metadata.reflect(bind=engines["tractor"])
-    from mappings.harvest_tables import Project
     bases["harvest"].metadata.create_all(bind=engines["harvest"])
+    bases["nimbygame"].metadata.create_all(bind=engines["nimbygame"])
 
     # Initialize the SQL functions to make sure we can use them in the raw queries
     execute_from_file("tractor", "func_valid_json.sql")

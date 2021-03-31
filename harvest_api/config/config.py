@@ -10,6 +10,7 @@ class Config(object):
         self.SQLALCHEMY_DATABASES = {
             "tractor": "postgresql://" + db_user + ":" + db_password + "@" + db_adress + "/tractor",
             "harvest": "postgresql://" + db_user + ":" + db_password + "@" + db_adress + "/harvest",
+            "nimbygame": "postgresql://" + db_user + ":" + db_password + "@" + db_adress + "/nimbygame",
         }
         # Ignore the warnings from sqlachemy 
         # (it gives errors because it does not support some types in the tractor's database)
