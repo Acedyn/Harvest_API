@@ -114,7 +114,7 @@ Return a list of JSON with the average amount of blades free, busy, nimby and of
 along each days of a week
 
 ```url
-/stats/farm-history/days
+/stats/projects-history
 ```
 
 URL Parameters :
@@ -122,5 +122,15 @@ URL Parameters :
 - start (int) timestamp (javascript precision) : date from wich we compute the average
 - end (int) timestamp (javascript precision) : date until wich we compute the average
 
-Return a list of JSON with the average amount of blades free, busy, nimby and off
-along each days of a week
+Return a list of JSON with the average amount of blades computing every hours for each project
+
+```url
+/stats/blades-history
+```
+
+URL Parameters :
+
+- start (int) timestamp (javascript precision) : date from wich we compute the average
+- end (int) timestamp (javascript precision) : date until wich we compute the average
+
+Return a JSON with the average computation time for all the blades for each types of blades

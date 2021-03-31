@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy import func
 from database import sessions, engines
 from mappings.tractor_tables import Blade, BladeUse, Task, Job
-from mappings.harvest_tables import HistoryFarm, HistoryProject, Project
+from mappings.harvest_tables import HistoryFarm, HistoryProject, HistoryBlade, Project
 
 # Initialize the set to routes for infos
 stats = Blueprint("stats", __name__)
@@ -211,7 +211,7 @@ def projects_history():
     .filter(HistoryProject.date <= ending_date) \
     .order_by(HistoryProject.date)
 
-    # Initialize the final response that will contain all the projects
+    # Initialize the final response that will contain all the timestamps
     response = []
     # If the sql result is empty return nothing
     if len(projects_history.all()) < 1:
@@ -234,5 +234,32 @@ def projects_history():
     # Append the response one last time
     response.append(response_buffer.copy())
 
+    # Return the response in json format
+    return jsonify(response)
+
+# Return the average total time of computation of the farm
+@stats.route("/stats/blades-history")
+def blades_history():
+    start = request.args.get('start', default = 0, type = int)
+    end = request.args.get('end', default = datetime.datetime.timestamp(datetime.datetime.now())*1000, type = int)
+    starting_date = datetime.datetime.fromtimestamp(int(start/1000))
+    ending_date = datetime.datetime.fromtimestamp(int(end/1000))
+
+    # Get the history of the blades compute time
+    blades_history = sessions["harvest"].query( \
+        HistoryBlade.blade, \
+        func.avg(HistoryBlade.computetime)) \
+    .filter(HistoryBlade.date >= starting_date) \
+    .filter(HistoryBlade.date <= ending_date) \
+    .group_by(HistoryBlade.blade)
+
+    # Initialize the final response that will contain all the timestamps
+    response = []
+
+    # Loop over all the rows of the sql response
+    for blade_history in blades_history:
+        # Append the response
+        response.append({"name": blade_history[0], "computetime": blade_history[1].total_seconds() * 1000})
+        
     # Return the response in json format
     return jsonify(response)
