@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, Boolean, DateTime, Time, String, Foreign
 
 # Mapping to get to the player table
 class Player(bases["nimbygame"]):
-    __tablename__ = "project"
+    __tablename__ = "player"
 
     computer = Column(String(50), primary_key = True, nullable=False)
     name = Column(String(50), default = "no name")
