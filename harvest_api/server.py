@@ -25,6 +25,8 @@ def create_app(config_file):
     app.register_blueprint(infos)
     from routes.stats import stats
     app.register_blueprint(stats)
+    from routes.game import game
+    app.register_blueprint(game)
 
     # Start the scheduled operations
     from scheduler.tractor_history import tractor_history_updater
