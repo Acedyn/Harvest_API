@@ -3,6 +3,7 @@ from sqlalchemy import func
 from sqlalchemy.sql import select, and_, true, false
 from database import execute_from_file, sessions, engines
 from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer, HistoryFarm
+from routes.infos import get_projects_infos
 import re, datetime
 
 # Initialize the set to routes for tractor
@@ -129,6 +130,21 @@ def blades_status_history():
         timetamp_state = {"timestamp": timestamp, "busy": result[0], "off": result[1], "free": result[2], "nimby": result[3]}
 
         response.append(timetamp_state)
+
+    # Return the response in json format
+    return jsonify(response)
+
+# Route to get the quantity of frame rendered for each group
+@graphics.route("/graphics/frame-computed")
+def frames_computed():
+    projects_frames = execute_from_file("tractor", "frame_computed.sql")
+
+    # Initialize the final response
+    response = []
+
+    # Loop over all the rows of the sql response
+    for project_frames in projects_frames:
+        response.append({"project": project_frames[0], "frames": project_frames[1]})
 
     # Return the response in json format
     return jsonify(response)

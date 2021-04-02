@@ -20,7 +20,6 @@ FROM
         array_length(string_to_array(regexp_replace(task_metadata->>'frames', '[\[\]\s\.]', '', 'g'), ',', '')::int[], 1) AS frames
         -- Join the subquery to the invocation and the blade table
         FROM
-
             -- SUBQUERY : Get the parsed metadata
             (SELECT 
             -- Select the metadata from job and task and cast them from string to json
