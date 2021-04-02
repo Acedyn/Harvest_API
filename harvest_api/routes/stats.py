@@ -237,9 +237,9 @@ def projects_history():
     # Return the response in json format
     return jsonify(response)
 
-# Return the average total time of computation of the farm
-@stats.route("/stats/blades-history")
-def blades_history():
+# Return the average total time of computation of the farm over an hour
+@stats.route("/stats/blades-history/hour")
+def blades_history_hour():
     start = request.args.get('start', default = 0, type = int)
     end = request.args.get('end', default = datetime.datetime.timestamp(datetime.datetime.now())*1000, type = int)
     starting_date = datetime.datetime.fromtimestamp(int(start/1000))
@@ -261,5 +261,35 @@ def blades_history():
         # Append the response
         response.append({"name": blade_history[0], "computetime": blade_history[1].total_seconds() * 1000})
         
+    # Return the response in json format
+    return jsonify(response)
+
+# Return the average time of computation for each computer types per day
+@stats.route("/stats/blades_history/day")
+def blades_history_day():
+    start = request.args.get('start', default = 0, type = int)
+    end = request.args.get('end', default = datetime.datetime.timestamp(datetime.datetime.now())*1000, type = int)
+    starting_date = datetime.datetime.fromtimestamp(int(start/1000))
+    ending_date = datetime.datetime.fromtimestamp(int(end/1000))
+
+    # Get the history of the blades compute time
+    blades_history = sessions["harvest"].query( \
+        HistoryBlade.blade, \
+        func.sum(HistoryBlade.computetime)) \
+    .filter(HistoryBlade.date >= starting_date) \
+    .filter(HistoryBlade.date <= ending_date) \
+    .group_by(func.extract("day", HistoryFarm.date), HistoryBlade.blade)
+    
+    # Initialize the final response that will contain all the projects
+    response = []
+
+    # Loop over all the rows of the sql response
+    for blade_history in blades_history:
+        response.append({"time": (blade_history[0] - 1) % 7, 
+            "busy": float(blade_history[1]), 
+            "nimby": float(blade_history[2]), 
+            "off": float(blade_history[3]), 
+            "free": float(blade_history[4])})
+
     # Return the response in json format
     return jsonify(response)
