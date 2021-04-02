@@ -31,5 +31,5 @@ FROM
             WHERE is_valid_json(job.metadata) AND is_valid_json(task.metadata) AND task.jid = job.jid LIMIT 999999999) AS taskData 
         
         -- Get only the task that are done and ignore the task that are from TEST_PIPE
-        WHERE state = 'done' AND job_metadata->>'project' != 'TEST_PIPE' AND job_metadata->>'renderState' = 'final') AS metadata) AS stats
+        WHERE state = 'done' AND job_metadata->>'project' != 'TEST_PIPE') AS metadata) AS stats
 GROUP BY stats.project
