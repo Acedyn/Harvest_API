@@ -148,13 +148,15 @@ def frames_computed():
 
     # Initialize the final response
     response = [{"project": project["name"], "rendered": int(0), "valid": int(0)} for project in get_projects_infos()]
+    response.remove({"project": "TEST_PIPE", "rendered": int(0), "valid": int(0)})
 
     # Loop over all the rows of the sql response
-    for project in response:
-        for project_rendered in projects_rendered:
+    for project_rendered in projects_rendered:
+        for project in response:
             if project_rendered[0] == project["project"]:
                 project["rendered"] = project_rendered[1]
-        for project_validated in projects_validated:
+    for project_validated in projects_validated:
+        for project in response:
             if project_validated[1] in project["project"]:
                 project["valid"] = project_validated[0]
 
