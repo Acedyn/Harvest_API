@@ -137,14 +137,26 @@ def blades_status_history():
 # Route to get the quantity of frame rendered for each group
 @graphics.route("/graphics/frame-computed")
 def frames_computed():
-    projects_frames = execute_from_file("tractor", "frame_computed.sql")
+    projects_rendered = execute_from_file("tractor", "frame_computed.sql")
+    projects_validated = sessions["harvest"].query(func.count(1), Project.name) \
+        .filter(Layer.frame_id == Frame.id) \
+        .filter(Frame.shot_id == Shot.id) \
+        .filter(Shot.sequence_id == Sequence.id) \
+        .filter(Sequence.project_id == Project.id) \
+        .filter(Layer.valid == True) \
+        .group_by(Project.name)
 
     # Initialize the final response
-    response = []
+    response = [{"project": project["name"], "rendered": int(0), "valid": int(0)} for project in get_projects_infos()]
 
     # Loop over all the rows of the sql response
-    for project_frames in projects_frames:
-        response.append({"project": project_frames[0], "frames": project_frames[1]})
+    for project in response:
+        for project_rendered in projects_rendered:
+            if project_rendered[0] == project["project"]:
+                project["rendered"] = project_rendered[1]
+        for project_validated in projects_validated:
+            if project_validated[1] in project["project"]:
+                project["valid"] = project_validated[0]
 
     # Return the response in json format
     return jsonify(response)
