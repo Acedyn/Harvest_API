@@ -1,4 +1,4 @@
-from config.config import DevelopmentConfig, ProductionConfig, DockerConfig, Config
+from config.config import DevelopmentConfig, ProductionConfig, ContainerConfig, Config
 import getpass, sys, getopt
 from server import create_app
 from database import create_orm
@@ -13,12 +13,24 @@ opts, args = getopt.getopt(argv, "e:h:u:p:")
 config_arg = {}
 
 for opt, arg in opts:
-    # Get the host adress of the database
-    if(opt == "-h" or opt == "--host"):
-        config_arg["db_adress"] = arg
-    # Get the user of the database
-    elif(opt == "-u" or opt == "--user"):
-        config_arg["db_user"] = arg
+    # Get the host adress of the tractor database
+    if(opt == "-th" or opt == "--tractor-host"):
+        config_arg["tractor_db_adress"] = arg
+    # Get the user of the tractor database
+    elif(opt == "-tu" or opt == "--tractor-user"):
+        config_arg["tractor_db_user"] = arg
+    # Get the name of the tractor database
+    elif(opt == "-tn" or opt == "--tractor-name"):
+        config_arg["tractor_db_name"] = arg
+    # Get the host adress of the harvest database
+    if(opt == "-hh" or opt == "--harvest-host"):
+        config_arg["harvest_db_adress"] = arg
+    # Get the user of the harvest database
+    elif(opt == "-hu" or opt == "--harvest-user"):
+        config_arg["harvest_db_user"] = arg
+    # Get the user of the harvest database
+    elif(opt == "-hn" or opt == "--harvest-name"):
+        config_arg["harvest_db_name"] = arg
     # Get the port of the flask flask server
     elif(opt == "-p" or opt == "--port"):
         config_arg["app_port"] = arg
@@ -26,15 +38,15 @@ for opt, arg in opts:
 # If the -e dev argument has been passed use development configuration
 if ("-e", "dev") in opts or ("-e", "development") in opts:
     # Get password from user
-    config_arg["db_password"] = getpass.getpass("Database password: ")
+    password = getpass.getpass("Database password: ")
+    config_arg["tractor_db_password"] = password
+    config_arg["harvest_db_password"] = password
     config = DevelopmentConfig(**config_arg)
 # If the -e prod argument has been passed use production configuration
 elif ("-e", "prod") in opts or ("-e", "production") in opts:
-    config_arg["db_password"] = ""
     config = ProductionConfig(**config_arg)
 # If the -e docker argument has been passed use docker configuration
 elif ("-e", "docker") in opts or ("-e", "container") in opts:
-    config_arg["db_password"] = ""
     config = ContainerConfig(**config_arg)
 # If the no -e argument has been passed use default configuration
 else:

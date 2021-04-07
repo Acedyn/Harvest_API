@@ -26,8 +26,8 @@ class Config(object):
     environment = "default"
     app_host="0.0.0.0"
     # TODO: Fix the scheduler so it does not start another scheduler every time the app reload
-    DEBUG = False
-    TESTING = True
+    debug = False
+    testing = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
@@ -35,14 +35,14 @@ class Config(object):
 class DevelopmentConfig(Config):
     def __init__(self, tractor_db_password = "", tractor_db_adress = "localhost:5432", tractor_db_user = "postgres", tractor_db_name = "tractor", \
             harvest_db_password = "", harvest_db_adress = "localhost:5432", harvest_db_user = "postgres", harvest_db_name = "harvest", app_port = "8080"):
-        config.__init__(self, tractor_db_password, tractor_db_adress, tractor_db_user, tractor_db_name, \
+        Config.__init__(self, tractor_db_password, tractor_db_adress, tractor_db_user, tractor_db_name, \
                 harvest_db_password, harvest_db_adress, harvest_db_user, harvest_db_name, app_port)
 
     environment = "development"
     app_host="0.0.0.0"
     # TODO: Fix the scheduler so it does not start another scheduler every time the app reload
-    DEBUG = False
-    TESTING = True
+    debug = False
+    testing = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     
 
@@ -50,24 +50,24 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     def __init__(self, tractor_db_password = "", tractor_db_adress = "localhost:9876", tractor_db_user = "root", tractor_db_name = "tractor", \
             harvest_db_password = "", harvest_db_adress = "localhost:9876", harvest_db_user = "root", harvest_db_name = "harvest", app_port = "5000"):
-        config.__init__(self, tractor_db_password, tractor_db_adress, tractor_db_user, tractor_db_name, \
+        super().__init__(self, tractor_db_password, tractor_db_adress, tractor_db_user, tractor_db_name, \
                 harvest_db_password, harvest_db_adress, harvest_db_user, harvest_db_name, app_port)
 
     environment = "production"
     app_host="0.0.0.0"
-    DEBUG = False
-    TESTING = False
+    debug = False
+    testing = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # To use these config, add "-e docker" when starting the server 
 class ContainerConfig(Config):
     def __init__(self, tractor_db_password = "password", tractor_db_adress = "tractor_db:9876", tractor_db_user = "artfx", tractor_db_name = "tractor", \
             harvest_db_password = "password", harvest_db_adress = "harvest_db:5432", harvest_db_user = "artfx", harvest_db_name = "harvest", app_port = "5000"):
-        config.__init__(self, tractor_db_password, tractor_db_adress, tractor_db_user, tractor_db_name, \
+        Config.__init__(self, tractor_db_password, tractor_db_adress, tractor_db_user, tractor_db_name, \
                 harvest_db_password, harvest_db_adress, harvest_db_user, harvest_db_name, app_port)
 
     environment = "container"
     app_host="0.0.0.0"
-    DEBUG = False
-    TESTING = False
+    debug = False
+    testing = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
