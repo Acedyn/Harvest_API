@@ -3,13 +3,15 @@ import warnings
 # These class are used to store all the config infos
 # They are imported in app.py to apply the config to the flask app
 class Config(object):
-    def __init__(self, db_password = "", db_adress = "localhost:5432", db_user = "postgres", app_port = "8080"):
+    def __init__(self, tractor_db_password = "", tractor_db_adress = "localhost:5432", tractor_db_user = "postgres", tractor_db_name = "tractor", \
+            harvest_db_password = "", harvest_db_adress = "localhost:5432", harvest_db_user = "postgres", harvest_db_name = "harvest", app_port = "8080"):
         # Initialize the attributes using the given parameters
         self.app_port = app_port
-        self.db_password = db_password
+        self.tractor_db_password = tractor_db_password
+        self.harvest_db_password = tractor_db_password
         self.SQLALCHEMY_DATABASES = {
-            "tractor": "postgresql://" + db_user + ":" + db_password + "@" + db_adress + "/tractor",
-            "harvest": "postgresql://" + db_user + ":" + db_password + "@" + db_adress + "/harvest",
+            "tractor": "postgresql://" + tractor_db_user + ":" + tractor_db_password + "@" + tractor_db_adress + "/" + tractor_db_name,
+            "harvest": "postgresql://" + harvest_db_user + ":" + harvest_db_password + "@" + harvest_db_adress + "/" + harvest_db_name,
         }
         # Ignore the warnings from sqlachemy 
         # (it gives errors because it does not support some types in the tractor's database)
@@ -31,10 +33,12 @@ class Config(object):
 
 # To use these config, add "-e dev" when starting the server 
 class DevelopmentConfig(Config):
-    def __init__(self, db_password = "", db_adress = "localhost:5432", db_user = "postgres", app_port = "8080"):
-        Config.__init__(self, db_password, db_adress, db_user, app_port)
+    def __init__(self, tractor_db_password = "", tractor_db_adress = "localhost:5432", tractor_db_user = "postgres", tractor_db_name = "tractor", \
+            harvest_db_password = "", harvest_db_adress = "localhost:5432", harvest_db_user = "postgres", harvest_db_name = "harvest", app_port = "8080"):
+        config.__init__(self, tractor_db_password, tractor_db_adress, tractor_db_user, tractor_db_name, \
+                harvest_db_password, harvest_db_adress, harvest_db_user, harvest_db_name, app_port)
 
-    environment = "dev"
+    environment = "development"
     app_host="0.0.0.0"
     # TODO: Fix the scheduler so it does not start another scheduler every time the app reload
     DEBUG = False
@@ -44,21 +48,25 @@ class DevelopmentConfig(Config):
 
 # To use these config, add "-e prod" when starting the server 
 class ProductionConfig(Config):
-    def __init__(self, db_password = "", db_adress = "localhost:9876", db_user = "root", app_port = "5000"):
-        Config.__init__(self, db_password, db_adress, db_user, app_port)
+    def __init__(self, tractor_db_password = "", tractor_db_adress = "localhost:9876", tractor_db_user = "root", tractor_db_name = "tractor", \
+            harvest_db_password = "", harvest_db_adress = "localhost:9876", harvest_db_user = "root", harvest_db_name = "harvest", app_port = "5000"):
+        config.__init__(self, tractor_db_password, tractor_db_adress, tractor_db_user, tractor_db_name, \
+                harvest_db_password, harvest_db_adress, harvest_db_user, harvest_db_name, app_port)
 
-    environment = "prod"
+    environment = "production"
     app_host="0.0.0.0"
     DEBUG = False
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # To use these config, add "-e docker" when starting the server 
-class DockerConfig(Config):
-    def __init__(self, db_password = "", db_adress = "localhost:9876", db_user = "root", app_port = "5000"):
-        Config.__init__(self, db_password, db_adress, db_user, app_port)
+class ContainerConfig(Config):
+    def __init__(self, tractor_db_password = "password", tractor_db_adress = "tractor_db:9876", tractor_db_user = "artfx", tractor_db_name = "tractor", \
+            harvest_db_password = "password", harvest_db_adress = "harvest_db:5432", harvest_db_user = "artfx", harvest_db_name = "harvest", app_port = "5000"):
+        config.__init__(self, tractor_db_password, tractor_db_adress, tractor_db_user, tractor_db_name, \
+                harvest_db_password, harvest_db_adress, harvest_db_user, harvest_db_name, app_port)
 
-    environment = "prod"
+    environment = "container"
     app_host="0.0.0.0"
     DEBUG = False
     TESTING = False

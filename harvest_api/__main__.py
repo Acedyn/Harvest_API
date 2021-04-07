@@ -14,5 +14,4 @@ for opt, arg in opts:
     command_args += opt + " " + arg + " "
 
 # Run the app.py file with all the arguments
-os.system("python \"" + str(os.path.join(basepath, "app.py")) + "\" " + command_args)
-
+os.system("python3 \"" + str(os.path.join(basepath, "app.py")) + "\" " + command_args)

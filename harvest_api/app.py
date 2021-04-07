@@ -33,9 +33,9 @@ elif ("-e", "prod") in opts or ("-e", "production") in opts:
     config_arg["db_password"] = ""
     config = ProductionConfig(**config_arg)
 # If the -e docker argument has been passed use docker configuration
-elif ("-e", "docker") in opts:
+elif ("-e", "docker") in opts or ("-e", "container") in opts:
     config_arg["db_password"] = ""
-    config = DockerConfig(**config_arg)
+    config = ContainerConfig(**config_arg)
 # If the no -e argument has been passed use default configuration
 else:
     config_arg["db_password"] = ""
@@ -50,14 +50,12 @@ app = create_app(config)
 
 # Start the flask application
 if __name__ == '__main__':
-    if config.environment == "prod":
-        pass
+    if config.environment == "production":
         # If we are in production serve with waitress
         serve(app, host=config.app_host, port=config.app_port)
-    elif config.environment == "dev":
-        pass
-        # If we are in development serve with flask
-        app.run(debug = config.DEBUG, host=config.app_host, port=config.app_port)
+    elif config.environment == "development" or config.environment == "container":
+        # if we are in development serve with flask
+        app.run(debug = config.debug, host=config.app_host, port=config.app_port)
     else:
         pass
         # By default serve with flask
