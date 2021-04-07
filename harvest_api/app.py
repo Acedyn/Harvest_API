@@ -10,7 +10,7 @@ opts, args = getopt.getopt(argv, "e:h:u:p:")
 
 
 # Get the input arguments and store them in a list
-config_arg = {"db_password": password}
+config_arg = {}
 
 for opt, arg in opts:
     # Get the host adress of the database
