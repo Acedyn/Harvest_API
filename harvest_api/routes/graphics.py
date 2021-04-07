@@ -113,8 +113,15 @@ def projects_progression():
 # Route to get the history of farm usage
 @graphics.route("/graphics/blade-status")
 def blades_status_history():
-    # Query all the layers of the given project to get the project name
+    start = request.args.get('start', default = 0, type = int)
+    end = request.args.get('end', default = datetime.datetime.timestamp(datetime.datetime.now())*1000, type = int)
+    starting_date = datetime.datetime.fromtimestamp(int(start/1000))
+    ending_date = datetime.datetime.fromtimestamp(int(end/1000))
+
+    # Query all the the history of the farm usage
     history_query = select([HistoryFarm.blade_busy, HistoryFarm.blade_off, HistoryFarm.blade_free, HistoryFarm.blade_nimby, HistoryFarm.date]) \
+        .filter(HistoryFarm.date >= starting_date) \
+        .filter(HistoryFarm.date <= ending_date) \
         .order_by(HistoryFarm.date)
     # Execute the query
     results = engines["harvest"].execute(history_query)
