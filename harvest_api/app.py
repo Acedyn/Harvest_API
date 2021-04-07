@@ -1,4 +1,4 @@
-from config.config import DevelopmentConfig, ProductionConfig, Config
+from config.config import DevelopmentConfig, ProductionConfig, DockerConfig, Config
 import getpass, sys, getopt
 from server import create_app
 from database import create_orm
@@ -9,12 +9,9 @@ argv = sys.argv[1:]
 opts, args = getopt.getopt(argv, "e:h:u:p:")
 
 
-# Get password from user
-password = getpass.getpass("Database password: ")
-
-
 # Get the input arguments and store them in a list
 config_arg = {"db_password": password}
+
 for opt, arg in opts:
     # Get the host adress of the database
     if(opt == "-h" or opt == "--host"):
@@ -28,12 +25,20 @@ for opt, arg in opts:
 
 # If the -e dev argument has been passed use development configuration
 if ("-e", "dev") in opts or ("-e", "development") in opts:
+    # Get password from user
+    config_arg["db_password"] = getpass.getpass("Database password: ")
     config = DevelopmentConfig(**config_arg)
 # If the -e prod argument has been passed use production configuration
 elif ("-e", "prod") in opts or ("-e", "production") in opts:
+    config_arg["db_password"] = ""
     config = ProductionConfig(**config_arg)
+# If the -e docker argument has been passed use docker configuration
+elif ("-e", "docker") in opts:
+    config_arg["db_password"] = ""
+    config = DockerConfig(**config_arg)
 # If the no -e argument has been passed use default configuration
 else:
+    config_arg["db_password"] = ""
     config = Config(**config_arg)
 
 

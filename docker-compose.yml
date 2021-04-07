@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+  harvest_postgres:
+    image: postgres
+    container_name: harvest_postgres
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: artfx
+      POSTGRES_DB: harvest
+    ports:
+      - 5432:5432
+    volumes:
+      - harvest_db:/var/lib/postgresql/data
+
+  tractor_postgres:
+    image: postgres
+    container_name: tractor_postgres
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: artfx
+      POSTGRES_DB: harvest
+    ports:
+      - 9876:9876
+    volumes:
+      - tractor_db:/var/lib/postgresql/data
+
+  harvest_flask:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: harvest
+    container_name: harvest_flask
+    ports: 
+      - 5000:5000
+    depends_on:
+      - harvest_postgres
+      - tractor_postgres
+
+volumes:
+  harvest_db:
+  tractor_db:

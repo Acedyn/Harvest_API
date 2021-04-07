@@ -52,3 +52,14 @@ class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# To use these config, add "-e docker" when starting the server 
+class DockerConfig(Config):
+    def __init__(self, db_password = "", db_adress = "localhost:9876", db_user = "root", app_port = "5000"):
+        Config.__init__(self, db_password, db_adress, db_user, app_port)
+
+    environment = "prod"
+    app_host="0.0.0.0"
+    DEBUG = False
+    TESTING = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False

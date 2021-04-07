@@ -1,7 +1,6 @@
 import os
 from setuptools import setup, find_packages
 
-
 # Utility function to read the README file.
 # Used for the long_description.
 def read(fname):
@@ -16,8 +15,8 @@ setup(
     packages=find_packages(),
     install_requires=[
           'flask',
-          'sqlalchemy',
           'flask_cors',
+          'sqlalchemy',
           'waitress',
           'psycopg2',
           'apscheduler'
