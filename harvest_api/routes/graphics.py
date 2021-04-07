@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from sqlalchemy import func
 from sqlalchemy.sql import select, and_, true, false
 from database import execute_from_file, sessions, engines
@@ -120,8 +120,9 @@ def blades_status_history():
 
     # Query all the the history of the farm usage
     history_query = select([HistoryFarm.blade_busy, HistoryFarm.blade_off, HistoryFarm.blade_free, HistoryFarm.blade_nimby, HistoryFarm.date]) \
-        .filter(HistoryFarm.date >= starting_date) \
-        .filter(HistoryFarm.date <= ending_date) \
+        .where(and_( \
+        HistoryFarm.date >= starting_date, \
+        HistoryFarm.date <= ending_date)) \
         .order_by(HistoryFarm.date)
     # Execute the query
     results = engines["harvest"].execute(history_query)
