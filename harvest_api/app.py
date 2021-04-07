@@ -50,7 +50,6 @@ elif ("-e", "docker") in opts or ("-e", "container") in opts:
     config = ContainerConfig(**config_arg)
 # If the no -e argument has been passed use default configuration
 else:
-    config_arg["db_password"] = ""
     config = Config(**config_arg)
 
 

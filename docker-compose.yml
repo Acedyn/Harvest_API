@@ -29,13 +29,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: harvest_api
+    image: harvest
     container_name: harvest_api
     ports: 
       - 5000:5000
     depends_on:
-      - harvest_postgres
-      - tractor_postgres
+      - harvest_db
+      - tractor_db
 
 volumes:
   harvest_db:
