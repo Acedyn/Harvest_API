@@ -61,7 +61,7 @@ class ProductionConfig(Config):
 
 # To use these config, add "-e docker" when starting the server 
 class ContainerConfig(Config):
-    def __init__(self, tractor_db_password = "password", tractor_db_adress = "tractor_db:9876", tractor_db_user = "artfx", tractor_db_name = "tractor", \
+    def __init__(self, tractor_db_password = "password", tractor_db_adress = "tractor_db:5432", tractor_db_user = "artfx", tractor_db_name = "tractor", \
             harvest_db_password = "password", harvest_db_adress = "harvest_db:5432", harvest_db_user = "artfx", harvest_db_name = "harvest", app_port = "5000"):
         Config.__init__(self, tractor_db_password, tractor_db_adress, tractor_db_user, tractor_db_name, \
                 harvest_db_password, harvest_db_adress, harvest_db_user, harvest_db_name, app_port)

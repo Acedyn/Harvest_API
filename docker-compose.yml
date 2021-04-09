@@ -2,6 +2,7 @@ version: "3"
 
 services:
   harvest_db:
+    container_name: harvest_db
     image: postgres
     container_name: harvest_db
     environment:
@@ -9,11 +10,14 @@ services:
       POSTGRES_USER: artfx
       POSTGRES_DB: harvest
     ports:
-      - 5432:5432
+      - 1234:5432
+    networks:
+      - harvest
     volumes:
       - harvest_db:/var/lib/postgresql/data
 
   tractor_db:
+    container_name: tractor_db
     image: postgres
     container_name: tractor_db
     environment:
@@ -21,11 +25,14 @@ services:
       POSTGRES_USER: artfx
       POSTGRES_DB: tractor
     ports:
-      - 9876:9876
+      - 5678:5432
+    networks:
+      - harvest
     volumes:
       - tractor_db:/var/lib/postgresql/data
 
   harvest_api:
+    container_name: harvest_api
     build:
       context: .
       dockerfile: Dockerfile
@@ -33,10 +40,19 @@ services:
     container_name: harvest_api
     ports: 
       - 5000:5000
+    networks:
+      - harvest
     depends_on:
       - harvest_db
       - tractor_db
 
 volumes:
   harvest_db:
+    name: harvest_db
   tractor_db:
+    name: tractor_db
+
+networks:
+  harvest:
+    name: harvest
+    driver: bridge
