@@ -20,6 +20,14 @@ class HistoryBuffer():
         self.projects_counter = int(0)
         self.blades_counter = int(0)
 
+    def reset(self):
+        self.farm_usage = {"busy": int(0), "free": int(0), "nimby": int(0), "off": int(0)}
+        self.projects_usage = {project["name"]: int(0) for project in get_projects_infos()}
+        self.blades_usage = {}
+        self.farm_counter = int(0)
+        self.projects_counter = int(0)
+        self.blades_counter = int(0)
+
     def __str__(self):
         return f"Buffer : \nbusy: {self.farm_usage['busy']}, free: {self.farm_usage['free']}, nimby: {self.farm_usage['nimby']}, off: {self.farm_usage['off']}, counter: {self.farm_counter}\nprojects: {self.projects_usage}, counter: {self.projects_counter}\nblades: {self.blades_usage}, counter: {self.blades_counter}"
 
@@ -84,7 +92,7 @@ def update_history_database(history_buffer: HistoryBuffer):
         sessions["harvest"].add(blade_history_record)
     sessions["harvest"].commit()
     # Reset the buffer
-    history_buffer.__init__()
+    history_buffer.reset()
 
 # Initialize the scheduler with the update_tractor_history function
 tractor_history_updater = BackgroundScheduler()
