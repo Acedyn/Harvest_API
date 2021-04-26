@@ -45,6 +45,7 @@ def update_farm_history(history_buffer: HistoryBuffer):
     # Increase the counter so we can compute the average
     history_buffer.farm_counter += 1
 
+
 def update_projects_history(history_buffer: HistoryBuffer):
     # Get the project usage on the farm
     projects_usage = get_projects_usage()
@@ -68,6 +69,10 @@ def update_blades_history(history_buffer: HistoryBuffer):
     history_buffer.blades_counter += 1
 
 def update_history_database(history_buffer: HistoryBuffer):
+    update_farm_history(history_buffer)
+    update_projects_history(history_buffer)
+    update_blades_history(history_buffer)
+
     record_time = datetime.datetime.now()
     # Add the result to a new record in the history table
     history_record = HistoryFarm(date = record_time, 
@@ -98,11 +103,11 @@ def update_history_database(history_buffer: HistoryBuffer):
 tractor_history_updater = BackgroundScheduler()
 # Set the function triggers
 # When the current second is equal to 0 (so every minute)
-tractor_history_updater.add_job(func = lambda: update_farm_history(history_buffer), trigger = "cron", second = 0, id = "tractor_history")
-tractor_history_updater.add_job(func = lambda: update_projects_history(history_buffer), trigger = "cron", second = 0, id = "projects_history")
-tractor_history_updater.add_job(func = lambda: update_blades_history(history_buffer), trigger = "cron", second = 0, id = "blades_history")
+# tractor_history_updater.add_job(func = lambda: update_farm_history(history_buffer), trigger = "cron", second = 0, id = "tractor_history")
+# tractor_history_updater.add_job(func = lambda: update_projects_history(history_buffer), trigger = "cron", second = 0, id = "projects_history")
+# tractor_history_updater.add_job(func = lambda: update_blades_history(history_buffer), trigger = "cron", second = 0, id = "blades_history")
 # When the current minute is equal to 0 (so every hours)
-tractor_history_updater.add_job(func = lambda: update_history_database(history_buffer), trigger = "cron", minute = 0, id = "database_history")
+tractor_history_updater.add_job(func = lambda: update_history_database(history_buffer), trigger = "cron", minute = "*/30", id = "database_history")
 
 # Shut down the scheduler when exiting the app
 atexit.register(lambda: tractor_history_updater.shutdown())
