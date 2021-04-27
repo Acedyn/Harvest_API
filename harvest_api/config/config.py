@@ -13,22 +13,12 @@ class Config(object):
         # Initialize the attributes using the given parameters
         self.app_port = app_port
         self.db_password = db_password
+        # fmt: off
         self.SQLALCHEMY_DATABASES = {
-            "tractor": "postgresql://"
-            + db_user
-            + ":"
-            + db_password
-            + "@"
-            + db_adress
-            + "/tractor",
-            "harvest": "postgresql://"
-            + db_user
-            + ":"
-            + db_password
-            + "@"
-            + db_adress
-            + "/harvest2",
+            "tractor": "postgresql://" + db_user + ":" + db_password + "@" + db_adress + "/tractor",
+            "harvest": "postgresql://" + db_user + ":" + db_password + "@" + db_adress + "/harvest2",
         }
+        # fmt: on
         # Ignore the warnings from sqlachemy
         # (it gives errors because it does not support some types in the tractor's database)
         warnings.filterwarnings("ignore", module="sqlalchemy.dialects.postgresql.base")
