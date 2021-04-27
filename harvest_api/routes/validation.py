@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy import func, case, not_
-from sqlalchemy.sql import select, and_, true, false
+from sqlalchemy.sql import select, and_
 from database import execute_from_file, sessions, engines
 from mappings.harvest_tables import Project, Sequence, Shot, Frame, Layer
 import re, datetime
@@ -144,6 +144,8 @@ def validate_progression_layer(project):
             url.pop(0)
 
             new_data = {}
+            new_data["valid"] = item["valid"]
+
             if(len(url) >= 1):
                 new_data["sequence"] = url[0]
             if(len(url) >= 2):
@@ -170,16 +172,18 @@ def validate_progression_layer(project):
 
 
     current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
 
     # Try to query the update of the databse according sequence_data
     try:
-        sessions["harvest"].query(Layer.valid)\
-        .filter(*combine_filters)\
-        .filter(Project.name == re.sub("-", '_', project.upper()))\
-        .filter(Sequence.index.in_([item["sequence"] for item in sequence_data]))\
-        .update({Layer.valid: not_(Layer.valid), Layer.validation_date: current_datetime}, synchronize_session = False)
+        for item in sequence_data:
+            sessions["harvest"].query(Layer.valid)\
+            .filter(*combine_filters)\
+            .filter(Project.name == re.sub("-", '_', project.upper()))\
+            .filter(Sequence.index == item["sequence"])\
+            .update({Layer.valid: item["valid"], Layer.validation_date: current_datetime}, synchronize_session = False)
 
-        sessions["harvest"].commit()
+            sessions["harvest"].commit()
 
     # If an error occured return an error message
     except Exception as exception:
@@ -188,14 +192,15 @@ def validate_progression_layer(project):
 
     # Try to query the update of the databse according shot_data
     try:
-        sessions["harvest"].query(Layer.valid)\
-        .filter(*combine_filters)\
-        .filter(Project.name == re.sub("-", '_', project.upper()))\
-        .filter(Shot.index.in_([item["shot"] for item in shot_data]))\
-        .filter(Sequence.index.in_([item["sequence"] for item in shot_data]))\
-        .update({Layer.valid: not_(Layer.valid), Layer.validation_date: current_datetime}, synchronize_session = False)
+        for item in shot_data:
+            sessions["harvest"].query(Layer.valid)\
+            .filter(*combine_filters)\
+            .filter(Project.name == re.sub("-", '_', project.upper()))\
+            .filter(Shot.index == item["shot"])\
+            .filter(Sequence.index == item["sequence"])\
+            .update({Layer.valid: item["valid"], Layer.validation_date: current_datetime}, synchronize_session = False)
 
-        sessions["harvest"].commit()
+            sessions["harvest"].commit()
 
     # If an error occured return an error message
     except Exception as exception:
@@ -204,15 +209,16 @@ def validate_progression_layer(project):
 
     # Try to query the update of the databse according frame_data
     try:
-        sessions["harvest"].query(Layer.valid)\
-        .filter(*combine_filters)\
-        .filter(Project.name == re.sub("-", '_', project.upper()))\
-        .filter(Frame.index.in_([item["frame"] for item in frame_data]))\
-        .filter(Shot.index.in_([item["shot"] for item in frame_data]))\
-        .filter(Sequence.index.in_([item["sequence"] for item in frame_data]))\
-        .update({Layer.valid: not_(Layer.valid), Layer.validation_date: current_datetime}, synchronize_session = False)
+        for item in shot_data:
+            sessions["harvest"].query(Layer.valid)\
+            .filter(*combine_filters)\
+            .filter(Project.name == re.sub("-", '_', project.upper()))\
+            .filter(Frame.index == item["frame"])\
+            .filter(Shot.index == item["shot"])\
+            .filter(Sequence.index == item["sequence"])\
+            .update({Layer.valid: item["valid"], Layer.validation_date: current_datetime}, synchronize_session = False)
 
-        sessions["harvest"].commit()
+            sessions["harvest"].commit()
 
     # If an error occured return an error message
     except Exception as exception:
@@ -221,16 +227,17 @@ def validate_progression_layer(project):
     
     # Try to query the update of the databse according layer_data
     try:
-        sessions["harvest"].query(Layer.valid)\
-        .filter(*combine_filters)\
-        .filter(Project.name == re.sub("-", '_', project.upper()))\
-        .filter(Layer.name.in_([item["layer"] for item in layer_data]))\
-        .filter(Frame.index.in_([item["frame"] for item in layer_data]))\
-        .filter(Shot.index.in_([item["shot"] for item in layer_data]))\
-        .filter(Sequence.index.in_([item["sequence"] for item in layer_data]))\
-        .update({Layer.valid: not_(Layer.valid), Layer.validation_date: current_datetime}, synchronize_session = False)
+        for item in shot_data:
+            sessions["harvest"].query(Layer.valid)\
+            .filter(*combine_filters)\
+            .filter(Project.name == re.sub("-", '_', project.upper()))\
+            .filter(Layer.name == item["layer"])\
+            .filter(Frame.index == item["frame"])\
+            .filter(Shot.index == item["shot"])\
+            .filter(Sequence.index == item["sequence"])\
+            .update({Layer.valid: item["valid"], Layer.validation_date: current_datetime}, synchronize_session = False)
 
-        sessions["harvest"].commit()
+            sessions["harvest"].commit()
 
     # If an error occured return an error message
     except Exception as exception:

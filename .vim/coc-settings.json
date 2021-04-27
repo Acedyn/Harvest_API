@@ -1,4 +1,24 @@
 {
-  "python.linting.pylintEnabled": true,
-  "python.linting.enabled": true
+    // "pyright.disableDiagnostics": true,
+    "python.linting.pylintEnabled": true,
+    "python.formatting.provider": "black",
+    "python.linting.pylintArgs": [
+        "--load-plugins=pylint_django",     // Enable django
+        "--disable=F5101",                  // No error if django is not installed
+        "--disable=django-not-configured",  // Remove warnings about django not being configured
+        "--disable=C0111",                  // No warnings when missing docstring
+        "--max-parents=20"                  // Enable up to 20 level of ineritance
+    ],
+    "python.analysis.extraPaths": [
+        "src",
+        "source",
+        "harvest_api"
+    ],
+    "typescript.preferences.quoteStyle": "double",
+    "coc.preferences.formatOnSaveFiletypes": [
+        "python",
+        "json",
+        "javascript"
+    ],
+    "python.pythonPath": "d:\\Simon\\Mes Documents\\PROJECT\\2021\\Harvest_API\\env\\Scripts\\python.exe"
 }
