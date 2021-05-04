@@ -6,23 +6,43 @@ from math import floor
 
 from database import sessions, engines
 from mappings.tractor_tables import Blade, BladeUse, Task, Job
-from mappings.harvest_tables import HistoryFarm, HistoryProject, HistoryBlade
+from mappings.harvest_tables import (
+    HistoryFarm,
+    HistoryProject,
+    HistoryBlade,
+    HistoryTotalCompute,
+    Project,
+)
 from routes.stats import get_farm_status, get_projects_usage, get_blades_usage
 from routes.infos import get_projects_infos
 
 # Buffer to store the result of every query, and flush every hour when we store its content in postgresql
-class HistoryBuffer():
+class HistoryBuffer:
     def __init__(self):
-        self.farm_usage = {"busy": int(0), "free": int(0), "nimby": int(0), "off": int(0)}
-        self.projects_usage = {project["name"]: int(0) for project in get_projects_infos()}
+        self.farm_usage = {
+            "busy": int(0),
+            "free": int(0),
+            "nimby": int(0),
+            "off": int(0),
+        }
+        self.projects_usage = {
+            project["name"]: int(0) for project in get_projects_infos()
+        }
         self.blades_usage = {}
         self.farm_counter = int(0)
         self.projects_counter = int(0)
         self.blades_counter = int(0)
 
     def reset(self):
-        self.farm_usage = {"busy": int(0), "free": int(0), "nimby": int(0), "off": int(0)}
-        self.projects_usage = {project["name"]: int(0) for project in get_projects_infos()}
+        self.farm_usage = {
+            "busy": int(0),
+            "free": int(0),
+            "nimby": int(0),
+            "off": int(0),
+        }
+        self.projects_usage = {
+            project["name"]: int(0) for project in get_projects_infos()
+        }
         self.blades_usage = {}
         self.farm_counter = int(0)
         self.projects_counter = int(0)
@@ -30,6 +50,7 @@ class HistoryBuffer():
 
     def __str__(self):
         return f"Buffer : \nbusy: {self.farm_usage['busy']}, free: {self.farm_usage['free']}, nimby: {self.farm_usage['nimby']}, off: {self.farm_usage['off']}, counter: {self.farm_counter}\nprojects: {self.projects_usage}, counter: {self.projects_counter}\nblades: {self.blades_usage}, counter: {self.blades_counter}"
+
 
 history_buffer = HistoryBuffer()
 
@@ -52,9 +73,12 @@ def update_projects_history(history_buffer: HistoryBuffer):
     for project_usage in projects_usage:
         # Check if the project exist in the database
         if project_usage["name"] in history_buffer.projects_usage:
-            history_buffer.projects_usage[project_usage["name"]] += project_usage["value"]
+            history_buffer.projects_usage[project_usage["name"]] += project_usage[
+                "value"
+            ]
     # Increase the counter so we can compute the average
     history_buffer.projects_counter += 1
+
 
 def update_blades_history(history_buffer: HistoryBuffer):
     # Get the blade usage on the farm
@@ -68,6 +92,55 @@ def update_blades_history(history_buffer: HistoryBuffer):
     # Increase the counter so we can compute the average
     history_buffer.blades_counter += 1
 
+
+def update_total_compute_history():
+    # Get the project usage on the farm
+    projects_usage = get_projects_usage()
+    for project_usage in projects_usage:
+        # Check if the project exist in the database
+        if project_usage["name"] not in [
+            project["name"] for project in get_projects_infos()
+        ]:
+            return
+
+        # Get the trucated datetime of today
+        today = datetime.datetime.now().replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        # Get the most recent total compute time of this project of today
+        current_total_compute = (
+            sessions["harvest"]
+            .query(HistoryTotalCompute)
+            .filter(func.date_trunc("day", HistoryTotalCompute.date) == today)
+            .filter(HistoryTotalCompute.project_id == Project.id)
+            .filter(Project.name == project_usage["name"])
+            .order_by(HistoryTotalCompute.date)
+            .first()
+        )
+
+        # If a compute time has been found for this project at that day increase it
+        if current_total_compute is not None:
+            current_total_compute.total_compute += project_usage["value"]
+            sessions["harvest"].commit()
+
+        # If no compute time for this project has been created for that day create it
+        else:
+            total_compute_record = HistoryTotalCompute(
+                date=today,
+                total_compute=project_usage["value"],
+                project_id=[
+                    project["id"]
+                    for project in get_projects_infos()
+                    if project["name"] == project_usage["name"]
+                ][0],
+            )
+            sessions["harvest"].add(total_compute_record)
+            sessions["harvest"].commit()
+
+        # Cleanup the session
+        sessions["harvest"].remove()
+
+
 def update_history_database(history_buffer: HistoryBuffer):
     update_farm_history(history_buffer)
     update_projects_history(history_buffer)
@@ -75,29 +148,47 @@ def update_history_database(history_buffer: HistoryBuffer):
 
     record_time = datetime.datetime.now()
     # Add the result to a new record in the history table
-    history_record = HistoryFarm(date = record_time, 
-        blade_busy = int(history_buffer.farm_usage["busy"] / history_buffer.farm_counter), 
-        blade_free = int(history_buffer.farm_usage["free"] / history_buffer.farm_counter), 
-        blade_nimby = int(history_buffer.farm_usage["nimby"] / history_buffer.farm_counter), 
-        blade_off = int(history_buffer.farm_usage["off"] / history_buffer.farm_counter))
+    history_record = HistoryFarm(
+        date=record_time,
+        blade_busy=int(history_buffer.farm_usage["busy"] / history_buffer.farm_counter),
+        blade_free=int(history_buffer.farm_usage["free"] / history_buffer.farm_counter),
+        blade_nimby=int(
+            history_buffer.farm_usage["nimby"] / history_buffer.farm_counter
+        ),
+        blade_off=int(history_buffer.farm_usage["off"] / history_buffer.farm_counter),
+    )
     sessions["harvest"].add(history_record)
     sessions["harvest"].commit()
     # Add the result to a new record in the history_project table
     for project_name, project_usage in history_buffer.projects_usage.items():
-        project_history_record = HistoryProject(date = record_time,
-            project_id = [project["id"] for project in get_projects_infos() if project["name"] == project_name][0],
-            blade_busy = int(project_usage / history_buffer.projects_counter))
+        project_history_record = HistoryProject(
+            date=record_time,
+            project_id=[
+                project["id"]
+                for project in get_projects_infos()
+                if project["name"] == project_name
+            ][0],
+            blade_busy=int(project_usage / history_buffer.projects_counter),
+        )
         sessions["harvest"].add(project_history_record)
     sessions["harvest"].commit()
     # Add the result to a new record in the history_blades table
     for blade_name, blade_usage in history_buffer.blades_usage.items():
-        blade_history_record = HistoryBlade(date = record_time,
-            blade = blade_name,
-            computetime = datetime.time(hour = floor(blade_usage / 60), minute = blade_usage % 60))
+        blade_history_record = HistoryBlade(
+            date=record_time,
+            blade=blade_name,
+            computetime=datetime.time(
+                hour=floor(blade_usage / 60), minute=blade_usage % 60
+            ),
+        )
         sessions["harvest"].add(blade_history_record)
     sessions["harvest"].commit()
     # Reset the buffer
     history_buffer.reset()
+
+    # Cleanup the session
+    sessions["harvest"].remove()
+
 
 # Initialize the scheduler with the update_tractor_history function
 tractor_history_updater = BackgroundScheduler()
@@ -107,7 +198,18 @@ tractor_history_updater = BackgroundScheduler()
 # tractor_history_updater.add_job(func = lambda: update_projects_history(history_buffer), trigger = "cron", second = 0, id = "projects_history")
 # tractor_history_updater.add_job(func = lambda: update_blades_history(history_buffer), trigger = "cron", second = 0, id = "blades_history")
 # When the current minute is equal to 0 (so every hours)
-tractor_history_updater.add_job(func = lambda: update_history_database(history_buffer), trigger = "cron", minute = "*/30", id = "database_history")
+tractor_history_updater.add_job(
+    func=lambda: update_history_database(history_buffer),
+    trigger="cron",
+    minute="*/30",
+    id="database_history",
+)
+tractor_history_updater.add_job(
+    func=lambda: update_total_compute_history(),
+    trigger="cron",
+    second=0,
+    id="total_compute_history",
+)
 
 # Shut down the scheduler when exiting the app
 atexit.register(lambda: tractor_history_updater.shutdown())

@@ -83,7 +83,7 @@ def get_projects_usage():
     blades_busy = sessions["tractor"].query(BladeUse.owners, func.count(1)) \
     .filter(profile_filters) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
-    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
+    .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(minutes=180)) \
     .filter(BladeUse.taskcount > 0) \
     .filter(func.array_length(BladeUse.owners, 1) == 1) \
     .group_by(BladeUse.owners)
