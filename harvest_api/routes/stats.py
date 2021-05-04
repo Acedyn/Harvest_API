@@ -1,6 +1,6 @@
 import datetime
 from flask import Blueprint, jsonify, request
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from database import sessions, engines
 from mappings.tractor_tables import Blade, BladeUse, Task, Job
 from mappings.harvest_tables import HistoryFarm, HistoryProject, HistoryBlade, Project
@@ -17,18 +17,26 @@ pool_filters = (
     Blade.availdisk > 5
 )
 
+# Set of filters for profiles
+profile_filters = or_(
+    func.upper(Blade.profile).like("MK%"),
+    func.upper(Blade.profile) == "RACK-LINUX",
+    func.upper(Blade.profile) == "JV",
+    func.upper(Blade.profile) == "VRAYMISSING",
+)
+
 # Return the amound of blades that are working, free, and on nimby
 def get_farm_status():
     # Get the working blades
     blades_busy = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.profile).like("MK%")) \
+    .filter(profile_filters) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
     .filter(BladeUse.taskcount > 0)
     
     # Get the free blades
     blades_free = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.profile).like("MK%")) \
+    .filter(profile_filters) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
     .filter(BladeUse.taskcount == 0) \
@@ -37,7 +45,7 @@ def get_farm_status():
 
     # Get the blades with nimby on
     blades_nimby = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.profile).like("MK%")) \
+    .filter(profile_filters) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
     .filter(BladeUse.taskcount == 0) \
@@ -45,7 +53,7 @@ def get_farm_status():
 
     # Get the blades that are off
     blades_off = sessions["tractor"].query(func.count(1)) \
-    .filter(func.upper(Blade.profile).like("MK%")) \
+    .filter(profile_filters) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(BladeUse.taskcount == 0) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) > datetime.timedelta(seconds=180)) \
@@ -70,7 +78,7 @@ def blades_status():
 def get_projects_usage():
     # Get the working blades
     blades_busy = sessions["tractor"].query(BladeUse.owners, func.count(1)) \
-    .filter(func.upper(Blade.profile).like("MK%")) \
+    .filter(profile_filters) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
     .filter(BladeUse.taskcount > 0) \
@@ -97,7 +105,7 @@ def projects_usage():
 def get_blades_usage():
     # Get the working blades
     blades_busy = sessions["tractor"].query(func.regexp_matches(func.upper(Blade.name), "MK[0-9]*", "g"), func.count(1)) \
-    .filter(func.upper(Blade.profile).like("MK%")) \
+    .filter(profile_filters) \
     .filter(Blade.bladeid == BladeUse.bladeid) \
     .filter(func.age(func.current_timestamp(), Blade.heartbeattime) < datetime.timedelta(seconds=180)) \
     .filter(BladeUse.taskcount > 0) \
