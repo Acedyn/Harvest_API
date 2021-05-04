@@ -11,7 +11,6 @@ stats = Blueprint("stats", __name__)
 # Set of filter to get rig of unused pools
 pool_filters = (
     Blade.profile != "LAVIT",
-    Blade.profile != "JV",
     Blade.profile != "windows10",
     Blade.profile != "TD",
     Blade.profile != "BUG",
