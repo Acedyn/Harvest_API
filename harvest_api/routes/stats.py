@@ -20,9 +20,12 @@ pool_filters = (
 # Set of filters for profiles
 profile_filters = or_(
     func.upper(Blade.profile).like("MK%"),
-    func.upper(Blade.profile) == "RACK-LINUX",
+    func.upper(Blade.profile).like("RACK-%"),
     func.upper(Blade.profile) == "JV",
+    func.upper(Blade.profile) == "TD",
     func.upper(Blade.profile) == "VRAYMISSING",
+    func.upper(Blade.profile) == "MULTIFCT",
+    func.upper(Blade.profile) == "WINDOWS10",
 )
 
 # Return the amound of blades that are working, free, and on nimby
@@ -300,11 +303,3 @@ def blades_history_day():
 
     # Return the response in json format
     return jsonify(response)
-
-# Return the quantity of active tasks
-@stats.route("/stats/active-blades")
-def active_tasks():
-    task_active = sessions["tractor"].query(func.count(1)) \
-    .filter(Task.state == "active")
-
-    return str(task_active.first()[0])
