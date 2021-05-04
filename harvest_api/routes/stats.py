@@ -293,3 +293,11 @@ def blades_history_day():
 
     # Return the response in json format
     return jsonify(response)
+
+# Return the quantity of active tasks
+@stats.route("/stats/active-blades")
+def active_tasks():
+    task_active = sessions["tractor"].query(func.count(1)) \
+    .filter(Task.state == "active")
+
+    return str(task_active.first()[0])
