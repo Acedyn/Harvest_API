@@ -325,8 +325,12 @@ def total_computetime():
     response = []
 
     # Loop over all the rows of the sql response
+    all_groups = int(0)
     for project_computetime in total_computetime:
         response.append({"project": project_computetime[0], "hours": int(project_computetime[1]/60), "minutes": project_computetime[1]%60})
+        all_groups += project_computetime[1]
+    
+    response.append({"project": "TOTAL", "hours": int(all_groups/60), "minutes": all_groups%60})
 
     # Return the response in json format
     return jsonify(response)
