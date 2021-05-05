@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from sqlalchemy import func, or_
 from database import sessions, engines
 from mappings.tractor_tables import Blade, BladeUse, Task, Job
-from mappings.harvest_tables import HistoryFarm, HistoryProject, HistoryBlade, Project
+from mappings.harvest_tables import HistoryFarm, HistoryProject, HistoryBlade, Project, HistoryTotalCompute
 
 # Initialize the set to routes for infos
 stats = Blueprint("stats", __name__)
@@ -300,6 +300,33 @@ def blades_history_day():
             "nimby": float(blade_history[2]), 
             "off": float(blade_history[3]), 
             "free": float(blade_history[4])})
+
+    # Return the response in json format
+    return jsonify(response)
+
+# Return the total time of computation for each teams
+@stats.route("/stats/total-computetime")
+def total_computetime():
+    start = request.args.get('start', default = 0, type = int)
+    end = request.args.get('end', default = datetime.datetime.timestamp(datetime.datetime.now())*1000, type = int)
+    starting_date = datetime.datetime.fromtimestamp(int(start/1000))
+    ending_date = datetime.datetime.fromtimestamp(int(end/1000))
+
+    # Get the history of the blades compute time
+    total_computetime = sessions["harvest"].query( \
+        Project.name, \
+        func.sum(HistoryTotalCompute.total_compute)) \
+    .filter(HistoryTotalCompute.date >= starting_date) \
+    .filter(HistoryTotalCompute.date <= ending_date) \
+    .filter(HistoryTotalCompute.project_id == Project.id) \
+    .group_by(Project.name).all()
+
+    # Initialize the final response that will contain all the projects
+    response = []
+
+    # Loop over all the rows of the sql response
+    for project_computetime in total_computetime:
+        response.append({"project": project_computetime[0], "value": project_computetime[1]})
 
     # Return the response in json format
     return jsonify(response)
