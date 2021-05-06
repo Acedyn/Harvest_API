@@ -334,3 +334,37 @@ def total_computetime():
 
     # Return the response in json format
     return jsonify(response)
+
+# Return the total time of computation for each teams
+@stats.route("/stats/history-computetime")
+def total_computetime_history():
+    start = request.args.get('start', default = 0, type = int)
+    end = request.args.get('end', default = datetime.datetime.timestamp(datetime.datetime.now())*1000, type = int)
+    starting_date = datetime.datetime.fromtimestamp(int(start/1000))
+    ending_date = datetime.datetime.fromtimestamp(int(end/1000))
+
+    # Get the history of the blades compute time
+    total_computetime = sessions["harvest"].query( \
+        HistoryTotalCompute.date, \
+        func.sum(HistoryTotalCompute.total_compute)) \
+    .filter(HistoryTotalCompute.date >= starting_date) \
+    .filter(HistoryTotalCompute.date <= ending_date) \
+    .filter(HistoryTotalCompute.project_id == Project.id) \
+    .group_by(HistoryTotalCompute.date)
+
+    # Initialize the final response that will contain all the projects
+    response = []
+    
+    today = datetime.datetime.now()
+    today = today.replace(hour=0, minute=0, second=0, microsecond=0) # Returns a copy
+
+    # Loop over all the rows of the sql response
+    all_groups = int(0)
+    for project_computetime in total_computetime:
+        if project_computetime[0] == today:
+            continue
+        response.append({"timestamp": project_computetime[0].timestamp() * 1000, "minutes": project_computetime[1]})
+        all_groups += project_computetime[1]
+    
+    # Return the response in json format
+    return jsonify(response)
