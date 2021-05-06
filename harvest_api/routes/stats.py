@@ -350,6 +350,7 @@ def total_computetime_history():
     .filter(HistoryTotalCompute.date >= starting_date) \
     .filter(HistoryTotalCompute.date <= ending_date) \
     .filter(HistoryTotalCompute.project_id == Project.id) \
+    .order_by(HistoryTotalCompute.date) \
     .group_by(HistoryTotalCompute.date)
 
     # Initialize the final response that will contain all the projects
