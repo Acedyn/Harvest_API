@@ -22,10 +22,7 @@ profile_filters = or_(
     func.upper(Blade.profile).like("MK%"),
     func.upper(Blade.profile).like("RACK-%"),
     func.upper(Blade.profile) == "JV",
-    func.upper(Blade.profile) == "TD",
     func.upper(Blade.profile) == "VRAYMISSING",
-    func.upper(Blade.profile) == "MULTIFCT",
-    func.upper(Blade.profile) == "WINDOWS10",
 )
 
 # Return the amound of blades that are working, free, and on nimby
