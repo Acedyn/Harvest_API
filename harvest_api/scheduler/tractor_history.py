@@ -139,6 +139,7 @@ def update_total_compute_history():
 
         # Cleanup the session
         sessions["harvest"].remove()
+        sessions["tractor"].remove()
 
 
 def update_history_database(history_buffer: HistoryBuffer):
@@ -188,6 +189,7 @@ def update_history_database(history_buffer: HistoryBuffer):
 
     # Cleanup the session
     sessions["harvest"].remove()
+    sessions["tractor"].remove()
 
 
 # Initialize the scheduler with the update_tractor_history function
