@@ -177,6 +177,7 @@ def validate_progression_layer(project):
         for item in sequence_data:
             sessions["harvest"].query(Layer)\
             .filter(*combine_filters)\
+            .filter(Layer.valid != item["valid"])\
             .filter(Project.name == re.sub("-", '_', project.upper()))\
             .filter(Sequence.index == item["sequence"])\
             .update({Layer.valid: item["valid"], Layer.validation_date: current_datetime}, synchronize_session = False)
