@@ -196,6 +196,7 @@ def validate_progression_layer(project):
             .filter(*combine_filters)\
             .filter(Project.name == re.sub("-", '_', project.upper()))\
             .filter(Shot.index == item["shot"])\
+            .filter(Layer.valid != item["valid"])\
             .filter(Sequence.index == item["sequence"])\
             .update({Layer.valid: item["valid"], Layer.validation_date: current_datetime}, synchronize_session = False)
 
