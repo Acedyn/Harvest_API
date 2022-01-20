@@ -1,2 +1,0 @@
-graft harvest_api/config
-global-exclude *.pyc
