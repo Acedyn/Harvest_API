@@ -6,3 +6,25 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+model Project {
+    name            String                  @id
+    usageRecords    ProjectUsageRecord[]
+}
+
+model BladeUsageRecord {
+    id              Int                     @id @default(autoincrement())
+    createdAt       DateTime                @default(now())
+    busy            Int
+    free            Int
+    nimby           Int
+    off             Int
+}
+
+model ProjectUsageRecord {
+    id              Int                     @id @default(autoincrement())
+    createdAt       DateTime                @default(now())
+    projectName     String
+    project         Project                 @relation(references: [name], fields: [projectName])
+    usage           Int
+}
