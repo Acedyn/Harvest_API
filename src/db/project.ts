@@ -35,3 +35,8 @@ export async function createProjectRecord(name: string, usage: number) {
     }
   });
 }
+
+// Get the all the history of the project's usage of the renderfarm
+export async function getProjectRecords() {
+  return await prisma.projectUsageRecord.findMany();
+}

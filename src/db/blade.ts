@@ -11,3 +11,8 @@ export async function createBladeRecord(usage: {busy: number, free: number, nimb
     }
   });
 }
+
+// Get the all the history of the project's usage of the renderfarm
+export async function getBladeRecords() {
+  return await prisma.bladeUsageRecord.findMany();
+}
