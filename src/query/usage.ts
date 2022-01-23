@@ -13,7 +13,7 @@ interface BladeQuery {
 }
 
 export async function getBladeUsage() {
-  const bladesStatuses: BladeQuery = await axios.get("http://tractor/Tractor/monitor?q=blades");
+  const bladesStatuses: BladeQuery = await axios.get(new URL("/monitor?q=blades", process.env.TRACTOR_URL).href);
   
   let busyCount = 0 ;
   let freeCount = 0 ;
@@ -42,4 +42,11 @@ export async function getBladeUsage() {
     // The blade is off
     offCount++;
   })
+
+  return {
+    "busy": busyCount,
+    "free": freeCount,
+    "nimby": nimbyCount,
+    "off": offCount,
+  }
 }
