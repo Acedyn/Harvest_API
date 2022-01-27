@@ -3,28 +3,30 @@ import axios from "axios";
 interface BladeStatus {
   profile: string,
   nimby: string,
-  owners: string[]
+  owners?: string[]
   t: number
 
 }
 
 interface BladeQuery {
-  blades: BladeStatus[]
+  data: {
+    blades: BladeStatus[]
+  }
 }
 
 export async function getBladeUsage() {
-  const bladesStatuses: BladeQuery = await axios.get(new URL("/monitor?q=blades", process.env.TRACTOR_URL).href);
+  const bladesStatuses: BladeQuery = await axios.get(`${process.env.TRACTOR_URL}/monitor?q=blades`);
   
   let busyCount = 0 ;
   let freeCount = 0 ;
   let nimbyCount = 0 ;
   let offCount = 0 ;
 
-  bladesStatuses.blades.forEach((blade) => {
+  bladesStatuses.data.blades.forEach((blade) => {
     const lastPulse = new Date(blade.t * 1000)
 
     // The blade is busy
-    if(blade.owners.length) {
+    if(blade.owners && blade.owners.length) {
       busyCount++;
       return;
     }

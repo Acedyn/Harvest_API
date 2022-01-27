@@ -11,11 +11,11 @@ function asciiToHexa(str: string) {
   return arr1.join("");
 }
 
-export async function get_authentification_tsid() {
-  const chalenge = await axios.get(new URL("/monitor?q=gentoken", process.env.TRACTOR_URL).href);
+export async function get_authentification_tsid(): Promise<string> {
+  const chalenge = await axios.get(`${process.env.TRACTOR_URL}/monitor?q=gentoken`);
   const challengeEncoded = asciiToHexa(chalenge.data.challenge + "|" + process.env.TRACTOR_PASSWORD);
   const token = await axios.get(
-    new URL(`/monitor?q=login&user=${process.env.TRACTOR_LOGIN}&c=${challengeEncoded}`, process.env.TRACTOR_URL).href
+    `${process.env.TRACTOR_URL}/monitor?q=login&user=${process.env.TRACTOR_LOGIN}&c=${challengeEncoded}`
   );
 
   return token.data.tsid
