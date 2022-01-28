@@ -37,16 +37,38 @@ export async function createProjectRecord(name: string, usage: number) {
 }
 
 // Get the all the history of the project's usage of the renderfarm
-export async function getProjectRecords(start: Date = new Date(0), end: Date = new Date()) {
-  return await prisma.projectUsageRecord.findMany({
+export async function getProjectRecords(start: Date = new Date(0), end: Date = new Date(), project: string = "") {
+  let query: any = {
     where: {
       createdAt: {
         gte: start,
         lte: end,
-      }
+      },
     },
     orderBy: {
       createdAt: "asc"
     },
-  });
+    include: {
+      project: true
+    }
+  }
+
+  if(project) {
+    query.where.projectName = {equals: project}
+  }
+  return await prisma.projectUsageRecord.findMany(query);
+}
+
+export async function getProjectComputeTime(start: Date = new Date(0), end: Date = new Date(), project: string = "") {
+  const projectRecords = await getProjectRecords(start, end, project)
+  if(!projectRecords) { return; }
+
+  let totalComputeTime = new Date(0);
+  let lastRecordDate = projectRecords[0].createdAt
+  projectRecords.forEach((projectRecord) => {
+    const timestampSpan = projectRecord.createdAt.getTime() - lastRecordDate.getTime()
+    totalComputeTime = new Date(totalComputeTime.getTime() + projectRecord.usage * timestampSpan)
+  })
+
+  return totalComputeTime
 }

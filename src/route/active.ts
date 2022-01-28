@@ -4,15 +4,8 @@ import { getBladeUsage } from '../query/blade';
 import { getProjectUsage } from '../query/project';
 
 export function getCurrentBladeUsage(app: Application) {
-  app.get('/stats/blades-status', async (req: Request, res: Response) => {
-    const bladeUsage = []
-    for(const [bladeStatus, bladeData] of Object.entries(await getBladeUsage())) {
-      bladeUsage.push({
-        name: bladeStatus,
-        value: bladeData,
-      })
-    }
-    res.send(bladeUsage);
+  app.get('/stats/blade-status', async (req: Request, res: Response) => {
+    res.send(await getBladeUsage());
   });
 }
 
