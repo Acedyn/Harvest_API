@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 
 import { getProjectHistory, getBladeHistory, getTotalComputeTime } from './history';
-import { getCurrentProjectUsage, getCurrentBladeUsage } from './active';
+import { getCurrentProjectUsage, getCurrentBladeUsage, getProjects } from './active';
 
 const app = express();
 app.use(cors());
@@ -13,6 +13,7 @@ getBladeHistory(app);
 getCurrentBladeUsage(app);
 getCurrentProjectUsage(app);
 getTotalComputeTime(app);
+getProjects(app);
 
 export function startRestServer(port: number) {
   app.listen(port, () => {

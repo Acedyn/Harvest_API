@@ -24,5 +24,12 @@ export async function getBladeRecords(start: Date = new Date(0), end: Date = new
     orderBy: {
       createdAt: "asc"
     },
+    select: {
+      busy: true,
+      nimby: true,
+      off: true,
+      free: true,
+      createdAt: true,
+    }
   });
 }

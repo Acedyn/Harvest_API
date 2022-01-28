@@ -1,5 +1,15 @@
 import { prisma } from "./client"
 
+export async function getProjectNames() {
+  const projectNames: string[] = []
+  const projects = await prisma.project.findMany()
+  projects.forEach((project) => {
+    projectNames.push(project.name)
+  })
+
+  return projectNames
+}
+
 // Create a project after making sure it does not already exists
 export async function createProject(name: string) {
   const project = await prisma.project.findUnique({
@@ -48,8 +58,10 @@ export async function getProjectRecords(start: Date = new Date(0), end: Date = n
     orderBy: {
       createdAt: "asc"
     },
-    include: {
-      project: true
+    select: {
+      projectName: true,
+      createdAt: true,
+      usage: true,
     }
   }
 
@@ -62,7 +74,7 @@ export async function getProjectRecords(start: Date = new Date(0), end: Date = n
 export async function getProjectComputeTime(start: Date = new Date(0), end: Date = new Date(), project: string = ""): Promise<Date> {
   const projectRecords = await getProjectRecords(start, end, project)
   let totalComputeTime = new Date(0);
-  if(!projectRecords) { totalComputeTime; }
+  if(!projectRecords[0]) { return totalComputeTime; }
 
   let lastRecordDate = projectRecords[0].createdAt
   projectRecords.forEach((projectRecord) => {
