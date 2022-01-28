@@ -10,14 +10,7 @@ export function getCurrentBladeUsage(app: Application) {
 }
 
 export function getCurrentProjectUsage(app: Application) {
-  app.get('/stats/projects-usage', async (req: Request, res: Response) => {
-    const projectUsage = []
-    for(const [projectName, projectData] of Object.entries(await getProjectUsage())) {
-      projectUsage.push({
-        name: projectName,
-        value: projectData
-      })
-    }
-    res.send(projectUsage);
+  app.get('/stats/project-usage', async (req: Request, res: Response) => {
+    res.send(await getProjectUsage());
   });
 }

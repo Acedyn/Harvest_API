@@ -33,6 +33,7 @@ export function getBladeHistory(app: Application) {
 export function getTotalComputeTime(app: Application) {
   app.get('/stats/total-computetime', async (req: Request<{}, {}, {}, {start?: string, end?: string}>, res: Response) => {
     const [start, end] = getTimeRange(req)
-    res.send(await getProjectComputeTime(new Date(start), new Date(end)));
+    const totalComputeTime = await getProjectComputeTime(new Date(start), new Date(end))
+    res.send({hours: Math.floor((totalComputeTime.getTime() / 1000) / 60 / 60), minutes: totalComputeTime.getMinutes()});
   });
 }

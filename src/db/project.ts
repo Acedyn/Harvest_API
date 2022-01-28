@@ -59,14 +59,15 @@ export async function getProjectRecords(start: Date = new Date(0), end: Date = n
   return await prisma.projectUsageRecord.findMany(query);
 }
 
-export async function getProjectComputeTime(start: Date = new Date(0), end: Date = new Date(), project: string = "") {
+export async function getProjectComputeTime(start: Date = new Date(0), end: Date = new Date(), project: string = ""): Promise<Date> {
   const projectRecords = await getProjectRecords(start, end, project)
-  if(!projectRecords) { return; }
-
   let totalComputeTime = new Date(0);
+  if(!projectRecords) { totalComputeTime; }
+
   let lastRecordDate = projectRecords[0].createdAt
   projectRecords.forEach((projectRecord) => {
     const timestampSpan = projectRecord.createdAt.getTime() - lastRecordDate.getTime()
+    lastRecordDate = projectRecord.createdAt
     totalComputeTime = new Date(totalComputeTime.getTime() + projectRecord.usage * timestampSpan)
   })
 
