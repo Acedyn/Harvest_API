@@ -4,15 +4,25 @@ import { prisma } from "./client"
 export async function createBladeRecord(usage: {busy: number, free: number, nimby: number, off: number}) {
   return await prisma.bladeUsageRecord.create({
     data: {
-      busy: usage.busy,
-      free: usage.free,
-      nimby: usage.nimby,
-      off: usage.off,
+      busy: Math.round(usage.busy),
+      free: Math.round(usage.free),
+      nimby: Math.round(usage.nimby),
+      off: Math.round(usage.off),
     }
   });
 }
 
 // Get the all the history of the project's usage of the renderfarm
-export async function getBladeRecords() {
-  return await prisma.bladeUsageRecord.findMany();
+export async function getBladeRecords(start: Date = new Date(0), end: Date = new Date()) {
+  return await prisma.bladeUsageRecord.findMany({
+    where: {
+      createdAt: {
+        gte: start,
+        lte: end,
+      }
+    },
+    orderBy: {
+      createdAt: "asc"
+    },
+  });
 }

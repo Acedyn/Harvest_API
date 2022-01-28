@@ -31,12 +31,22 @@ export async function createProjectRecord(name: string, usage: number) {
           name: project.name
         }
       },
-      usage: usage
+      usage: Math.round(usage)
     }
   });
 }
 
 // Get the all the history of the project's usage of the renderfarm
-export async function getProjectRecords() {
-  return await prisma.projectUsageRecord.findMany();
+export async function getProjectRecords(start: Date = new Date(0), end: Date = new Date()) {
+  return await prisma.projectUsageRecord.findMany({
+    where: {
+      createdAt: {
+        gte: start,
+        lte: end,
+      }
+    },
+    orderBy: {
+      createdAt: "asc"
+    },
+  });
 }

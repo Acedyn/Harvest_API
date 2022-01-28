@@ -1,12 +1,15 @@
 import express from 'express';
 
 import { getProjectHistory, getBladeHistory } from './history';
+import { getCurrentProjectUsage, getCurrentBladeUsage } from './active';
 
 const app = express();
 
-// Start the routes
+// Register the routes
 getProjectHistory(app);
 getBladeHistory(app);
+getCurrentBladeUsage(app);
+getCurrentProjectUsage(app);
 
 export function startRestServer(port: number) {
   app.listen(port, () => {
