@@ -1,4 +1,4 @@
-import {Request, Response, Application, json } from 'express';
+import {Request, Response, Application } from 'express';
 
 import { getProjectRecords } from '../db/project';
 import { getBladeRecords } from '../db/blade';
