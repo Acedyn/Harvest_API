@@ -4,6 +4,7 @@ import { getProjectHistory, getBladeHistory } from './history';
 
 const app = express();
 
+// Start the routes
 getProjectHistory(app);
 getBladeHistory(app);
 
