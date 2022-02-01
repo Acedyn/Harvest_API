@@ -6,4 +6,4 @@ import { startRestServer  } from './route/app';
 dotenv.config()
 
 startRestServer(3000);
-startDataRecord(2000, 5000);
+startDataRecord(60000, 60000 * 60);
