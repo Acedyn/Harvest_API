@@ -1,12 +1,9 @@
-import express from 'express';
+import dotenv from 'dotenv';
 
-const app = express();
-const port = 3000;
+import { startDataRecord  } from './schedule/historyRecord';
+import { startRestServer  } from './route/app';
 
-app.get('/', (req, res) => {
-  res.send('Hello world!');
-});
+dotenv.config()
 
-app.listen(port, () => {
-  return console.log(`server is listening on ${port}`);
-});
+startRestServer(3000);
+startDataRecord(60000, 60000 * 60);
