@@ -1,0 +1,38 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:10.3
+    restart: always
+    container_name: harvest-postgres
+    environment:
+      POSTGRES_DB: "harvest"
+      POSTGRES_USER: "${HARVEST_DB_USER}"
+      POSTGRES_PASSWORD: "${HARVEST_DB_PASSWORD}"
+    volumes:
+      - harvest_db:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - harvest
+  harvest-api:
+    image: "harvest-api"
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://${HARVEST_DB_USER}:${HARVEST_DB_PASSWORD}@localhost:5432/harvest?schema=public"
+      TRACTOR_URL: "${TRACTOR_URL}"
+      TRACTOR_LOGIN: "${TRACTOR_LOGIN}"
+      TRACTOR_PASSWORD: "${TRACTOR_PASSWORD}"
+    networks:
+      - harvest
+    depends_on:
+      - postgres
+
+volumes:
+  harvest_db:
+
+networks:
+  harvest:
+    name: silex
+    driver: bridge
