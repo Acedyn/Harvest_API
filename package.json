@@ -6,7 +6,8 @@
   "author": "Simon Lambin <slambin@artfx.fr>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon src/index.ts"
+    "dev": "nodemon src/index.ts",
+    "prod": "ts-node src/index.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",

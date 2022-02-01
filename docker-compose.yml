@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: "${HARVEST_DB_USER}"
       POSTGRES_PASSWORD: "${HARVEST_DB_PASSWORD}"
     volumes:
-      - harvest_db:/var/lib/postgresql/data
+      - harvest-db:/var/lib/postgresql/data
     ports:
       - '5432:5432'
     networks:
@@ -30,7 +30,8 @@ services:
       - postgres
 
 volumes:
-  harvest_db:
+  harvest-db:
+    name: harvest
 
 networks:
   harvest:
