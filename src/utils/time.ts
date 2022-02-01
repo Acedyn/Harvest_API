@@ -1,4 +1,4 @@
-import {Request, Response, Application } from 'express';
+import {Request } from 'express';
 
 export function getTimeRange(req: Request<{}, {}, {}, {start?: string, end?: string}>) {
   let start: number = 0

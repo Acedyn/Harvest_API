@@ -10,10 +10,10 @@ export function getProjects(app: Application) {
   });
 }
 
-export function getTotalComputeTime(app: Application) {
-  app.get('/info/compute-time', async (req: Request<{}, {}, {}, {start?: string, end?: string}>, res: Response) => {
+export function getComputeTime(app: Application) {
+  app.get('/info/compute-time', async (req: Request<{}, {}, {}, {start?: string, end?: string, project?: string}>, res: Response) => {
     const [start, end] = getTimeRange(req)
-    const totalComputeTime = await getProjectComputeTime(new Date(start), new Date(end))
+    const totalComputeTime = await getProjectComputeTime(new Date(start), new Date(end), req.query.project)
     res.send({hours: Math.floor((totalComputeTime.getTime() / 1000) / 60 / 60), minutes: totalComputeTime.getMinutes()});
   });
 }
