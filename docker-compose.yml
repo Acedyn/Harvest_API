@@ -34,5 +34,5 @@ volumes:
 
 networks:
   harvest:
-    name: silex
+    name: harvest
     driver: bridge
