@@ -1,6 +1,6 @@
 version: '3'
 services:
-  postgres:
+  harvest-postgres:
     image: postgres:10.3
     restart: always
     container_name: harvest-postgres
@@ -9,12 +9,13 @@ services:
       POSTGRES_USER: "${HARVEST_DB_USER}"
       POSTGRES_PASSWORD: "${HARVEST_DB_PASSWORD}"
     volumes:
-      - harvest-db:/var/lib/postgresql/data
+      - harvest:/var/lib/postgresql/data
     ports:
       - '5432:5432'
     networks:
       - harvest
   harvest-api:
+    container_name: harvest-api
     image: "harvest-api"
     build: .
     ports:
@@ -27,10 +28,10 @@ services:
     networks:
       - harvest
     depends_on:
-      - postgres
+      - harvest-postgres
 
 volumes:
-  harvest-db:
+  harvest:
     name: harvest
 
 networks:
