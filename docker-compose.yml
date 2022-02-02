@@ -21,7 +21,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: "postgresql://${HARVEST_DB_USER}:${HARVEST_DB_PASSWORD}@localhost:5432/harvest?schema=public"
+      DATABASE_URL: "postgresql://${HARVEST_DB_USER}:${HARVEST_DB_PASSWORD}@harvest-postgres:5432/harvest?schema=public"
       TRACTOR_URL: "${TRACTOR_URL}"
       TRACTOR_LOGIN: "${TRACTOR_LOGIN}"
       TRACTOR_PASSWORD: "${TRACTOR_PASSWORD}"
