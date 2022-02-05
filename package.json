@@ -7,7 +7,13 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "prod": "ts-node src/index.ts"
+    "prod": "ts-node src/index.ts",
+    "lint": "eslint --ext .ts,.tsx .",
+    "lint:fix": "eslint --fix --ext .ts,.tsx .",
+    "prettify": "prettier --check .",
+    "prettify:write": "prettier --write .",
+    "tsc": "tsc",
+    "tsc:watch": "tsc --watch"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",
