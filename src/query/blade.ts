@@ -1,54 +1,55 @@
 import axios from "axios";
 
 interface BladeStatus {
-  profile: string,
-  nimby: string,
-  owners?: string[]
-  t: number
-
+  profile: string;
+  nimby: string;
+  owners?: string[];
+  t: number;
 }
 
 interface BladeQuery {
   data: {
-    blades: BladeStatus[]
-  }
+    blades: BladeStatus[];
+  };
 }
 
 export async function getBladeUsage() {
-  const bladesStatuses: BladeQuery = await axios.get(`${process.env.TRACTOR_URL}/monitor?q=blades`);
-  
-  let busyCount = 0 ;
-  let freeCount = 0 ;
-  let nimbyCount = 0 ;
-  let offCount = 0 ;
+  const bladesStatuses: BladeQuery = await axios.get(
+    `${process.env.TRACTOR_URL}/monitor?q=blades`
+  );
+
+  let busyCount = 0;
+  let freeCount = 0;
+  let nimbyCount = 0;
+  let offCount = 0;
 
   bladesStatuses.data.blades.forEach((blade) => {
-    const lastPulse = new Date(blade.t * 1000)
+    const lastPulse = new Date(blade.t * 1000);
 
     // The blade is busy
-    if(blade.owners && blade.owners.length) {
+    if (blade.owners && blade.owners.length) {
       busyCount++;
       return;
     }
     // The blade has its nimby on
-    if(blade.nimby) {
+    if (blade.nimby) {
       nimbyCount++;
       return;
     }
     // The blade is in idle
-    if(Date.now() - lastPulse.getTime() < 500000) {
+    if (Date.now() - lastPulse.getTime() < 500000) {
       freeCount++;
-      return
+      return;
     }
 
     // The blade is off
     offCount++;
-  })
+  });
 
   return {
-    "busy": busyCount,
-    "free": freeCount,
-    "nimby": nimbyCount,
-    "off": offCount,
-  }
+    busy: busyCount,
+    free: freeCount,
+    nimby: nimbyCount,
+    off: offCount,
+  };
 }
