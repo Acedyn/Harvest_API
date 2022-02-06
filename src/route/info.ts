@@ -2,6 +2,7 @@ import { Request, Response, Application } from "express";
 
 import { getProjectNames } from "../db/project";
 import { getProjectComputeTime } from "../db/project";
+import { RequestQuery } from "../types/api";
 import { getTimeRange } from "../utils/time";
 
 export function getProjects(app: Application) {
@@ -14,12 +15,7 @@ export function getComputeTime(app: Application) {
   app.get(
     "/info/compute-time",
     async (
-      req: Request<
-        {},
-        {},
-        {},
-        { start?: string; end?: string; project?: string }
-      >,
+      req: RequestQuery<{ start?: string; end?: string; project?: string }>,
       res: Response
     ) => {
       const [start, end] = getTimeRange(req);

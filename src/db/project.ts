@@ -1,4 +1,5 @@
 import { prisma } from "./client";
+import { Prisma } from "@prisma/client";
 
 export async function getProjectNames() {
   const projectNames: string[] = [];
@@ -50,9 +51,9 @@ export async function createProjectRecord(name: string, usage: number) {
 export async function getProjectRecords(
   start: Date = new Date(0),
   end: Date = new Date(),
-  project: string = ""
+  project = ""
 ) {
-  let query: any = {
+  const query: Prisma.ProjectUsageRecordFindManyArgs = {
     where: {
       createdAt: {
         gte: start,
@@ -69,16 +70,17 @@ export async function getProjectRecords(
     },
   };
 
-  if (project) {
+  if (project && query.where) {
     query.where.projectName = { equals: project };
   }
+
   return await prisma.projectUsageRecord.findMany(query);
 }
 
 export async function getProjectComputeTime(
   start: Date = new Date(0),
   end: Date = new Date(),
-  project: string = ""
+  project = ""
 ): Promise<Date> {
   const projectRecords = await getProjectRecords(start, end, project);
   let totalComputeTime = new Date(0);

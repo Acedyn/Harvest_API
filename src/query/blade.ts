@@ -1,20 +1,8 @@
 import axios from "axios";
-
-interface BladeStatus {
-  profile: string;
-  nimby: string;
-  owners?: string[];
-  t: number;
-}
-
-interface BladeQuery {
-  data: {
-    blades: BladeStatus[];
-  };
-}
+import { Blade } from "../types/tractor";
 
 export async function getBladeUsage() {
-  const bladesStatuses: BladeQuery = await axios.get(
+  const bladesStatuses = await axios.get<{ blades: Blade[] }>(
     `${process.env.TRACTOR_URL}/monitor?q=blades`
   );
 
@@ -31,11 +19,13 @@ export async function getBladeUsage() {
       busyCount++;
       return;
     }
+
     // The blade has its nimby on
     if (blade.nimby) {
       nimbyCount++;
       return;
     }
+
     // The blade is in idle
     if (Date.now() - lastPulse.getTime() < 500000) {
       freeCount++;
