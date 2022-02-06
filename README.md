@@ -30,7 +30,7 @@ Before starting the API, make sure the variables defined in the [`.env`](.env) f
 
 They are:
 
-- `TRACTOR_URL` - the url of the running Tractor API instance. Usually the hostname is `tractor` so it will be `http://tractor/Tractor``
+- `TRACTOR_URL` - the url of the running Tractor API instance. Usually the hostname is `tractor` so it will be [http://tractor/Tractor](http://tractor/Tractor)
 
 - `TRACTOR_LOGIN` / `TRACTOR_PASSWORD` - the user and password of the Tractor account (you need to enable account based auth in the configuration)
 
