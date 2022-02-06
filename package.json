@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "dst/index.js",
   "repository": "https://github.com/ArtFXDev/harvest-api.git",
-  "author": "Simon Lambin <slambin@artfx.fr>",
+  "author": "ArtFX TDs",
   "license": "MIT",
   "scripts": {
     "dev": "nodemon src/index.ts",
