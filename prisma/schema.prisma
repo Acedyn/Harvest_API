@@ -8,23 +8,24 @@ datasource db {
 }
 
 model Project {
-    name            String                  @id
-    usageRecords    ProjectUsageRecord[]
+  name         String               @id
+  usageRecords ProjectUsageRecord[]
 }
 
 model BladeUsageRecord {
-    id              Int                     @id @default(autoincrement())
-    createdAt       DateTime                @default(now())
-    busy            Int
-    free            Int
-    nimby           Int
-    off             Int
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  busy        Int      @default(0)
+  free        Int      @default(0)
+  nimby       Int      @default(0)
+  off         Int      @default(0)
+  noFreeSlots Int      @default(0)
 }
 
 model ProjectUsageRecord {
-    id              Int                     @id @default(autoincrement())
-    createdAt       DateTime                @default(now())
-    projectName     String
-    project         Project                 @relation(references: [name], fields: [projectName])
-    usage           Int
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  projectName String
+  project     Project  @relation(references: [name], fields: [projectName])
+  usage       Int
 }

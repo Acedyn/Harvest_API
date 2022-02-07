@@ -9,6 +9,7 @@ interface HistoryRecordBuffer {
     off: number;
     nimby: number;
     free: number;
+    noFreeSlots: number;
   };
   projectUsage: {
     [name: string]: number;
@@ -61,7 +62,13 @@ async function storeHistoryBuffer(historyBuffer: HistoryRecordBuffer) {
 
   historyBuffer.queryCounter = 0;
   historyBuffer.projectUsage = {};
-  historyBuffer.bladeUsage = { nimby: 0, off: 0, busy: 0, free: 0 };
+  historyBuffer.bladeUsage = {
+    nimby: 0,
+    off: 0,
+    busy: 0,
+    free: 0,
+    noFreeSlots: 0,
+  };
 
   // Store a record for every project
   for (const [projectName, projectData] of Object.entries(
@@ -114,6 +121,7 @@ export function startDataRecord(queryInterval: number) {
       off: 0,
       busy: 0,
       free: 0,
+      noFreeSlots: 0,
     },
     projectUsage: {},
     queryCounter: 0,
