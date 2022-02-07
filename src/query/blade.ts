@@ -1,17 +1,23 @@
 import axios from "axios";
 import { Blade } from "../types/tractor";
+import { tractorAPIURL } from "../utils/tractor";
+
+/**
+ * Queries Tractor about blades
+ */
+export function queryBlades() {
+  return axios.get<{ blades: Blade[] }>(tractorAPIURL("monitor?q=blades"));
+}
 
 export async function getBladeUsage() {
-  const bladesStatuses = await axios.get<{ blades: Blade[] }>(
-    `${process.env.TRACTOR_URL}/monitor?q=blades`
-  );
+  const bladesResponse = await queryBlades();
 
   let busyCount = 0;
   let freeCount = 0;
   let nimbyCount = 0;
   let offCount = 0;
 
-  bladesStatuses.data.blades.forEach((blade) => {
+  bladesResponse.data.blades.forEach((blade) => {
     const lastPulse = new Date(blade.t * 1000);
 
     // The blade is busy
@@ -21,7 +27,7 @@ export async function getBladeUsage() {
     }
 
     // The blade has its nimby on
-    if (blade.nimby) {
+    if (blade.nimby.length > 0) {
       nimbyCount++;
       return;
     }

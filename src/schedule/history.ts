@@ -85,12 +85,29 @@ async function storeHistoryBuffer(historyBuffer: HistoryRecordBuffer) {
 }
 
 /**
- * Starts the data fetching interval for storing the history of different metrics
- * It samples data every queryInterval and store them every storeInterval in the database
- * @param queryInterval the interval in ms between sample queries
- * @param storeInterval the interval in ms between store operations (it averages values over that period)
+ * Runs the provided function every full hour
+ * From: https://stackoverflow.com/questions/12309019/javascript-how-to-do-something-every-full-hour/12309126
  */
-export function startDataRecord(queryInterval: number, storeInterval: number) {
+const runEveryFullHours = (callbackFn: () => void) => {
+  const hour = 60 * 60 * 1000;
+  const currentDate = new Date();
+  const firstCall =
+    hour -
+    (currentDate.getMinutes() * 60 + currentDate.getSeconds()) * 1000 -
+    currentDate.getMilliseconds();
+
+  setTimeout(() => {
+    callbackFn();
+    setInterval(callbackFn, hour);
+  }, firstCall);
+};
+
+/**
+ * Starts the data fetching interval for storing the history of different metrics
+ * It samples data every queryInterval and store them every hour in the database
+ * @param queryInterval the interval in ms between sample queries
+ */
+export function startDataRecord(queryInterval: number) {
   const historyBuffer: HistoryRecordBuffer = {
     bladeUsage: {
       nimby: 0,
@@ -103,5 +120,5 @@ export function startDataRecord(queryInterval: number, storeInterval: number) {
   };
 
   setInterval(() => queryDataIntoBuffer(historyBuffer), queryInterval);
-  setInterval(() => storeHistoryBuffer(historyBuffer), storeInterval);
+  runEveryFullHours(() => storeHistoryBuffer(historyBuffer));
 }

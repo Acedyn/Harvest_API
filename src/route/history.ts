@@ -1,4 +1,4 @@
-import { Response, Application } from "express";
+import { Application } from "express";
 
 import { getProjectRecords } from "../db/project";
 import { getBladeRecords } from "../db/blade";
@@ -10,7 +10,7 @@ export function getProjectHistory(app: Application) {
     "/history/project-usage",
     async (
       req: RequestQuery<{ start?: string; end?: string; project?: string }>,
-      res: Response
+      res
     ) => {
       const [start, end] = getTimeRange(req);
       const projectRecords = await getProjectRecords(
@@ -52,10 +52,7 @@ export function getProjectHistory(app: Application) {
 export function getBladeHistory(app: Application) {
   app.get(
     "/history/blade-usage",
-    async (
-      req: RequestQuery<{ start?: string; end?: string }>,
-      res: Response
-    ) => {
+    async (req: RequestQuery<{ start?: string; end?: string }>, res) => {
       const [start, end] = getTimeRange(req);
       res.send(await getBladeRecords(new Date(start), new Date(end)));
     }
