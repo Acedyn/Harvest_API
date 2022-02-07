@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   harvest-postgres:
     image: postgres:10.3
@@ -11,7 +11,7 @@ services:
     volumes:
       - harvest:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - "5432:5432"
     networks:
       - harvest
   harvest-api:

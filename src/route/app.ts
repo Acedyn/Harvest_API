@@ -1,9 +1,9 @@
-import express from 'express';
-import cors from 'cors';
+import express from "express";
+import cors from "cors";
 
-import { getProjectHistory, getBladeHistory, } from './history';
-import { getCurrentProjectUsage, getCurrentBladeUsage } from './current';
-import { getProjects, getComputeTime } from './info';
+import { getProjectHistory, getBladeHistory } from "./history";
+import { getCurrentProjectUsage, getCurrentBladeUsage } from "./current";
+import { getProjects, getComputeTime } from "./info";
 
 const app = express();
 app.use(cors());
