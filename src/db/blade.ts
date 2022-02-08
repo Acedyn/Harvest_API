@@ -34,6 +34,7 @@ export async function getBladeRecords(
       nimby: true,
       off: true,
       free: true,
+      noFreeSlots: true,
       createdAt: true,
     },
   });
