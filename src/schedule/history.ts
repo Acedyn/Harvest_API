@@ -2,15 +2,10 @@ import { createProjectRecord } from "../db/project";
 import { createBladeRecord } from "../db/blade";
 import { getProjectUsage } from "../query/project";
 import { getBladeUsage } from "../query/blade";
+import { BladeStatuses } from "../types/tractor";
 
 interface HistoryRecordBuffer {
-  bladeUsage: {
-    busy: number;
-    off: number;
-    nimby: number;
-    free: number;
-    noFreeSlots: number;
-  };
+  bladeUsage: BladeStatuses;
   projectUsage: {
     [name: string]: number;
   };

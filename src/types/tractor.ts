@@ -35,3 +35,11 @@ export interface LoginData {
   engine: string;
   protocol: string;
 }
+
+export interface BladeStatuses {
+  busy: number;
+  off: number;
+  nimby: number;
+  free: number;
+  noFreeSlots: number;
+}
