@@ -16,6 +16,7 @@ export async function getBladeUsage() {
   let freeCount = 0;
   let nimbyCount = 0;
   let offCount = 0;
+  let noFreeSlotsCount = 0;
 
   bladesResponse.data.blades.forEach((blade) => {
     const lastPulse = new Date(blade.t * 1000);
@@ -34,7 +35,11 @@ export async function getBladeUsage() {
 
     // The blade is in idle
     if (Date.now() - lastPulse.getTime() < 500000) {
-      freeCount++;
+      if (blade.note === "no free slots (1)") {
+        noFreeSlotsCount++;
+      } else {
+        freeCount++;
+      }
       return;
     }
 
@@ -47,5 +52,6 @@ export async function getBladeUsage() {
     free: freeCount,
     nimby: nimbyCount,
     off: offCount,
+    noFreeSlots: noFreeSlotsCount,
   };
 }
