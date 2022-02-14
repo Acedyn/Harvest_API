@@ -89,6 +89,7 @@ export async function getProjectComputeTime(
   }
 
   let lastRecordDate = projectRecords[0].createdAt;
+
   projectRecords.forEach((projectRecord) => {
     const timestampSpan =
       projectRecord.createdAt.getTime() - lastRecordDate.getTime();
