@@ -4,6 +4,7 @@ import cors from "cors";
 import { getProjectHistory, getBladeHistory } from "./history";
 import { getCurrentProjectUsage, getCurrentBladeUsage } from "./current";
 import { getProjects, getComputeTime, getBlades } from "./info";
+import { getGroups } from "./fog";
 
 const app = express();
 app.use(cors());
@@ -20,6 +21,9 @@ getCurrentProjectUsage(app);
 getComputeTime(app);
 getProjects(app);
 getBlades(app);
+
+// /fog
+getGroups(app);
 
 export function startRestServer(port: number) {
   app.listen(port, () => {
