@@ -27,24 +27,28 @@ export async function getBladeUsage() {
       return;
     }
 
+    // The blade is active
+    if (Date.now() - lastPulse.getTime() < 500000) {
+      if (blade.note === "no free slots (1)") {
+        noFreeSlotsCount++;
+        return;
+      }
+
+      // It's not in nimby
+      if (blade.nimby.length === 0) {
+        freeCount++;
+        return;
+      }
+    } else {
+      offCount++;
+      return;
+    }
+
     // The blade has its nimby on
     if (blade.nimby.length > 0) {
       nimbyCount++;
       return;
     }
-
-    // The blade is in idle
-    if (Date.now() - lastPulse.getTime() < 500000) {
-      if (blade.note === "no free slots (1)") {
-        noFreeSlotsCount++;
-      } else {
-        freeCount++;
-      }
-      return;
-    }
-
-    // The blade is off
-    offCount++;
   });
 
   return {
