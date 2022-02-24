@@ -56,11 +56,16 @@ async function queryFogGroups() {
 
 export function getGroups(app: Application) {
   app.get("/fog/groups", async (req, res) => {
-    const groups = await cacheResult(
-      "/fog/groups",
-      1000 * 60 * 60,
-      queryFogGroups
-    );
-    res.send(groups);
+    try {
+      const groups = await cacheResult(
+        "/fog/groups",
+        1000 * 60 * 60,
+        queryFogGroups
+      );
+      res.send(groups);
+    } catch (err) {
+      const error = err as Error;
+      res.status(400).send({ route: "/fog/groups", error: error.message });
+    }
   });
 }
