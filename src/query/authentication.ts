@@ -1,5 +1,8 @@
 import axios from "axios";
 import { LoginData } from "../types/tractor";
+import { tractorAPIURL } from "../utils/tractor";
+
+let TSID: string | undefined = undefined;
 
 /**
  * Converts a string into hexadecimal
@@ -19,9 +22,13 @@ function asciiToHexa(str: string) {
  * Authenticate to the Tractor API and return the TSID token
  * See: https://rmanwiki.pixar.com/display/TRA/Login+Management#LoginManagement-ImplementingAuthenticationinExternalScripts
  */
-export async function getAuthentificationTsid(): Promise<string> {
+export async function getAuthenticationTsid(): Promise<string> {
+  if (TSID) {
+    return TSID;
+  }
+
   const chalenge = await axios.get<{ challenge: string }>(
-    `${process.env.TRACTOR_URL}/monitor?q=gentoken`
+    tractorAPIURL("monitor?q=gentoken")
   );
 
   const challengeEncoded = asciiToHexa(
@@ -29,8 +36,11 @@ export async function getAuthentificationTsid(): Promise<string> {
   );
 
   const loginResponse = await axios.get<LoginData>(
-    `${process.env.TRACTOR_URL}/monitor?q=login&user=${process.env.TRACTOR_LOGIN}&c=${challengeEncoded}`
+    tractorAPIURL(
+      `monitor?q=login&user=${process.env.TRACTOR_LOGIN}&c=${challengeEncoded}`
+    )
   );
 
-  return loginResponse.data.tsid;
+  TSID = loginResponse.data.tsid;
+  return TSID;
 }

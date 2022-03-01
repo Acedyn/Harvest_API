@@ -1,9 +1,10 @@
 import axios from "axios";
-import { getAuthentificationTsid } from "./authentification";
+import { tractorAPIURL } from "../utils/tractor";
+import { getAuthenticationTsid } from "./authentication";
 
 async function createRunningJobFilter(filterName = "running_jobs") {
   const filterFullName = `${filterName}.joblist`;
-  const tsid = await getAuthentificationTsid();
+  const tsid = await getAuthenticationTsid();
 
   const filterData = {
     Filtername: filterName,
@@ -19,7 +20,9 @@ async function createRunningJobFilter(filterName = "running_jobs") {
     ],
   };
 
-  const queryUrl = `${process.env.TRACTOR_URL}/monitor?q=putfilter&user=${process.env.TRACTOR_LOGIN}&key=${filterFullName}&tsid=${tsid}`;
+  const queryUrl = tractorAPIURL(
+    `monitor?q=putfilter&user=${process.env.TRACTOR_LOGIN}&key=${filterFullName}&tsid=${tsid}`
+  );
   await axios.post(new URL(queryUrl, process.env.TRACTOR_URL).href, filterData);
   return filterFullName;
 }
@@ -31,27 +34,33 @@ type RunningJobs = {
         data: {
           projects: string[];
           nTasks: number[];
+          user: string;
         };
       };
     };
   };
 };
 
+export async function getRunningJobs() {
+  const runningJobsFilter = await createRunningJobFilter();
+  const tsid = await getAuthenticationTsid();
+
+  const response = await axios.get<RunningJobs>(
+    tractorAPIURL(
+      `monitor?q=jobs&metadata=0&filter=${runningJobsFilter}&tsid=${tsid}`
+    )
+  );
+
+  return Object.values(response.data.users)
+    .map((user) => Object.values(user).map((job) => job.data))
+    .flat();
+}
+
 /**
  * Returns a dictionnary with the number of tasks per project
  */
 export async function getProjectUsage() {
-  const runningJobsFilter = await createRunningJobFilter();
-  const tsid = await getAuthentificationTsid();
-
-  const runningJobsResponse = await axios.get<RunningJobs>(
-    `${process.env.TRACTOR_URL}/monitor?q=jobs&metadata=0&filter=${runningJobsFilter}&tsid=${tsid}`
-  );
-
-  // Flatten the into a list of running jobs
-  const runningJobs = Object.values(runningJobsResponse.data.users)
-    .map((user) => Object.values(user).map((job) => job.data))
-    .flat();
+  const runningJobs = await getRunningJobs();
 
   const projectUsage: { [project: string]: number } = {};
 

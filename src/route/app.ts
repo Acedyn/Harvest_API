@@ -3,7 +3,14 @@ import cors from "cors";
 
 import { getProjectHistory, getBladeHistory } from "./history";
 import { getCurrentProjectUsage, getCurrentBladeUsage } from "./current";
-import { getProjects, getComputeTime, getBlades } from "./info";
+import {
+  getProjects,
+  getComputeTime,
+  getBlades,
+  getJobsPerOwner,
+  getJobsPerProject,
+  // getProfileUsagePerProject,
+} from "./info";
 import { getGroups } from "./fog";
 
 const app = express();
@@ -21,6 +28,10 @@ getCurrentProjectUsage(app);
 getComputeTime(app);
 getProjects(app);
 getBlades(app);
+
+getJobsPerOwner(app);
+getJobsPerProject(app);
+// getProfileUsagePerProject(app);
 
 // /fog
 getGroups(app);
