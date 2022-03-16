@@ -26,15 +26,22 @@ const OWNER_EXCLUDE = [
   "oargentieri",
   "groeder",
   "slambin",
+  "gfbnd,;",
 ];
 
 const PROJECT_EXCLUDE = ["TD", "3D4", "default"];
-const DEFAULT_OPTS = { fields: [], filter: "", includeArchived: true };
+const DEFAULT_OPTS = {
+  fields: [],
+  filter: "",
+  includeArchived: true,
+  limit: 10000,
+};
 
 type TractorSelectOptions = {
   includeArchived: boolean;
   filter: string;
   fields: string[];
+  limit: number;
 };
 
 export async function tractorSelect<T>(
@@ -49,7 +56,7 @@ export async function tractorSelect<T>(
     tractorAPIURL(
       `db?q=tractorselect('${entity.toLowerCase()}', '${
         options.filter
-      }', '${flds}', '', 10000, '${
+      }', '${flds}', '', ${options.limit}, '${
         options.includeArchived ? "t" : "f"
       }', '')&tsid=${tsid}`
     )
@@ -62,8 +69,8 @@ export async function getJobs(opts: Partial<TractorSelectOptions> = {}) {
   return await tractorSelect<Job>("Job", opts);
 }
 
-export async function getJobsFilteredByOwnerAndProject() {
-  const jobs = await getJobs();
+export async function getJobsFilteredByOwnerAndProject(fields: string[] = []) {
+  const jobs = await getJobs({ fields });
 
   return {
     ...jobs.data,

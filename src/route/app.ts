@@ -9,7 +9,6 @@ import {
   getBlades,
   getJobsPerOwner,
   getJobsPerProject,
-  // getProfileUsagePerProject,
 } from "./info";
 import { getGroups } from "./fog";
 
@@ -31,7 +30,6 @@ getBlades(app);
 
 getJobsPerOwner(app);
 getJobsPerProject(app);
-// getProfileUsagePerProject(app);
 
 // /fog
 getGroups(app);
