@@ -1,0 +1,30 @@
+output.elasticsearch:
+  hosts: ["https://elasticsearch:9200"]
+  username: "elastic"
+  password: "toto" 
+
+
+setup.kibana:
+  host: "kibana:5601" 
+  username: "elastic"  
+  password: "toto"
+
+
+filebeat.inputs:
+  - type: log
+    paths:
+      - /var/log/*/*/*.log
+
+processors:
+  - script:
+      lang: javascript
+      file: ${path.config}/processors/tractorInfo.js
+  - script:
+      lang: javascript
+      file: ${path.config}/processors/tractorTag.js
+  - script:
+      lang: javascript
+      file: ${path.config}/processors/vrsceneTag.js
+
+output.elasticsearch.ssl.verification_mode: none
+setup.kibana.ssl.verification_mode: none
