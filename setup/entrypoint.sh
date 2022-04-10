@@ -83,4 +83,3 @@ done
 
 mkdir -p "$(dirname "${state_file}")"
 touch "$state_file"
-

@@ -1,84 +1,78 @@
-version: "3"
+version: '3.7'
+
 services:
-  harvest-postgres:
-    image: postgres:10.3
-    restart: always
-    container_name: harvest-postgres
-    environment:
-      POSTGRES_DB: "harvest"
-      POSTGRES_USER: "${HARVEST_DB_USER}"
-      POSTGRES_PASSWORD: "${HARVEST_DB_PASSWORD}"
-    volumes:
-      - harvest:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - harvest
 
-  harvest-api:
-    container_name: harvest-api
-    image: "harvest-api"
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: "postgresql://${HARVEST_DB_USER}:${HARVEST_DB_PASSWORD}@harvest-postgres:5432/harvest?schema=public"
-      TRACTOR_URL: "${TRACTOR_URL}"
-      TRACTOR_LOGIN: "${TRACTOR_LOGIN}"
-      TRACTOR_PASSWORD: "${TRACTOR_PASSWORD}"
-    networks:
-      - harvest
-    depends_on:
-      - harvest-postgres
-
-  elasticsearch-setup:
-    init: true
+  # The 'setup' service runs a one-off script which initializes the
+  # 'logstash_internal' and 'kibana_system' users inside Elasticsearch with the
+  # values of the passwords defined in the '.env' file.
+  #
+  # This task is only performed during the *initial* startup of the stack. On all
+  # subsequent runs, the service simply returns immediately, without performing
+  # any modification to existing users.
+  elastic-setup:
     build:
-      context: elasticsearch/deploy/
+      context: setup/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    init: true
     volumes:
-      - elasticsearch-setup:/state:Z
+      - elastic-setup:/state:Z
     environment:
-      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD-password}
-      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD-password}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
-      - harvest
+      - elk
 
-  harvest-elasticsearch:
-    container_name: harvest-elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.1.0
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
+    volumes:
+      - ./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,z
+      - elasticsearch:/usr/share/elasticsearch/data:z
     ports:
       - "9200:9200"
       - "9300:9300"
     environment:
-      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD-password}
+      ES_JAVA_OPTS: -Xmx256m -Xms256m
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
       discovery.type: single-node
-    volumes:
-      - elasticsearch:/usr/share/elasticsearch/data:z
     networks:
-      - harvest
+      - elk
 
-  harvest-kibana:
-    container_name: harvest-kibana
-    image: docker.elastic.co/kibana/kibana:8.1.0
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}
+    volumes:
+      - ./config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
     ports:
       - "5601:5601"
     environment:
-      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD-password}
-      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD-password}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
-      - harvest
+      - elk
     depends_on:
-      - harvest-elasticsearch
+      - elasticsearch
 
-volumes:
-  harvest:
-    name: harvest
-  elasticsearch:
-    name: elasticsearch
-  elasticsearch-setup:
-    name: elasticsearch-setup
+  elastic-agent:
+    image: docker.elastic.co/beats/elastic-agent:${ELASTIC_VERSION}
+    networks:
+      - elk
+    environment:
+      - FLEET_SERVER_ENABLE=true
+      - FLEET_SERVER_HOST=0.0.0.0
+      - FLEET_SERVER_PORT=8220
+      - FLEET_SERVER_SERVICE_TOKEN=${FLEET_SERVER_SERVICE_TOKEN:-}
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD:-}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - KIBANA_FLEET_SETUP=true
+      - KIBANA_FLEET_HOST=http://kibana:5601
+    depends_on:
+      - elasticsearch
 
 networks:
-  harvest:
-    name: harvest
+  elk:
     driver: bridge
+
+volumes:
+  elastic-setup:
+  elasticsearch:
