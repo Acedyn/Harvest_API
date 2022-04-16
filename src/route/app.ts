@@ -11,6 +11,7 @@ import {
   getJobsPerProject,
 } from "./info";
 import { getGroups } from "./fog";
+import logger from "../utils/logger";
 
 const app = express();
 app.use(cors());
@@ -36,6 +37,6 @@ getGroups(app);
 
 export function startRestServer(port: number) {
   app.listen(port, () => {
-    return console.log(`Harvest is listening on port ${port}`);
+    logger.info(`Server listening on port ${port}`);
   });
 }
