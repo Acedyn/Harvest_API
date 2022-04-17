@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Command, Job, Task } from "../types/tractor";
+import { IGNORE_OWNERS, IGNORE_PROJECTS } from "../utils/constants";
 import { tractorAPIURL } from "../utils/tractor";
 import { getAuthenticationTsid } from "./authentication";
 
@@ -9,27 +10,6 @@ type TractorSelectResponse<T> = {
   rows: T[];
 };
 
-const OWNER_EXCLUDE = [
-  "3d4",
-  "3D4",
-  "josephhenry",
-  "Olivier",
-  "td",
-  "td@artfx.fr",
-  "root",
-  "Joseph HENRY",
-  "jhenry",
-  "Joseph",
-  "etudiant",
-  "slambin@artfx.fr",
-  "jhenry@artfx.fr",
-  "oargentieri",
-  "groeder",
-  "slambin",
-  "gfbnd,;",
-];
-
-const PROJECT_EXCLUDE = ["TD", "3D4", "default"];
 const DEFAULT_OPTS = {
   fields: [],
   filter: "",
@@ -76,8 +56,8 @@ export async function getJobsFilteredByOwnerAndProject(fields: string[] = []) {
     ...jobs.data,
     rows: jobs.data.rows.filter(
       (j) =>
-        !OWNER_EXCLUDE.includes(j.owner) &&
-        !j.projects.some((p) => PROJECT_EXCLUDE.includes(p))
+        !IGNORE_OWNERS.includes(j.owner) &&
+        !j.projects.some((p) => IGNORE_PROJECTS.includes(p))
     ),
   };
 }
