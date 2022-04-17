@@ -10,6 +10,7 @@ import {
   getJobsPerOwner,
   getJobsPerProject,
   getRunningJobsRoute,
+  getJobsPerOwnerHistory,
 } from "./info";
 import { getGroups } from "./fog";
 import logger from "../utils/logger";
@@ -36,6 +37,7 @@ export function initializeRoutes() {
 
   getRunningJobsRoute(app);
   getJobsPerOwner(app);
+  getJobsPerOwnerHistory(app);
   getJobsPerProject(app);
 
   // /fog

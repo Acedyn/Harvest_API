@@ -6,6 +6,7 @@ import { queryBlades } from "../query/blade";
 import { getJobsFilteredByOwnerAndProject } from "../query/jobs";
 import { getRunningJobs } from "../query/project";
 import { RequestQuery } from "../types/api";
+import { Job } from "../types/tractor";
 import { cacheResult } from "../utils/cache";
 import { IGNORE_PROJECTS } from "../utils/constants";
 import { getTimeRange } from "../utils/time";
@@ -65,20 +66,86 @@ function getCachedJobs() {
   return cacheResult("jobs", 1000 * 60 * 10, getJobsFilteredByOwnerAndProject);
 }
 
+function numberOfJobsPerUser(jobs: Job[]) {
+  const frequency: { [owner: string]: number } = {};
+
+  for (const job of jobs) {
+    if (!frequency[job.owner]) {
+      frequency[job.owner] = 0;
+    }
+    frequency[job.owner]++;
+  }
+
+  return frequency;
+}
+
 export function getJobsPerOwner(app: Application) {
   app.get("/info/jobs-per-owner", async (req, res) => {
     const jobs = await getCachedJobs();
-    const frequency: { [owner: string]: number } = {};
-
-    for (const job of jobs.rows) {
-      if (!frequency[job.owner]) {
-        frequency[job.owner] = 0;
-      }
-      frequency[job.owner]++;
-    }
-
-    res.send(frequency);
+    res.send(numberOfJobsPerUser(jobs.rows));
   });
+}
+
+export function getJobsPerOwnerHistory(app: Application) {
+  app.get(
+    "/history/jobs-per-owner",
+    async (req: RequestQuery<{ resolution?: string }>, res) => {
+      const jobs = (await getCachedJobs()).rows;
+      const slices = req.query.resolution ? parseInt(req.query.resolution) : 50;
+
+      const spoolTimes = jobs.map((job) => new Date(job.spooltime).getTime());
+      const minTime = Math.min(...spoolTimes);
+      const maxTime = Math.max(...spoolTimes);
+      const timeSlice = Math.round((maxTime - minTime) / slices);
+
+      const history: { [date: string]: { [owner: string]: number } } = {};
+
+      for (const job of jobs) {
+        const dateRounded =
+          Math.floor(
+            (new Date(job.spooltime).getTime() - minTime) / timeSlice
+          ) *
+            timeSlice +
+          minTime;
+
+        if (!history[dateRounded]) {
+          history[dateRounded] = {};
+        }
+
+        if (!history[dateRounded][job.owner]) {
+          history[dateRounded][job.owner] = 0;
+        }
+
+        history[dateRounded][job.owner]++;
+      }
+
+      const dateSorted = Object.keys(history).map((k) => parseInt(k));
+      dateSorted.sort((a, b) => a - b);
+
+      const accumulate: { [owner: string]: number } = {};
+      for (let i = 0; i < dateSorted.length; i++) {
+        for (const [owner, njobs] of Object.entries(history[dateSorted[i]])) {
+          if (!accumulate[owner]) accumulate[owner] = 0;
+
+          accumulate[owner] += njobs;
+          history[dateSorted[i]][owner] = accumulate[owner];
+        }
+
+        for (const owner of Object.keys(accumulate)) {
+          if (!history[dateSorted[i]][owner]) {
+            history[dateSorted[i]][owner] = accumulate[owner];
+          }
+        }
+      }
+
+      res.send(
+        dateSorted.map((key: number) => ({
+          ...history[key],
+          createdAt: new Date(key),
+        }))
+      );
+    }
+  );
 }
 
 export function getJobsPerProject(app: Application) {
