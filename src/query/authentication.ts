@@ -1,5 +1,6 @@
 import axios from "axios";
 import { LoginData } from "../types/tractor";
+import logger from "../utils/logger";
 import { tractorAPIURL } from "../utils/tractor";
 
 let TSID: string | undefined = undefined;
@@ -34,6 +35,8 @@ export async function getAuthenticationTsid(): Promise<string> {
   const challengeEncoded = asciiToHexa(
     chalenge.data.challenge + "|" + process.env.TRACTOR_PASSWORD
   );
+
+  logger.info("Querying Tractor TSID...");
 
   const loginResponse = await axios.get<LoginData>(
     tractorAPIURL(

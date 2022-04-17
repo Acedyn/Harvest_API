@@ -4,14 +4,16 @@ import { getProjectNames } from "../db/project";
 import { getProjectComputeTime } from "../db/project";
 import { queryBlades } from "../query/blade";
 import { getJobsFilteredByOwnerAndProject } from "../query/jobs";
+import { getRunningJobs } from "../query/project";
 import { RequestQuery } from "../types/api";
 import { cacheResult } from "../utils/cache";
+import { IGNORE_PROJECTS } from "../utils/constants";
 import { getTimeRange } from "../utils/time";
 
 export function getProjects(app: Application) {
   app.get("/info/projects", async (req, res) => {
     const projects = (await getProjectNames()).filter(
-      (p) => !["default", "TEST_PIPE"].includes(p)
+      (p) => !IGNORE_PROJECTS.includes(p)
     );
     res.send(projects);
   });
@@ -42,7 +44,20 @@ export function getComputeTime(app: Application) {
 
 export function getBlades(app: Application) {
   app.get("/info/blades", async (req, res) => {
-    res.send((await queryBlades()).data);
+    const response = await queryBlades();
+
+    if (response) {
+      res.send(response.data);
+    } else {
+      res.status(500);
+    }
+  });
+}
+
+export function getRunningJobsRoute(app: Application) {
+  app.get("/info/running-jobs", async (req, res) => {
+    const jobs = await getRunningJobs();
+    res.send(jobs);
   });
 }
 

@@ -1,16 +1,19 @@
-import axios from "axios";
 import { Blade } from "../types/tractor";
-import { tractorAPIURL } from "../utils/tractor";
+import { tractorQuery } from "../utils/tractor";
 
 /**
  * Queries Tractor about blades
  */
 export function queryBlades() {
-  return axios.get<{ blades: Blade[] }>(tractorAPIURL("monitor?q=blades"));
+  return tractorQuery<{ blades: Blade[] }>("monitor?q=blades");
 }
 
 export async function getBladeUsage() {
   const bladesResponse = await queryBlades();
+
+  if (!bladesResponse) {
+    return undefined;
+  }
 
   let busyCount = 0;
   let freeCount = 0;
