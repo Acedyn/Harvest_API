@@ -3,6 +3,7 @@ import { createBladeRecord } from "../db/blade";
 import { getProjectUsage } from "../query/project";
 import { getBladeUsage } from "../query/blade";
 import { BladeStatuses } from "../types/tractor";
+import logger from "../utils/logger";
 
 interface HistoryRecordBuffer {
   bladeUsage: BladeStatuses;
@@ -28,6 +29,8 @@ async function storeProjectUsage(historyBuffer: HistoryRecordBuffer) {
 async function storeBladeUsage(historyBuffer: HistoryRecordBuffer) {
   const bladeUsage = await getBladeUsage();
 
+  if (!bladeUsage) return;
+
   let bladeStatus: keyof typeof historyBuffer.bladeUsage;
   for (bladeStatus in bladeUsage) {
     historyBuffer.bladeUsage[bladeStatus] += bladeUsage[bladeStatus];
@@ -41,6 +44,9 @@ async function queryDataIntoBuffer(historyBuffer: HistoryRecordBuffer) {
   storeProjectUsage(historyBuffer);
   storeBladeUsage(historyBuffer);
   historyBuffer.queryCounter++;
+  logger.info(
+    `Storing queries in history buffer (count: ${historyBuffer.queryCounter})`
+  );
 }
 
 /**
@@ -84,6 +90,7 @@ async function storeHistoryBuffer(historyBuffer: HistoryRecordBuffer) {
   }
 
   await createBladeRecord(historyBufferCopy.bladeUsage);
+  logger.info("Buffers saved successfully!");
 }
 
 /**

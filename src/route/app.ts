@@ -9,33 +9,56 @@ import {
   getBlades,
   getJobsPerOwner,
   getJobsPerProject,
+  getRunningJobsRoute,
+  getJobsPerOwnerHistory,
 } from "./info";
 import { getGroups } from "./fog";
+import logger from "../utils/logger";
 
 const app = express();
 app.use(cors());
 
-// /history
-getProjectHistory(app);
-getBladeHistory(app);
+/**
+ * Initialize express routes for each category
+ */
+export function initializeRoutes() {
+  // /history
+  getProjectHistory(app);
+  getBladeHistory(app);
 
-// /current
-getCurrentBladeUsage(app);
-getCurrentProjectUsage(app);
+  // /current
+  getCurrentBladeUsage(app);
+  getCurrentProjectUsage(app);
 
-// /info
-getComputeTime(app);
-getProjects(app);
-getBlades(app);
+  // /info
+  getComputeTime(app);
+  getProjects(app);
+  getBlades(app);
 
-getJobsPerOwner(app);
-getJobsPerProject(app);
+  getRunningJobsRoute(app);
+  getJobsPerOwner(app);
+  getJobsPerOwnerHistory(app);
+  getJobsPerProject(app);
 
-// /fog
-getGroups(app);
+  // /fog
+  getGroups(app);
+
+  // Add route listing
+  app.get("/", (req, res) => {
+    type Route = { path: string };
+    const layers = app._router.stack;
+    const routes = layers
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((layer: { route: Route | undefined }) => layer.route)
+      .filter((route: Route) => route !== undefined)
+      .map((route: Route) => route.path);
+
+    res.send({ routes });
+  });
+}
 
 export function startRestServer(port: number) {
   app.listen(port, () => {
-    return console.log(`Harvest is listening on port ${port}`);
+    logger.info(`Server listening on port ${port}`);
   });
 }

@@ -1,6 +1,6 @@
 import { Application } from "express";
 
-import { gatherProjectUsageHistory, getProjectRecords } from "../db/project";
+import { gatherProjectUsageHistory } from "../db/project";
 import { getBladeRecords } from "../db/blade";
 import { getTimeRange } from "../utils/time";
 import { RequestQuery } from "../types/api";

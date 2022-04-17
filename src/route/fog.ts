@@ -2,8 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { Application } from "express";
 import { Group, GroupID, Host, HostID } from "../types/fog";
 import { cacheResult } from "../utils/cache";
-
-type HostDict = { [hostID: HostID]: Host };
+import logger from "../utils/logger";
 
 async function queryFogGroups() {
   const config: AxiosRequestConfig = {
@@ -20,6 +19,7 @@ async function queryFogGroups() {
   );
   const groups = groupsRequest.data.groups;
 
+  type HostDict = { [hostID: HostID]: Host };
   const groupsDict: { [groupID: GroupID]: Group & { hosts: HostDict } } = {};
   for (const group of groups) {
     groupsDict[group.id] = { ...group, hosts: {} };
@@ -37,11 +37,15 @@ async function queryFogGroups() {
   }
 
   // Query associations group <-> host
-  const groupAssociation = (
-    await axios.get<{
-      groupassociations: { id: string; hostID: HostID; groupID: GroupID }[];
-    }>(`${process.env.FOG_URL}/groupassociation`, config)
-  ).data.groupassociations;
+  type GroupAssociations = {
+    groupassociations: { id: string; hostID: HostID; groupID: GroupID }[];
+  };
+
+  const groupAssociationQuery = await axios.get<GroupAssociations>(
+    `${process.env.FOG_URL}/groupassociation`,
+    config
+  );
+  const groupAssociation = groupAssociationQuery.data.groupassociations;
 
   for (const assoc of groupAssociation) {
     const group = groupsDict[assoc.groupID];
@@ -62,9 +66,11 @@ export function getGroups(app: Application) {
         1000 * 60 * 60,
         queryFogGroups
       );
+
       res.send(groups);
     } catch (err) {
       const error = err as Error;
+      logger.error(`Error when getting FOG groups: ${error.message}`);
       res.status(400).send({ route: "/fog/groups", error: error.message });
     }
   });

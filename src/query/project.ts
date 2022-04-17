@@ -65,7 +65,9 @@ export async function getProjectUsage() {
   const projectUsage: { [project: string]: number } = {};
 
   runningJobs.forEach((runningJob) => {
+    // Get the number of running tasks
     const taskCount = runningJob.nTasks[1];
+
     runningJob.projects.forEach((project: string) => {
       projectUsage[project] =
         project in projectUsage ? taskCount + projectUsage[project] : taskCount;

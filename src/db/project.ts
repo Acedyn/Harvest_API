@@ -1,5 +1,6 @@
 import { prisma } from "./client";
 import { Prisma } from "@prisma/client";
+import logger from "../utils/logger";
 
 export async function getProjectNames() {
   const projectNames: string[] = [];
@@ -34,6 +35,7 @@ export async function createProject(name: string) {
 
 // Create a project record after making sure the given project exists
 export async function createProjectRecord(name: string, usage: number) {
+  logger.info("Saving project usage record...");
   const project = await createProject(name);
 
   return await prisma.projectUsageRecord.create({
@@ -84,9 +86,11 @@ export async function gatherProjectUsageHistory(
   project = ""
 ) {
   const projectRecords = await getProjectRecords(start, end, project);
+
   const groupedProjectRecords: {
     [time: string]: { [name: string]: number };
   } = {};
+
   projectRecords.forEach((projectRecord) => {
     // We have to round the creation time to the closest hour to reduce the amount of records
     const roundDate = projectRecord.createdAt;
@@ -121,6 +125,7 @@ export async function getProjectComputeTime(
   end: Date = new Date(),
   project = ""
 ): Promise<Date> {
+  // Get project usage records
   const projectRecords = await gatherProjectUsageHistory(start, end, project);
   let totalComputeTime = 0;
 
@@ -130,12 +135,15 @@ export async function getProjectComputeTime(
 
   let lastRecordDate = projectRecords[0].createdAt;
 
+  // For each project record compute timeDiff * number of computers used
   projectRecords.forEach((projectRecord) => {
     const { createdAt, ...rest } = projectRecord;
 
     const timestampSpan = createdAt.getTime() - lastRecordDate.getTime();
 
     lastRecordDate = createdAt;
+
+    // Sum up all projects active tasks
     const allProjectsUsage = Object.values(rest).reduce((a, b) => a + b, 0);
 
     totalComputeTime += allProjectsUsage * timestampSpan;
