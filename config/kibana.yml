@@ -11,3 +11,50 @@ monitoring.ui.container.elasticsearch.enabled: true
 #
 elasticsearch.username: kibana_system
 elasticsearch.password: ${KIBANA_SYSTEM_PASSWORD}
+
+# Agent policy configuration
+xpack.fleet.packages:
+  - name: fleet_server
+    version: 1.1.0
+  - name: httpjson
+    version: 1.1.1
+xpack.fleet.agentPolicies:
+  - name: Fleet agent policy
+    id: fleet-agent-policy
+    namespace: default
+    package_policies:
+      - name: fleet-main
+        package:
+          name: fleet_server
+  - name: Main agent policy
+    id: main-agent-policy
+    namespace: default
+    package_policies:
+      - name: http-blade-usage
+        package:
+          name: httpjson
+        inputs:
+          - type: httpjson
+            enabled: true
+            streams:
+              - data_stream:
+                  dataset: httpjson.generic
+                  type: logs
+                enabled: true
+                vars:
+                  - name: request_url
+                    value: http://harvest.preprod.silex.artfx.fr/api/current/blade-usage
+                  - name: request_interval
+                    value: 1m
+                  - name: request_method
+                    value: GET
+xpack.fleet.agents.fleet_server.hosts:
+  - http://elastic-fleet:8220
+xpack.fleet.outputs:
+  - id: harvest
+    name: Harvest
+    type: elasticsearch
+    hosts: 
+      - http://elasticsearch:9200
+    is_default: true
+
