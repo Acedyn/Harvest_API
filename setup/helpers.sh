@@ -124,7 +124,7 @@ function create_user {
 
 	local -a args=( '-s' '-D-' '-m15' '-w' '%{http_code}'
 		"http://${elasticsearch_host}:9200/_security/user/${username}"
-		'-X' 'POST'
+		'-X' 'PUT'
 		'-H' 'Content-Type: application/json'
 		'-d' "{\"password\":\"${password}\",\"roles\":[\"${role}\"]}"
 		)
@@ -158,6 +158,38 @@ function ensure_role {
 	local -a args=( '-s' '-D-' '-m15' '-w' '%{http_code}'
 		"http://${elasticsearch_host}:9200/_security/role/${name}"
 		'-X' 'POST'
+		'-H' 'Content-Type: application/json'
+		'-d' "$body"
+		)
+
+	if [[ -n "${ELASTIC_PASSWORD:-}" ]]; then
+		args+=( '-u' "elastic:${ELASTIC_PASSWORD}" )
+	fi
+
+	local -i result=1
+	local output
+
+	output="$(curl "${args[@]}")"
+	if [[ "${output: -3}" -eq 200 ]]; then
+		result=0
+	fi
+
+	if ((result)); then
+		echo -e "\n${output::-3}\n"
+	fi
+
+	return $result
+}
+
+function create_pipeline {
+    local name=$1
+	local body=$2
+
+	local elasticsearch_host="${ELASTICSEARCH_HOST:-elasticsearch}"
+
+	local -a args=( '-s' '-D-' '-m15' '-w' '%{http_code}'
+		"http://${elasticsearch_host}:9200/_ingest/pipeline/${name}"
+		'-X' 'PUT'
 		'-H' 'Content-Type: application/json'
 		'-d' "$body"
 		)

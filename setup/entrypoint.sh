@@ -20,13 +20,15 @@ users_roles=(
 	[logstash_internal]='logstash_writer'
 )
 
-# --------------------------------------------------------
-# Roles declarations
-
-declare -A roles_files
-roles_files=(
-	[logstash_writer]='logstash_writer.json'
-)
+# Pipelines declarations
+declare -A pipelines
+for file in /pipelines/*; do 
+    if [[ -f $file ]]; then 
+        filename=$(basename -- "$file")
+        filename="${filename%.*}"
+        pipelines["$filename"]="$(cat $file)"
+    fi
+done
 
 # --------------------------------------------------------
 
@@ -42,20 +44,6 @@ fi
 log 'Waiting for availability of Elasticsearch'
 wait_for_elasticsearch
 sublog 'Elasticsearch is running'
-
-for role in "${!roles_files[@]}"; do
-	log "Role '$role'"
-
-	declare body_file
-	body_file="$(dirname "${BASH_SOURCE[0]}")/roles/${roles_files[$role]:-}"
-	if [[ ! -f "${body_file:-}" ]]; then
-		sublog "No role body found at '${body_file}', skipping"
-		continue
-	fi
-
-	sublog 'Creating/updating'
-	ensure_role "$role" "$(<"${body_file}")"
-done
 
 for user in "${!users_passwords[@]}"; do
 	log "User '$user'"
@@ -79,6 +67,11 @@ for user in "${!users_passwords[@]}"; do
 		sublog 'User does not exist, creating'
 		create_user "$user" "${users_passwords[$user]}" "${users_roles[$user]}"
 	fi
+done
+
+for pipeline in "${!pipelines[@]}"; do
+	log "Pipeline '$pipeline'"
+    create_pipeline "$pipeline" "${pipelines[$pipeline]}"
 done
 
 mkdir -p "$(dirname "${state_file}")"

@@ -1,0 +1,12 @@
+{
+  "description" : "Tractor specific log parser",
+  "processors" : [
+    {
+      "set" : {
+        "description" : "My optional processor description",
+        "field": "my-keyword-field",
+        "value": "foo"
+      }
+    }
+  ]
+}
