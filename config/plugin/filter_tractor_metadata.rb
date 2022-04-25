@@ -6,9 +6,6 @@ module Fluent::Plugin
     Fluent::Plugin.register_filter('tractor_metadata', self)
 
     def filter(tag, time, record)
-      # Since our example is a pass-thru filter, it does nothing and just
-      # returns the record as-is.
-      # If returns nil, that records are ignored.
       record["time"] = time
       record["file"] = tag
 

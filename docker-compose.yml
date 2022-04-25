@@ -14,6 +14,7 @@ services:
       - "5432:5432"
     networks:
       - harvest
+
   harvest-api:
     container_name: harvest-api
     image: "harvest-api"
@@ -29,6 +30,20 @@ services:
       - harvest
     depends_on:
       - harvest-postgres
+
+  harvest-logs:
+    container_name: harvest-logs
+    image: fluentd
+    networks:
+      - harvest
+    depends_on:
+      - harvest-api
+    volumes:
+      - ${TRACTOR_LOG_PATH}:/var/log
+      - ./config/fluentd.conf:/fluentd/etc/fluent.conf
+      - ./config/plugin:/fluentd/plugins
+      - ./config/output:/output
+
 
 volumes:
   harvest:
