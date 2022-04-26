@@ -13,10 +13,12 @@ import {
   getJobsPerOwnerHistory,
 } from "./info";
 import { getGroups } from "./fog";
+import { postLogRecord } from "./logs";
 import logger from "../utils/logger";
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 /**
  * Initialize express routes for each category
@@ -42,6 +44,9 @@ export function initializeRoutes() {
 
   // /fog
   getGroups(app);
+
+  // /log
+  postLogRecord(app)
 
   // Add route listing
   app.get("/", (req, res) => {

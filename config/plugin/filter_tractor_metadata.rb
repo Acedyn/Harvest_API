@@ -10,9 +10,9 @@ module Fluent::Plugin
       record["file"] = tag
 
       filesplit = tag.split(".")
-      record["user"] = filesplit[2]
-      record["jid"] = filesplit[3]
-      record["tid"] = filesplit[4]
+      record["user"] = filesplit[1]
+      record["jid"] = filesplit[2]
+      record["tid"] = filesplit[3]
 
       record
     end

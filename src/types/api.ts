@@ -7,3 +7,14 @@ export type RequestQuery<Q extends Query> = Request<
   unknown,
   Q
 >;
+
+export interface LogRecordRequest {
+  message: string,
+  time: number,
+  file: string,
+  user: string,
+  tid: string,
+  jid: string,
+  type: string,
+  help: string,
+}

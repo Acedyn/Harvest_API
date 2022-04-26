@@ -14,6 +14,11 @@ services:
       - "5432:5432"
     networks:
       - harvest
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
 
   harvest-api:
     container_name: harvest-api
@@ -29,7 +34,8 @@ services:
     networks:
       - harvest
     depends_on:
-      - harvest-postgres
+      harvest-postgres:
+        condition: service_healthy
 
   harvest-logs:
     container_name: harvest-logs

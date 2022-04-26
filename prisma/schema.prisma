@@ -10,6 +10,34 @@ datasource db {
 model Project {
   name         String               @id
   usageRecords ProjectUsageRecord[]
+  jobs         Job[]
+}
+
+model Job {
+  name        String  @id
+  projectName String
+  project     Project @relation(references: [name], fields: [projectName])
+  tasks       Task[]
+}
+
+model Task {
+  name          String
+  jobName       String
+  job           Job         @relation(references: [name], fields: [jobName])
+  logRecords    LogRecord[]
+  @@unique([name, jobName])
+}
+
+model LogRecord {
+  id      Int      @id @default(autoincrement())
+  jobName  String
+  taskName  String
+  task    Task     @relation(references: [name, jobName], fields: [taskName, jobName])
+  message String
+  time    DateTime
+  file    String
+  type    String
+  help    String
 }
 
 model BladeUsageRecord {
