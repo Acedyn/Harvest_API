@@ -15,21 +15,14 @@ export async function getProjectNames() {
 
 // Create a project after making sure it does not already exists
 export async function createProject(name: string) {
-  const project = await prisma.project.findUnique({
+  return await prisma.project.upsert({
     where: {
       name: name,
     },
-  });
-
-  // If the project already exists, just return it
-  if (project !== null) {
-    return project;
-  }
-
-  return await prisma.project.create({
-    data: {
+    update: {},
+    create: {
       name: name,
-    },
+    }
   });
 }
 

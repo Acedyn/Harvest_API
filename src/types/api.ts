@@ -15,6 +15,8 @@ export interface LogRecordRequest {
   user: string,
   tid: string,
   jid: string,
-  type: string,
-  help: string,
+  match: {
+    type: string,
+    help: string,
+  }
 }

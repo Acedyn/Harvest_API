@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Project {
@@ -14,26 +14,30 @@ model Project {
 }
 
 model Job {
-  name        String  @id
+  id          String
   projectName String
   project     Project @relation(references: [name], fields: [projectName])
   tasks       Task[]
+  @@unique([id, projectName])
 }
 
 model Task {
-  name          String
-  jobName       String
-  job           Job         @relation(references: [name], fields: [jobName])
+  id          String
+  jid           String
+  projectName String
+  job           Job         @relation(references: [id, projectName], fields: [jid, projectName])
   logRecords    LogRecord[]
-  @@unique([name, jobName])
+  @@unique([id, jid, projectName])
 }
 
 model LogRecord {
   id      Int      @id @default(autoincrement())
-  jobName  String
-  taskName  String
-  task    Task     @relation(references: [name, jobName], fields: [taskName, jobName])
+  jid     String
+  tid     String
+  projectName String
+  task    Task     @relation(references: [id, jid, projectName], fields: [tid, jid, projectName])
   message String
+  artist  String
   time    DateTime
   file    String
   type    String
