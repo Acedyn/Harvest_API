@@ -11,19 +11,27 @@ const createJobQueryMap: { [key: string]: Promise<Job> } = {}
 export async function createJob(id: string, project: Project) {
   const queryKey = `${id}-${project.name}`
   if(!(queryKey in createJobQueryMap)) {
-    createJobQueryMap[queryKey] = prisma.job.upsert({
-      where: {
-        id_projectName: {
+    createJobQueryMap[queryKey] = new Promise((resolve) => {
+      prisma.job.upsert({
+        where: {
+          id_projectName: {
+            id: id,
+            projectName: project.name,
+          },
+        },
+        update: {},
+        create: {
           id: id,
           projectName: project.name,
-        },
-      },
-      update: {},
-      create: {
-        id: id,
-        projectName: project.name,
-      }
-    });
+        }
+      }).then((newJob) => {
+        resolve(newJob)
+        delete createJobQueryMap[queryKey]
+      }).catch((reason) => {
+        console.log(reason)
+        delete createJobQueryMap[queryKey]
+      })
+    })
   }
 
   return await createJobQueryMap[queryKey]
@@ -38,21 +46,29 @@ const createTaskQueryMap: { [key: string]: Promise<Task> } = {}
 export async function createTask(id: string, job: Job) {
   const queryKey = `${id}-${job.id}`
   if(!(queryKey in createTaskQueryMap)) {
-    createTaskQueryMap[queryKey] = prisma.task.upsert({
-      where: {
-        id_jid_projectName: {
+    createTaskQueryMap[queryKey] = new Promise((resolve) => {
+      prisma.task.upsert({
+        where: {
+          id_jid_projectName: {
+            id: id,
+            jid: job.id,
+            projectName: job.projectName,
+          },
+        },
+        update: {},
+        create: {
           id: id,
           jid: job.id,
-          projectName: job.projectName,
-        },
-      },
-      update: {},
-      create: {
-        id: id,
-        jid: job.id,
-        projectName: job.projectName
-      }
-    });
+          projectName: job.projectName
+        }
+      }).then((newTask) => {
+        resolve(newTask)
+        delete createTaskQueryMap[queryKey]
+      }).catch((reason) => {
+        console.log(reason)
+        delete createJobQueryMap[queryKey]
+      })
+    })
   }
 
   return await createTaskQueryMap[queryKey]
