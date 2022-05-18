@@ -17,11 +17,10 @@ export async function getProcessesQuery(bladeIp: string) {
   }
 }
 
-
 export async function killProcessesQuery(bladeIp: string, pid: number) {
-    try {
-      return await axios.post(gokillprocessURL(bladeIp, `kill/${pid}`));
-    } catch (err) {
-      logger.error(`${err} killing ${pid} for ${bladeIp}`);
-    }
+  try {
+    return await axios.post(gokillprocessURL(bladeIp, `kill/${pid}`));
+  } catch (err) {
+    logger.error(`${err} killing ${pid} for ${bladeIp}`);
   }
+}
