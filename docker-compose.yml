@@ -25,6 +25,7 @@ services:
       TRACTOR_URL: "${TRACTOR_URL}"
       TRACTOR_LOGIN: "${TRACTOR_LOGIN}"
       TRACTOR_PASSWORD: "${TRACTOR_PASSWORD}"
+      GOKILLPROCESS_PORT: "5119"
     networks:
       - harvest
     depends_on:
