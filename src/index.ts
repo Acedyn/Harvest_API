@@ -10,4 +10,4 @@ dotenv.config();
 initializeRoutes();
 startRestServer(3000);
 startDataRecord(60000);
-startClearNoFreeSlots(60000 * 60 * 3)
+startClearNoFreeSlots(60000 * 60 * 3);

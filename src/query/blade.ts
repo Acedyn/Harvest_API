@@ -14,7 +14,7 @@ export async function getNoFreeSlots() {
     return [];
   }
 
-  const noFreeSlotBlades : Blade[] = [];
+  const noFreeSlotBlades: Blade[] = [];
 
   bladesResponse.data.blades.forEach((blade: Blade) => {
     const lastPulse = new Date(blade.t * 1000);
@@ -28,7 +28,7 @@ export async function getNoFreeSlots() {
     if (Date.now() - lastPulse.getTime() < 500000) {
       if (blade.note !== "no free slots (1)") return;
       noFreeSlotBlades.push(blade);
-      return
+      return;
     }
   });
   return noFreeSlotBlades;
