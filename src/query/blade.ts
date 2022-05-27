@@ -7,6 +7,32 @@ export function queryBlades() {
   return tractorQuery<{ blades: Blade[] }>("monitor?q=blades");
 }
 
+
+export async function getNoPulse() {
+  const bladesResponse = await queryBlades();
+
+  if (!bladesResponse) {
+    return [];
+  }
+
+  const noPulseBlade: Blade[] = [];
+
+  bladesResponse.data.blades.forEach((blade: Blade) => {
+    const lastPulse = new Date(blade.t * 1000);
+
+    // Exclude all busy blade
+    if (blade.owners && blade.owners.length) {
+      return;
+    }
+
+    // The blade is active
+    if (!(Date.now() - lastPulse.getTime() < 500000)) {
+      noPulseBlade.push(blade);
+    }
+  });
+  return noPulseBlade;
+}
+
 export async function getNoFreeSlots() {
   const bladesResponse = await queryBlades();
 

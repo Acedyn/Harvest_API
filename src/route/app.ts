@@ -12,7 +12,7 @@ import {
   getRunningJobsRoute,
   getJobsPerOwnerHistory,
 } from "./info";
-import { getGroups } from "./fog";
+import { getGroups, getHosts } from "./fog";
 import logger from "../utils/logger";
 
 const app = express();
@@ -42,6 +42,7 @@ export function initializeRoutes() {
 
   // /fog
   getGroups(app);
+  getHosts(app);
 
   // Add route listing
   app.get("/", (req, res) => {

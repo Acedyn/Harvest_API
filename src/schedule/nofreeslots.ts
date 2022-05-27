@@ -12,7 +12,6 @@ type ResultGoKillProcess = {
  */
 export async function clearNoFreeSlots() {
   const blades = await getNoFreeSlots();
-
   blades.forEach(async (b) => {
     const result = await getProcessesQuery(b.addr);
     const processesToKill = ["rez", "maya", "hrender", "kick", "vray"];

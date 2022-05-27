@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 
 import { startDataRecord } from "./schedule/history";
 import { startClearNoFreeSlots } from "./schedule/nofreeslots";
+import { startRestartNoPulse } from "./schedule/restartnopulse";
 import { initializeRoutes, startRestServer } from "./route/app";
 
 // Read env file for configuration
@@ -11,3 +12,4 @@ initializeRoutes();
 startRestServer(3000);
 startDataRecord(60000);
 startClearNoFreeSlots(60000 * 60 * 3);
+startRestartNoPulse(60000 * 60 * 3);

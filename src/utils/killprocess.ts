@@ -24,3 +24,19 @@ export async function killProcessesQuery(bladeIp: string, pid: number) {
     logger.error(`${err} killing ${pid} for ${bladeIp}`);
   }
 }
+
+export async function restartServiceQuery(bladeIp: string, serviceName: string) {
+  try {
+    return await axios.post(gokillprocessURL(bladeIp, 'restartservice'), serviceName);
+  } catch (err) {
+    logger.error(`${err} restarting service ${serviceName} for ${bladeIp}`);
+  }
+}
+
+export async function getServicesQuery(bladeIp: string) {
+  try {
+    return await axios.get(gokillprocessURL(bladeIp, "services"));
+  } catch (err) {
+    logger.error(`${err} for ${bladeIp}`);
+  }
+}
