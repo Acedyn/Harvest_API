@@ -14,12 +14,12 @@ It uses [Prisma](https://www.prisma.io/) which is a [TypeScript](https://www.typ
 
 ## Installation
 
-The package manager used is [NPM](https://npmjs.com/). Clone the repository and install the dependencies:
+The package manager used is [Yarn](https://yarnpkg.com/). Clone the repository and install the dependencies:
 
 ```bash
 $ git clone https://github.com/ArtFXDev/harvest-api
 $ cd harvest-api
-$ npm install # Install the dependencies
+$ yarn install # Install the dependencies
 ```
 
 ## Usage
@@ -38,17 +38,17 @@ They are:
 
 ### Available scripts
 
-- 🚀 `npm run dev` -> will start a [`nodemon`](https://nodemon.io/) process to automatically reload the code on changes
+- 🚀 `yarn dev` -> will start a [`nodemon`](https://nodemon.io/) process to automatically reload the code on changes
 
   You can then access the api on [`http://localhost:3000`](http://localhost:3000).
 
-- 👷 `npm run prod` -> launches the API in production mode without hot-reload
+- 👷 `yarn prod` -> launches the API in production mode without hot-reload
 
-- 🔨 `npm run tsc` -> runs the TypeScript compiler and report errors. Add `:watch` to run an interactive process that watches file changes.
+- 🔨 `yarn tsc` -> runs the TypeScript compiler and report errors. Add `:watch` to run an interactive process that watches file changes.
 
-- 💅 `npm run prettify` -> prettify the code with Prettier. Add `:write` to write the modifications.
+- 💅 `yarn prettify` -> prettify the code with Prettier. Add `:write` to write the modifications.
 
-- 🚨 `npm run lint` -> shows ESLint warnings and errors. Add `:fix` to apply auto fixes.
+- 🚨 `yarn lint` -> shows ESLint warnings and errors. Add `:fix` to apply auto fixes.
 
 ## Libraries
 
