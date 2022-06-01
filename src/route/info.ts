@@ -5,8 +5,9 @@ import { getProjectComputeTime } from "../db/project";
 import { queryBlades } from "../query/blade";
 import { getJobsFilteredByOwnerAndProject } from "../query/jobs";
 import { getRunningJobs } from "../query/project";
+import { getTractorConfigFile } from "../query/tractor";
 import { RequestQuery } from "../types/api";
-import { Job } from "../types/tractor";
+import { BladeProfile, Job } from "../types/tractor";
 import { cacheResult } from "../utils/cache";
 import { IGNORE_PROJECTS } from "../utils/constants";
 import { getTimeRange } from "../utils/time";
@@ -46,8 +47,24 @@ export function getComputeTime(app: Application) {
 export function getBlades(app: Application) {
   app.get("/info/blades", async (req, res) => {
     const response = await queryBlades();
+    const bladeConfig = await getTractorConfigFile("blade.config");
 
-    if (response) {
+    if (response && bladeConfig) {
+      const configPerProfile: { [name: string]: BladeProfile } = {};
+
+      // Organize blade profiles per name in a dictionary for easier lookup
+      for (const profile of bladeConfig.data.BladeProfiles) {
+        configPerProfile[profile.ProfileName] = profile;
+      }
+
+      // Fill the provides field for each blade
+      for (const blade of response.data.blades) {
+        // off blades have an empty profile name
+        if (blade.profile) {
+          blade.provides = configPerProfile[blade.profile].Provides;
+        }
+      }
+
       res.send(response.data);
     } else {
       res.status(500);

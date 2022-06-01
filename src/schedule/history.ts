@@ -69,6 +69,7 @@ async function storeHistoryBuffer(historyBuffer: HistoryRecordBuffer) {
     busy: 0,
     free: 0,
     noFreeSlots: 0,
+    bug: 0,
   };
 
   // Store a record for every project
@@ -124,6 +125,7 @@ export function startDataRecord(queryInterval: number) {
       busy: 0,
       free: 0,
       noFreeSlots: 0,
+      bug: 0,
     },
     projectUsage: {},
     queryCounter: 0,

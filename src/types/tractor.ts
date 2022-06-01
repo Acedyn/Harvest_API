@@ -22,6 +22,9 @@ export interface Blade {
   lp: number;
   ns: number;
   cpu: number;
+
+  // Added manually
+  provides?: string[];
 }
 
 export interface LoginData {
@@ -42,6 +45,7 @@ export interface BladeStatuses {
   nimby: number;
   free: number;
   noFreeSlots: number;
+  bug: number;
 }
 
 export interface Job {
@@ -139,3 +143,43 @@ export interface Command {
   expand: boolean;
   msg: string;
 }
+
+export type BladeProfile = {
+  Access?: {
+    Crews: string[];
+    NimbyConnectPolicy: number;
+    NimbyCrews: string[];
+  };
+  Capacity?: {
+    MaxLoad: number;
+    MaxSlots: number;
+    MinDisk: number;
+    MinRAM: string;
+  };
+  CmdOutputLogging?: string;
+  EnvKeys: {
+    envhandler: string;
+    environment: { [env: string]: string };
+    keys: string[];
+  }[];
+  Hosts?: {
+    Name?: string[];
+    Platform?: string;
+    "GPU.label"?: string[];
+    PathExists?: string[];
+  };
+  NIMBY?: number;
+  ProfileName: string;
+  Provides?: string[];
+  RecentErrorThrottle?: number[];
+  SiteModulePath?: string;
+  TR_EXIT_STATUS_terminate?: number;
+  UDI?: number;
+};
+
+export type TractorConfigFiles = {
+  "blade.config": {
+    BladeProfiles: BladeProfile[];
+    ProfileDefaults: BladeProfile;
+  };
+};

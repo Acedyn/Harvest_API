@@ -1,5 +1,7 @@
 import { Blade } from "../types/tractor";
+import { BUG_PROFILES } from "../utils/constants";
 import { tractorQuery } from "../utils/tractor";
+
 /**
  * Queries Tractor about blades
  */
@@ -46,39 +48,47 @@ export async function getBladeUsage() {
   let nimbyCount = 0;
   let offCount = 0;
   let noFreeSlotsCount = 0;
+  let bugCount = 0;
 
-  bladesResponse.data.blades.forEach((blade: Blade) => {
+  for (const blade of bladesResponse.data.blades) {
+    // It's in a bug pool so not usable
+    if (BUG_PROFILES.includes(blade.profile)) {
+      bugCount++;
+      continue;
+    }
+
     const lastPulse = new Date(blade.t * 1000);
 
     // The blade is busy
     if (blade.owners && blade.owners.length) {
       busyCount++;
-      return;
+      continue;
     }
 
     // The blade is active
     if (Date.now() - lastPulse.getTime() < 500000) {
       if (blade.note === "no free slots (1)") {
         noFreeSlotsCount++;
-        return;
+        continue;
       }
 
       // It's not in nimby
       if (blade.nimby.length === 0) {
         freeCount++;
-        return;
+        continue;
       }
     } else {
+      // It's off
       offCount++;
-      return;
+      continue;
     }
 
     // The blade has its nimby on
     if (blade.nimby.length > 0) {
       nimbyCount++;
-      return;
+      continue;
     }
-  });
+  }
 
   return {
     busy: busyCount,
@@ -86,5 +96,6 @@ export async function getBladeUsage() {
     nimby: nimbyCount,
     off: offCount,
     noFreeSlots: noFreeSlotsCount,
+    bug: bugCount,
   };
 }

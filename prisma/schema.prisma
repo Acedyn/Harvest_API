@@ -20,6 +20,7 @@ model BladeUsageRecord {
   nimby       Int      @default(0)
   off         Int      @default(0)
   noFreeSlots Int      @default(0)
+  bug         Int      @default(0)
 }
 
 model ProjectUsageRecord {
