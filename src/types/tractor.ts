@@ -42,6 +42,7 @@ export interface BladeStatuses {
   nimby: number;
   free: number;
   noFreeSlots: number;
+  bug: number;
 }
 
 export interface Job {

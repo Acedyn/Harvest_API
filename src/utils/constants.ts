@@ -20,3 +20,5 @@ export const IGNORE_OWNERS = [
   "slambin",
   "gfbnd,;",
 ];
+
+export const BUG_PROFILES = ["BUG", "DONOTUSE"];
