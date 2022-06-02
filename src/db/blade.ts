@@ -5,14 +5,9 @@ import { prisma } from "./client";
 // Create a record that stores the blade usage at a given point
 export async function createBladeRecord(usage: BladeStatuses) {
   logger.info("Saving Blade usage record...");
+
   return await prisma.bladeUsageRecord.create({
-    data: {
-      busy: Math.round(usage.busy),
-      free: Math.round(usage.free),
-      nimby: Math.round(usage.nimby),
-      off: Math.round(usage.off),
-      noFreeSlots: Math.round(usage.noFreeSlots),
-    },
+    data: usage,
   });
 }
 

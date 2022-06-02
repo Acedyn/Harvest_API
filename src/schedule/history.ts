@@ -41,8 +41,8 @@ async function storeBladeUsage(historyBuffer: HistoryRecordBuffer) {
  * Queries different data from Tractor and put it in the history buffer
  */
 async function queryDataIntoBuffer(historyBuffer: HistoryRecordBuffer) {
-  storeProjectUsage(historyBuffer);
-  storeBladeUsage(historyBuffer);
+  await storeProjectUsage(historyBuffer);
+  await storeBladeUsage(historyBuffer);
   historyBuffer.queryCounter++;
   logger.info(
     `Storing queries in history buffer (count: ${historyBuffer.queryCounter})`
@@ -78,7 +78,7 @@ async function storeHistoryBuffer(historyBuffer: HistoryRecordBuffer) {
   )) {
     await createProjectRecord(
       projectName,
-      projectData / historyBufferCopy.queryCounter
+      Math.round(projectData / historyBufferCopy.queryCounter)
     );
   }
 
@@ -86,8 +86,9 @@ async function storeHistoryBuffer(historyBuffer: HistoryRecordBuffer) {
 
   let bladeStatus: keyof typeof historyBuffer.bladeUsage;
   for (bladeStatus in bladeUsage) {
-    historyBufferCopy.bladeUsage[bladeStatus] =
-      bladeUsage[bladeStatus] / historyBufferCopy.queryCounter;
+    historyBufferCopy.bladeUsage[bladeStatus] = Math.round(
+      bladeUsage[bladeStatus] / historyBufferCopy.queryCounter
+    );
   }
 
   await createBladeRecord(historyBufferCopy.bladeUsage);
