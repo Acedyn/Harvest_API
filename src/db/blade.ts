@@ -37,6 +37,7 @@ export async function getBladeRecords(
       off: true,
       free: true,
       noFreeSlots: true,
+      bug: true,
       createdAt: true,
     },
   });
