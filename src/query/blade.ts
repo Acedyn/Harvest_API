@@ -52,7 +52,10 @@ export async function getBladeUsage() {
 
   for (const blade of bladesResponse.data.blades) {
     // It's in a bug pool so not usable
-    if (BUG_PROFILES.includes(blade.profile)) {
+    if (
+      BUG_PROFILES.includes(blade.profile) ||
+      blade.note.startsWith("MinDisk")
+    ) {
       bugCount++;
       continue;
     }
