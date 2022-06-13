@@ -10,4 +10,4 @@ COPY . .
 EXPOSE 5000
 
 RUN npx prisma generate
-CMD sh ./scripts/startup.sh
+CMD [  "yarn", "start:migrate:prod" ]

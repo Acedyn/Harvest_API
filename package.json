@@ -1,6 +1,6 @@
 {
   "name": "harvest-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dst/index.js",
   "repository": "https://github.com/ArtFXDev/harvest-api.git",
   "author": "ArtFX TDs",
@@ -13,7 +13,8 @@
     "prettify": "prettier --check .",
     "prettify:write": "prettier --write .",
     "tsc": "tsc",
-    "tsc:watch": "tsc --watch"
+    "tsc:watch": "tsc --watch",
+    "start:migrate:prod": "prisma migrate deploy && yarn prod"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",
