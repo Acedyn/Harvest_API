@@ -7,7 +7,7 @@ COPY package.json yarn.lock ./
 
 RUN yarn install --frozen-lockfile
 COPY . . 
-EXPOSE 5000
+EXPOSE 3000
 
 RUN npx prisma generate
 CMD sh ./scripts/startup.sh
